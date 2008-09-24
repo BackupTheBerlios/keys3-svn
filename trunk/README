@@ -20,10 +20,10 @@ properties:
 
 The keys3 package is intended as a method for testing how key
 management might be implemented in LaTeX3.  Both the methods
-used inside the package and the interface provided are
-intended to be discussed.  Feedback is welcomed either by
-e-mail (joseph.wright@morningstar2.co.uk) or at the package
-website (http://keys.berlios.de).
+used inside the package and the interface provided are intended
+to be discussed.  Feedback is welcomed either by e-mail
+(joseph.wright@morningstar2.co.uk) or at the package website
+(http://keys3.berlios.de).
 
 The experimental nature of keys3 and the underlying expl3
 system means that it should not be used in production

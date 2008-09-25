@@ -208,16 +208,6 @@
 %   used will have \TeX\ <parameters>.
 % \end{function}
 %
-% \begin{function}{/.complement:n}
-%   \begin{syntax}
-%     <key>/.complement:n = \Arg{name}
-%   \end{syntax}
-%   Creates a new key <name> as a complement to existing Boolean <key>.
-%   The complementary key will work in the opposite sense to the parent.
-%   Thus setting <name> to \texttt{true} is the same as setting <key> to
-%   \texttt{false}.
-% \end{function}
-%
 % \begin{function}{/.default:n}
 %   \begin{syntax}
 %     <key>/.default:n = \Arg{value}
@@ -225,19 +215,22 @@
 %   Use <value> whenever <key> is given without a value.
 % \end{function}
 %
-% \begin{function}{/.equivalent:n}
+% \begin{function}{/.equivalent~key:n}
 %   \begin{syntax}
-%     <key>/.equivalent:n = <key2>
+%     <key>/.equivalent~key:n = <key2>
 %   \end{syntax}
 %   Makes <key2> a key with equivalent meaning to <key>: intended to
 %   make creating alternative spellings or choices simple.
 % \end{function}
 %
-% \begin{function}{/.initial:n}
+% \begin{function}{/.inverse~key:n}
 %   \begin{syntax}
-%     <key>/.initial:n = \Arg{value}
+%     <key>/.inverse key:n = \Arg{name}
 %   \end{syntax}
-%   Initialise <key> with <value>, until a second assignment is made.
+%   Creates a new key <name> as an inverse of existing Boolean <key>.
+%   The inverse key will work in the opposite sense to the parent. Thus
+%   setting <name> to \texttt{true} is the same as setting <key> to
+%   \texttt{false}.
 % \end{function}
 %
 % \begin{function}{%
@@ -293,13 +286,13 @@
 % \begin{function}{%
 %   /.set:N|
 %   /.set:c|
-%   /.set~exp:N|
-%   /.set~exp:c}
+%   /.xset:N|
+%   /.xset:c}
 %   \begin{syntax}
 %     <key>/.set:N = <tlp>
 %     <key>/.set:c = \Arg{name}
 %   \end{syntax}
-%   When <key> is called, store the value in <tlp>. The |exp| variant
+%   When <key> is called, store the value in <tlp>. The |xset| variant
 %   expands the value at the point of storage. No check is made on the
 %   <tlp> at definition time: when the key is used, the value is stored
 %   with no checks. For the |:c| variant, a tlp of name
@@ -310,9 +303,10 @@
 %
 % \begin{function}{%
 %   /.show~code:|
-%   /.show~key:}
+%   /.show:}
 %   \begin{syntax}
-%     <key>/.show key:
+%     <key>/.show code:
+%     <key>/.show:
 %   \end{syntax}
 %   Show the contents of the key macro itself or the hidden property
 %   storing |.code:n|. May be useful for debugging, but note that all
@@ -1601,11 +1595,8 @@
     \keys_put_code:nc {#1} {left}
   },
 %    \end{macrocode}
-% Initial and default values can now be created.
+% Default values can now be created.
 %    \begin{macrocode}
-  \c_keys_properties_path_tlp /.initial:n/.code:n = {
-    \keys_def:cn {\l_keys_current_path_tlp} {#1}
-  },
   \c_keys_properties_path_tlp /.default:n/.code:n = {
     \keys_def:cn {\l_keys_current_path_tlp /._default_tlp} {#1}
   },
@@ -1712,7 +1703,7 @@
       }
     }
   },
-  \c_keys_properties_path_tlp /.set~exp:N/.code:n = {
+  \c_keys_properties_path_tlp /.xset:N/.code:n = {
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:n = {
         \tlp_set:Nx #1 {##1}
@@ -1727,7 +1718,7 @@
       }
     }
   },
-  \c_keys_properties_path_tlp /.set~exp:c/.code:n = {
+  \c_keys_properties_path_tlp /.xset:c/.code:n = {
     \keys_module_name:
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:x = {
@@ -1781,10 +1772,10 @@
       {\use:c {l_ \l_keys_tmpa_tlp #1_bool}}}
   },
 %    \end{macrocode}
-% Creating a complement needs a little work as the logic needs to be
+% Creating an inverse needs a little work as the logic needs to be
 % reversed.
 %    \begin{macrocode}
-  \c_keys_properties_path_tlp /.complement:n/.code:n = {
+  \c_keys_properties_path_tlp /.inverse~key:n/.code:n = {
     \keys_if_really_exist:cTF {\l_keys_current_path_tlp /._boolean} {
       \tlp_set_eq:NN \l_keys_tmpa_tlp \l_keys_current_path_tlp
       \tlp_set_eq:NN \l_keys_current_key_tlp \l_keys_current_path_tlp
@@ -1845,7 +1836,7 @@
 %    \end{macrocode}
 % Different names for the same thing.
 %    \begin{macrocode}
-  \c_keys_properties_path_tlp /.equivalent:n/.code:n = {
+  \c_keys_properties_path_tlp /.equivalent~key:n/.code:n = {
     \keys_if_really_exist:cT {\l_keys_current_path_tlp /._cmd:w} {
       \tlp_set_eq:NN \l_keys_current_key_tlp \l_keys_current_path_tlp
       \keys_separate:
@@ -1879,7 +1870,7 @@
   \c_keys_properties_path_tlp /.show~code:/.code:n = {
     \cs_show:c {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._cmd:w}
   },
-  \c_keys_properties_path_tlp /.show~key:/.code:n = {
+  \c_keys_properties_path_tlp /.show:/.code:n = {
     \cs_show:c {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
   },
 %    \end{macrocode}

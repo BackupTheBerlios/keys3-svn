@@ -1,0 +1,198 @@
+%\iffalse
+%% File: keys3opts2.dtx Copyright (C) 2008 Joseph Wright
+%%
+%% It may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License (LPPL), either version 1.3c of this
+%% license or (at your option) any later version.  The latest version
+%% of this license is in the file
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+%% -----------------------------------------------------------------------
+%<*driver|package>
+\RequirePackage{l3names}
+%</driver|package>
+%\fi
+\GetIdInfo$Id: keys3opts2.dtx 8 2008-09-25 06:11:19Z josephwright $
+  {Using keys3 for LaTeX2e options}
+%\iffalse
+%<*driver>
+%\fi
+\ProvidesFile{\filename.\filenameext}
+  [\filedate\space v\fileversion\space\filedescription]
+%\iffalse
+\documentclass[full]{l3doc}
+\begin{document}
+\DocInput{\filename.\filenameext}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{The \textsf{keys3opts2} package^^A
+%   \thanks{This file has version number \fileversion, last
+%     revised \filedate.}\\
+% Using \textsf{keys3} for \LaTeXe\ options}
+% \author{Joseph Wright^^A
+%   \thanks{E-mail: joseph.wright@morningstar2.co.uk}}
+% \date{\filedate}
+% \maketitle
+%
+%\section{Package options}
+%
+% The methods that \LaTeX3 will use to process package options are not
+% clear at the present time.  However, in order to fully test the
+% \textsf{expl3} bundle fully, it is useful to be able to work with
+% the \LaTeXe\ system but using \LaTeX3 methods as far as possible.
+%
+% The \textsf{keys3} package provides an experimental method for
+% managing key--value input using \textsf{expl3} syntax. It is
+% self-contained and does not use any \LaTeXe methods. On the other
+% hand, \textsf{keys3opts2} is intended as a ``bridge'' between the
+% \LaTeXe\ kernel and \textsf{keys3}. It allows keys to be created
+% using \textsf{keys3} and processed by \LaTeXe\ as package or class
+% options.
+%
+%\subsection{functions}
+%
+% \begin{function}{\keys_options_ltx:n}
+%   \begin{syntax}
+%     "\keys_options_ltx:n" \Arg{module}
+%   \end{syntax}
+%   The only macro for outside use. Processes the current option list
+%   using the currently defined keys, checking if they exist for
+%   <module>.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_options_ltx_cls:n|
+%   \keys_options_ltx_pkg:n}
+%   \begin{syntax}
+%     "\keys_options_ltx_cls:n" \Arg{option}
+%   \end{syntax}
+%   Helper macros for processing class and package options,
+%   respectively.
+% \end{function}
+%
+% \begin{function}{\keys_options_ltx_strip_eq:w}
+%   \begin{syntax}
+%     "\keys_options_ltx_strip_eq:w" <option> "\q_stop"
+%   \end{syntax}
+%   Used to strip ``|=|'' out of options.
+% \end{function}
+%
+% \begin{variable}{\l_keys_options_ltx_clist}
+%   Storage area for option list.
+% \end{variable}
+%
+%\subsection{Implementation}
+%
+% Almost everything here is based heavily on \textsf{pgfopts}, which is
+% itself a port of the appropriate code from \textsf{kvoptions} to work
+% with \textsf{pgfkeys}.
+%
+% As this package is an add-on to \textsf{keys3}, the same internal
+% module name (|\keys_|) is used here as in the main package.
+%
+% The usual preliminaries.
+%    \begin{macrocode}
+%<*package>
+\ProvidesExplPackage
+  {\filename}{\filedate}{\fileversion}{\filedescription}
+\RequirePackage{keys3}
+%    \end{macrocode}
+%
+%\begin{macro}{\l_keys_options_ltx_clist}
+%    \begin{macrocode}
+\clist_new:N \l_keys_options_ltx_clist
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_options_ltx:n}
+% As this is a minimal testing package, a lot of the complexity of the
+% normal \LaTeX\ options is ignored. Here, the package insists a path
+% is given for the keys. First, a path may need to be added to the
+% argument given. The path we need to process is then stored in
+% \cs{l_keys_current_key_tlp}.
+%    \begin{macrocode}
+\def_new:Npn \keys_options_ltx:n #1 {
+  \tlp_set:Nx \l_keys_current_key_tlp {#1}
+  \exp_after:NN \keys_path_add:w \l_keys_current_key_tlp \q_stop
+  \clist_clear:N \l_keys_options_ltx_clist
+%    \end{macrocode}
+% Processing now depends on whether a class is being processed.
+% If it is and there are options, only known ones should be processed
+% as unknown ones are passed thought to packages.
+%    \begin{macrocode}
+  \cs_if_eq:NNTF \@currext \@clsextension {
+    \cs_if_free:cF {opt@ \@currname . \@currext} {
+      \clist_map_function:cN {opt@ \@currname . \@currext}
+        \keys_options_ltx_cls:n
+    }
+  }{
+%    \end{macrocode}
+% When not processing a class, only the global options that are known
+% to the package should be looked at.
+%    \begin{macrocode}
+    \cs_if_free:NF \@classoptionslist {
+      \clist_map_function:NN \@classoptionslist \keys_options_ltx_pkg:n
+    }
+    \cs_if_free:cF {opt@ \@currname . \@currext} {
+      \exp_args:NNc \clist_concat:NNN \l_keys_options_ltx_clist
+        {opt@ \@currname . \@currext} \l_keys_options_ltx_clist
+    }
+  }
+  \clist_put_left:Nn \l_keys_options_ltx_clist {#1/.cd:}
+  \exp_args:No \keys_manage:n {\l_keys_options_ltx_clist}
+  \AtEndOfPackage {\let:NN \@unprocessedoptions \scan_stop:}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_options_ltx_cls:n}
+% This macro checks if the current class option is a known key. To do
+% that, any ``|=|'' part has to be removed first. The code key is
+% checked for, hence the |/._cmd:w| part.
+%    \begin{macrocode}
+\def_new:Npn \keys_options_ltx_cls:n #1 {
+  \keys_if_really_exist:cTF {
+    \l_keys_current_key_tlp /
+    \keys_options_ltx_strip_eq:w #1 = \q_stop
+    /._cmd:w
+  } {
+    \clist_put_right:Nn \l_keys_options_ltx_clist {#1}
+  }{
+    \clist_put_right:Nn \@unusedoptionlist {#1}
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_options_ltx_pkg:n}
+% For packages, options need to be removed from the global list.
+%    \begin{macrocode}
+\def_new:Npn \keys_options_ltx_pkg:n #1 {
+  \keys_if_really_exist:cT {
+    \l_keys_current_key_tlp /
+    \keys_options_ltx_strip_eq:w #1 = \q_stop
+    /._cmd:w
+  } {
+    \clist_put_right:Nn \l_keys_options_ltx_clist {#1}
+%    \end{macrocode}
+% At this stage, some \LaTeXe\ is needed; the option is removed from
+% the unused list.
+%    \begin{macrocode}
+    \exp_args:Nnx \@removeelement {#1} \@unusedoptionlist
+      \@unusedoptionlist
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_options_ltx_strip_eq:w}
+%    \begin{macrocode}
+\def_new:Npn \keys_options_ltx_strip_eq:w #1=#2 \q_stop {#1}
+%    \end{macrocode}
+%\end{macro}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+%\Finale

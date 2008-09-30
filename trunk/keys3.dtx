@@ -284,24 +284,6 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.set:N|
-%   /.set:c|
-%   /.xset:N|
-%   /.xset:c}
-%   \begin{syntax}
-%     <key>/.set:N = <tlp>
-%     <key>/.set:c = \Arg{name}
-%   \end{syntax}
-%   When <key> is called, store the value in <tlp>. The |xset| variant
-%   expands the value at the point of storage. No check is made on the
-%   <tlp> at definition time: when the key is used, the value is stored
-%   with no checks. For the |:c| variant, a tlp of name
-%   \cs{l_<module>_<name>_tlp} is used for the storage. The <module>
-%   value is defined by |/keys/.current module:n| as described in
-%   section~\ref{sec:keys:prog}.
-% \end{function}
-%
-% \begin{function}{%
 %   /.show~code:|
 %   /.show:}
 %   \begin{syntax}
@@ -311,6 +293,24 @@
 %   Show the contents of the key macro itself or the hidden property
 %   storing |.code:n|. May be useful for debugging, but note that all
 %   |._cmd:w| keys have a delimited argument ending \cs{q_keys_stop}.
+% \end{function}
+% 
+% \begin{function}{%
+%   /.tlp:N|
+%   /.tlp:c|
+%   /.tlp~x:N|
+%   /.tlp~x:c}
+%   \begin{syntax}
+%     <key>/.tlp:N = <tlp>
+%     <key>/.tlp:c = \Arg{name}
+%   \end{syntax}
+%   When <key> is called, store the value in <tlp>. The |tlp~x| variant
+%   expands the value at the point of storage. No check is made on the
+%   <tlp> at definition time: when the key is used, the value is stored
+%   with no checks. For the |:c| variant, a tlp of name
+%   \cs{l_<module>_<name>_tlp} is used for the storage. The <module>
+%   value is defined by |/keys/.current module:n| as described in
+%   section~\ref{sec:keys:prog}.
 % \end{function}
 %
 % \begin{function}{%
@@ -1700,21 +1700,21 @@
 % That is all of the lower-level things done.  Now use them to build
 % some higher-level functionality.
 %    \begin{macrocode}
-  \c_keys_properties_path_tlp /.set:N/.code:n = {
+  \c_keys_properties_path_tlp /.tlp:N/.code:n = {
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:n = {
         \tlp_set:Nn #1 {##1}
       }
     }
   },
-  \c_keys_properties_path_tlp /.xset:N/.code:n = {
+  \c_keys_properties_path_tlp /.tlp~x:N/.code:n = {
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:n = {
         \tlp_set:Nx #1 {##1}
       }
     }
   },
-  \c_keys_properties_path_tlp /.set:c/.code:n = {
+  \c_keys_properties_path_tlp /.tlp:c/.code:n = {
     \keys_module_name:
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:x = {
@@ -1722,7 +1722,7 @@
       }
     }
   },
-  \c_keys_properties_path_tlp /.xset:c/.code:n = {
+  \c_keys_properties_path_tlp /.tlp~x:c/.code:n = {
     \keys_module_name:
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:x = {

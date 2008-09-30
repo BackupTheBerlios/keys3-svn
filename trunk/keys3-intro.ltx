@@ -202,25 +202,25 @@ the module name:
 \end{verbatim}
 
 Keys to set a storage tlp are created using the properties
-\texttt{.set:N} and \texttt{.set:c}. The \texttt{:N} property
+\texttt{.tlp:N} and \texttt{.tlp:c}. The \texttt{:N} property
 requires the full name of a tlp.
 \begin{verbatim}
   keys_manage:n {
     /module/.cd:,
-    key one/.set:N = \l_MyMacro_tlp,
+    key one/.tlp:N = \l_MyMacro_tlp,
   }
 \end{verbatim}
-The \texttt{.set:c} constructs a tlp name starting \verb|l_|
+The \texttt{.tlp:c} constructs a tlp name starting \verb|l_|
 and ending \verb|_tlp|, and using the  argument and current
 module (if set).
 \begin{verbatim}
   keys_manage:n {
     /module/.cd:,
     % Uses \l_MyMacro_tlp
-    key one/.set:c = MyMacro,
+    key one/.tlp:c = MyMacro,
     /keys/current module:n = module,
     % Uses \l_module_MyMacro_tlp
-    key two/.set:c = MyOtherMacro,
+    key two/.tlp:c = MyOtherMacro,
   }
 \end{verbatim}
 

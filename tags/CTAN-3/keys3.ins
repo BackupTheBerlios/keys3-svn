@@ -1,0 +1,31 @@
+
+\input docstrip.tex
+\askforoverwritefalse
+
+\preamble
+
+
+EXPERIMENTAL CODE
+
+Do not distribute this file without also distributing the
+source files specified above.
+
+Do not distribute a modified version of this file.
+
+
+\endpreamble
+% stop docstrip adding \endinput
+\postamble
+\endpostamble
+
+\keepsilent
+
+\usedir{tex/latex/keys3}
+
+%% LaTeX3 key management module
+\generate{\file{keys3.sty}{\from{keys3.dtx}{package}}}
+
+%% LaTeX2e option processing using keys3
+\generate{\file{keys3opts2.sty}{\from{keys3opts2.dtx}{package}}}
+
+\endbatchfile

@@ -223,6 +223,28 @@
 %   make creating alternative spellings or choices simple.
 % \end{function}
 %
+% \begin{function}{%
+%   /.int:N|
+%   /.int:c}
+%   \begin{syntax}
+%     <key>/.int:N = <int>
+%     <key>/.int:c = \Arg{int}
+%   \end{syntax}
+%   When <key> is called, store the value in <int>. No check is made on the
+%   <int> at definition time: when the key is used, the value is stored
+%   with no checks. For the |:c| variant, an int of name
+%   \cs{l_<module>_<name>_int} is used for the storage. The <module>
+%   value is defined by |/keys/.current module:n| as described in
+%   section~\ref{sec:keys:prog}.
+% \end{function}
+% 
+% \begin{function}{.int~set~eq:N}
+%   \begin{syntax}
+%     <key>/.int set eq:N = <int>
+%   \end{syntax}
+%   Set <int> equal to the current contents of <key>.
+% \end{function}
+%
 % \begin{function}{/.inverse~key:n}
 %   \begin{syntax}
 %     <key>/.inverse key:n = \Arg{name}
@@ -294,7 +316,7 @@
 %   storing |.code:n|. May be useful for debugging, but note that all
 %   |._cmd:w| keys have a delimited argument ending \cs{q_keys_stop}.
 % \end{function}
-% 
+%
 % \begin{function}{%
 %   /.tlp:N|
 %   /.tlp:c|
@@ -311,6 +333,13 @@
 %   \cs{l_<module>_<name>_tlp} is used for the storage. The <module>
 %   value is defined by |/keys/.current module:n| as described in
 %   section~\ref{sec:keys:prog}.
+% \end{function}
+% 
+% \begin{function}{.tlp~set~eq:N}
+%   \begin{syntax}
+%     <key>/.tlp set eq:N = <tlp>
+%   \end{syntax}
+%   Set <tlp> equal to the current contents of <key>.
 % \end{function}
 %
 % \begin{function}{%
@@ -333,17 +362,17 @@
 % \cs{keys_manage:n}.
 %
 % The key |/keys/current module:n| is used to set the name of the
-% current module for use with properties |.boolean:c|, |.set:c| and
-% |.set exp:c|. If this key has been set, the module name is used
-% when creating |_bool| and |_tlp| storage.
+% current module for use with properties |.boolean:c|, |.int:c|,
+% |.tlp:c| and |.tlp x:c|. If this key has been set, the module name is
+% used when creating |_bool| and |_tlp| storage.
 %\begin{verbatim}
 %  \keys_manage:n {
 %    /module/.cd:,
 %    key one/.boolean:c    = one,    % Uses \l_one_bool
-%    key two/.set:c        = two,    % Uses \l_two_tlp
+%    key two/.tlp:c        = two,    % Uses \l_two_tlp
 %    /keys/curren module:n = module,
 %    key three/.boolean:c  = three,  % Uses \l_module_three_bool
-%    key four/.set:c       = four,   % Uses \l_module_four_tlp
+%    key four/.tlp:c       = four,   % Uses \l_module_four_tlp
 %  }
 %\end{verbatim}
 % As illustrated, an additional ``|_|'' is included in the name when a
@@ -433,7 +462,7 @@
 %   \end{syntax}
 %   Common macro used by all key management functions to initiate key
 %   evaluation. Can be used to recursively set keys (see for example
-%   definition of |.set keys:n|).
+%   definition of |.keys:n|).
 % \end{function}
 %
 % \begin{function}{%
@@ -597,16 +626,6 @@
 %     "\keys_separate:w" <key> / "\q_stop"
 %   \end{syntax}
 %   Separates <key> into a <path> and a <name>.
-% \end{function}
-%
-% \begin{function}{%
-%   \keys_tlp_set_eq:cN|
-%   \keys_tlp_set_eq:Nc}
-%   \begin{syntax}
-%     "\keys_tlp_set_eq:cN" \Arg{key} <tlp>
-%     "\keys_tlp_set_eq:Nc" <tlp> \Arg{key}
-%   \end{syntax}
-%   Copy between a <key> and <tlp>
 % \end{function}
 %
 % \begin{function}{\keys_toks_new:cn}
@@ -827,6 +846,9 @@
 % Does the package need to provide something like
 % \cs{DisableKeyvalOption}? If so, does a method for globally disabling
 % keys need to be provided?
+%
+% As well as |.tlp:N|, |.tlp:c|, |.int:N| and |.int:c|, are any other
+% storage properties needed: perhaps for toks?
 %
 %\subsection{Implementation}
 %
@@ -1383,18 +1405,6 @@
 }
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\keys_tlp_set_eq:Nc}
-%\begin{macro}{\keys_tlp_set_eq:cN}
-%    \begin{macrocode}
-\def_new:Npn \keys_tlp_set_eq:cN #1#2 {
-  \tlp_set_eq:cN {\c_keys_cs_prefix_tlp #1} #2
-}
-\def_new:Npn \keys_tlp_set_eq:Nc #1#2 {
-  \tlp_set_eq:Nc #1 {\c_keys_cs_prefix_tlp #2}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %\begin{macro}{\keys_toks_new:cn}
 %    \begin{macrocode}
 \def_new:Npn \keys_toks_new:cn #1#2 {
@@ -1679,13 +1689,13 @@
     }
   },
 %    \end{macrocode}
-% Transfer of data directly to and from tlps.
+% Transfer of data out.
 %    \begin{macrocode}
-  \c_keys_properties_path_tlp /.set~equal:N/.code:n = {
-    \keys_tlp_set_eq:cN {\l_keys_current_path_tlp} #1
+  \c_keys_properties_path_tlp /.tlp~set~eq:N/.code:n = {
+    \tlp_set_eq:Nc #1 {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
   },
-  \c_keys_properties_path_tlp /.set~tlp:N/.code:n = {
-    \keys_tlp_set_eq:Nc #1 {\l_keys_current_path_tlp}
+  \c_keys_properties_path_tlp /.int~set~eq:N/.code:n = {
+    \int_set_eq:Nc #1 {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
   },
 %    \end{macrocode}
 % Adding to literal values is easier than adding to code.
@@ -1727,6 +1737,21 @@
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:x = {
         \exp_not:N \tlp_set:Nx {l_ \l_keys_tmpa_tlp #1_tlp} {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.int:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \int_set:Nn #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.int:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \int_set:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
       }
     }
   },
@@ -1881,7 +1906,7 @@
 % Keys for programmers.
 %    \begin{macrocode}
   \c_keys_utilities_path_tlp /execute:n/.code:n = {#1},
-  \c_keys_utilities_path_tlp /current~module:n/.set:N =
+  \c_keys_utilities_path_tlp /current~module:n/.tlp:N =
     \l_keys_current_module_tlp
 }
 %</package>

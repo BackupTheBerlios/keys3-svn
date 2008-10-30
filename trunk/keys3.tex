@@ -156,16 +156,16 @@
 
 % Keys can be set to tlp values, or vice versa.
 \SetModuleKeys{
-  key thirteen/.set equal:N = \tlpone,
+  key thirteen/.tlp to key:N = \tlpone,
   key thirteen,
   key fourteen/.initial:n = New contents,
-  key fourteen/.set tlp:N = \tlpone
+  key fourteen/.key to tlp:N = \tlpone
 }
 \tlpone
 
 % Adding to a stored value.
 \SetModuleKeys{
-  key fifteen/.set equal:N = \tlpone,
+  key fifteen/.tlp to key:N = \tlpone,
   key fifteen/.put right:n = { extended},
   key fifteen,
   key fifteen/.put left:n = {See how },
@@ -175,12 +175,12 @@
 % Data can be stored directly in a tlp, either as given or expanded.
 \renewcommand*{\demo}{ABC}
 \SetModuleKeys{
-  key sixteen/.set:N = \tlpone,
+  key sixteen/.store in tlp:N = \tlpone,
   key sixteen = Text
 }
 \tlpone
 \SetModuleKeys{
-  key seventeen/.set exp:N = \tlpone,
+  key seventeen/.store in tlp x:N = \tlpone,
   key seventeen = \demo
 }
 \renewcommand*{\demo}{DEF}
@@ -194,7 +194,7 @@
   key eighteen = false,
   key eighteen,
   key eighteen = rubbish,
-  key eighteen/.complement:n = key nineteen,
+  key eighteen/.inverse key:n = key nineteen,
   key nineteen = true
 }
 
@@ -204,7 +204,7 @@
   key twenty/choice one/.code:n = One,
   key twenty/choice two/.code:n = Two,
   key twenty/choice three/.code:n = Three,
-  key twenty/choice three/.equivalent:n = choice four,
+  key twenty/choice three/.equivalent key:n = choice four,
   key twenty = choice one,
   key twenty = choice four,
   key twenty = what?
@@ -254,10 +254,10 @@
   key twenty-six/.retry:n = Badgers,
 }
 
-% Keys can be debugged using the ".show key:" and ".show code:"
+% Keys can be debugged using the ".show:" and ".show code:"
 % properties.
 \SetModuleKeys{
-  key fifteen/.show key:,
+  key fifteen/.show:,
   key one/.show code:
 }
 

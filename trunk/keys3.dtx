@@ -237,13 +237,20 @@
 %   value is defined by |/keys/.current module:n| as described in
 %   section~\ref{sec:keys:prog}.
 % \end{function}
-% 
+%
 % \begin{function}{.int~set~eq:N}
 %   \begin{syntax}
 %     <key>/.int set eq:N = <int>
 %   \end{syntax}
 %   Set <int> equal to the current contents of <key>.
 % \end{function}
+% 
+% \begin{function}{.initial:n}
+%   \begin{syntax}
+%     <key>/.initial:n = \Arg{value}
+%   \end{syntax}
+%   Initialise <key> with <value>, until a second assignment is made.
+% \end{functi
 %
 % \begin{function}{/.inverse~key:n}
 %   \begin{syntax}
@@ -334,7 +341,7 @@
 %   value is defined by |/keys/.current module:n| as described in
 %   section~\ref{sec:keys:prog}.
 % \end{function}
-% 
+%
 % \begin{function}{.tlp~set~eq:N}
 %   \begin{syntax}
 %     <key>/.tlp set eq:N = <tlp>
@@ -1609,8 +1616,11 @@
     \keys_put_code:nc {#1} {left}
   },
 %    \end{macrocode}
-% Default values can now be created.
+% Initial and default values can now be created.
 %    \begin{macrocode}
+  \c_keys_properties_path_tlp /.initial:n/.code:n = {
+    \keys_def:cn {\l_keys_current_path_tlp} {#1}
+  },
   \c_keys_properties_path_tlp /.default:n/.code:n = {
     \keys_def:cn {\l_keys_current_path_tlp /._default_tlp} {#1}
   },

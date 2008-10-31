@@ -202,30 +202,31 @@ the module name:
 \end{verbatim}
 
 Keys to set a storage tlp are created using the properties
-\texttt{.tlp:N} and \texttt{.tlp:c}. The \texttt{:N} property
-requires the full name of a tlp.
+\texttt{.store in tlp:N} and \texttt{.store in tlp:c}. The 
+\texttt{:N} property requires the full name of a tlp.
 \begin{verbatim}
   keys_manage:n {
     /module/.cd:,
-    key one/.tlp:N = \l_MyMacro_tlp,
+    key one/.store in tlp:N = 
+      \l_MyMacro_tlp,
   }
 \end{verbatim}
-The \texttt{.tlp:c} constructs a tlp name starting \verb|l_|
-and ending \verb|_tlp|, and using the  argument and current
-module (if set).
+The \texttt{:c} variant constructs a tlp name starting 
+\verb|l_| and ending \verb|_tlp|, and using the  argument and 
+current module (if set).
 \begin{verbatim}
   keys_manage:n {
     /module/.cd:,
     % Uses \l_MyMacro_tlp
-    key one/.tlp:c = MyMacro,
+    key one/.store in tlp:c = MyMacro,
     /keys/current module:n = module,
     % Uses \l_module_MyMacro_tlp
-    key two/.tlp:c = MyOtherMacro,
+    key two/.store in tlp:c = MyOtherMacro,
   }
 \end{verbatim}
-For integer values, the \verb|.int:N| and \verb|.int:c| 
-properties are also available. These work in the same way
-as the tlp versions.
+For integer values and toks, versions replacing \texttt{tlp} 
+with \texttt{int} or \texttt{toks} are available.  These work
+in the same way as the tlp versions.
 
 Creating Boolean keys works in the same way, with two
 variations \texttt{.boolean:N} and \texttt{.boolean:c}

@@ -223,15 +223,6 @@
 %   make creating alternative spellings or choices simple.
 % \end{function}
 % 
-% \begin{function}{%
-%   .int~to~key:N|
-%   .int~to~key:c}
-%   \begin{syntax}
-%     <key>/.int~to~key:N = <int>
-%   \end{syntax}
-%   Set <key> equal to the current contents of <int>.
-% \end{function}
-%
 % \begin{function}{.initial:n}
 %   \begin{syntax}
 %     <key>/.initial:n = \Arg{value}
@@ -250,15 +241,12 @@
 % \end{function}
 %
 % \begin{function}{%
-%   .key~to~int:N|
-%   .key~to~int:c|
 %   .key~to~tlp:N|
 %   .key~to~tlp:c}
 %   \begin{syntax}
-%     <key>/.key~to~int:N = <int>
 %     <key>/.key~to~tlp:N = <tlp>
 %   \end{syntax}
-%   Set <int> or <tlp> equal to the current contents of <key>.
+%   Set <tlp> equal to the current contents of <key>.
 % \end{function}
 %
 % \begin{function}{%
@@ -1734,23 +1722,11 @@
   \c_keys_properties_path_tlp /.key~to~tlp:c/.code:n = {
     \tlp_set_eq:cc {#1} {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
   },
-  \c_keys_properties_path_tlp /.key~to~int:N/.code:n = {
-    \int_set_eq:Nc #1 {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
-  },
-  \c_keys_properties_path_tlp /.key~to~int:c/.code:n = {
-    \int_set_eq:cc {#1} {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
-  },
   \c_keys_properties_path_tlp /.tlp~to~key:N/.code:n = {
     \tlp_set_eq:cN {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} #1
   },
   \c_keys_properties_path_tlp /.tlp~to~key:c/.code:n = {
     \tlp_set_eq:cc {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} {#1}
-  },
-  \c_keys_properties_path_tlp /.int~to~key:N/.code:n = {
-    \int_set_eq:cN {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} #1
-  },
-  \c_keys_properties_path_tlp /.int~to~key:c/.code:n = {
-    \int_set_eq:cc {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} {#1}
   },
 %    \end{macrocode}
 % Adding to literal values is easier than adding to code.

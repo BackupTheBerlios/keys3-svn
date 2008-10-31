@@ -344,6 +344,21 @@
 %   value is defined by |/keys/.current module:n| as described in
 %   section~\ref{sec:keys:prog}.
 % \end{function}
+% 
+% \begin{function}{%
+%   /.store~in~toks:N|
+%   /.store~in~toks:c}
+%   \begin{syntax}
+%     <key>/.store~in~toks:N = <toks>
+%     <key>/.store~in~toks:c = \Arg{toks}
+%   \end{syntax}
+%   When <key> is called, store the value in <toks>. No check is made on the
+%   <int> at definition time: when the key is used, the value is stored
+%   with no checks. For the |:c| variant, a toks of name
+%   \cs{l_<module>_<name>_toks} is used for the storage. The <module>
+%   value is defined by |/keys/.current module:n| as described in
+%   section~\ref{sec:keys:prog}.
+% \end{function}
 %
 % \begin{function}{%
 %   .tlp~to~key:N|
@@ -1783,6 +1798,21 @@
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:x = {
         \exp_not:N \int_set:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.store~in~toks:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \toks_set:Nn #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.store~in~toks:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \toks_set:cn {l_ \l_keys_tmpa_tlp #1_toks} {##1}
       }
     }
   },

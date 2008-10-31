@@ -479,6 +479,13 @@
 %
 % In all cases, \m{key} should be a fully-qualified key name starting
 % with |/| and including the \m{module}, \emph{etc}.
+% 
+% \begin{function}{\keys_manage_internal:n}
+%   \begin{syntax}
+%     "\keys_manage_internal:n" \Arg{keyval list}
+%   \end{syntax}
+%   Private version of \cs{keys_manage:n} for internal use.
+% \end{function}
 %
 % \begin{function}{\keys_process:n}
 %   \begin{syntax}
@@ -1073,26 +1080,32 @@
 %\end{macro}
 %\begin{macro}{\keys_manage:n}
 %\begin{macro}{\keys_manage_quick:n}
+%\begin{macro}{\keys_manage_internal:n}
 %\begin{macro}{\keys_manage_aux:nn}
 % The main key management macros both call the auxiliary function after
 % setting up the parser.  The expansion trick means a literal path is
 % sent to the later function, and so the default path can be redefined.
 %    \begin{macrocode}
-\def_new:Npn\keys_manage:n #1 {
+\def_new:Npn \keys_manage:n #1 {
   \let:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
+  \tlp_clear:N \l_keys_current_module_tlp
   \exp_args:No \keys_manage_aux:nn {\l_keys_default_path_tlp} {#1}
 }
-\def_new:Npn\keys_manage_quick:n #1 {
+\def_new:Npn \keys_manage_quick:n #1 {
   \let:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
+  \tlp_clear:N \l_keys_current_module_tlp
+  \exp_args:No \keys_manage_aux:nn {\l_keys_default_path_tlp} {#1}
+}
+\def_new:Npn \keys_manage_internal:n #1 {
   \exp_args:No \keys_manage_aux:nn {\l_keys_default_path_tlp} {#1}
 }
 \def_new:Npn \keys_manage_aux:nn #1#2 {
   \tlp_set:Nn \l_keys_default_path_tlp {\c_keys_root_tlp}
-  \tlp_clear:N \l_keys_current_module_tlp
   \keys_process:n {#2}
   \tlp_set:Nn \l_keys_default_path_tlp {#1}
 }
 %    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %\end{macro}
@@ -1103,17 +1116,17 @@
 % argument.  When setting lots of keys separately, this is a little
 % faster than the key-based method.
 %    \begin{macrocode}
-\def_new:Npn\keys_manage:nn #1#2 {
+\def_new:Npn \keys_manage:nn #1#2 {
   \let:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
   \exp_args:No \keys_manage_aux:nnn {\l_keys_default_path_tlp} {#1}
     {#2}
 }
-\def_new:Npn\keys_manage_quick:nn #1#2 {
+\def_new:Npn \keys_manage_quick:nn #1#2 {
   \let:NN \keys_parse:n \KV_parse_space_no_removal_no_sanitize:n
   \exp_args:No \keys_manage_aux:nnn {\l_keys_default_path_tlp} {#1}
     {#2}
 }
-\def_new:Npn\keys_manage_aux:nnn #1#2#3 {
+\def_new:Npn \keys_manage_aux:nnn #1#2#3 {
   \tlp_set:Nn \l_keys_default_path_tlp {#2}
   \tlp_clear:N \l_keys_current_module_tlp
   \keys_process:n {#3}
@@ -1602,7 +1615,7 @@
 % itself. Here, the |_quick| method is used as there is no need to
 % worry about spaces or catcodes.
 %    \begin{macrocode}
-\keys_manage_quick:n{
+\keys_manage_quick:n {
 %    \end{macrocode}
 % First, an error is created for unknown keys: this should help to
 % prevent any odd internal errors.
@@ -1664,7 +1677,7 @@
     \tlp_set:Nx \l_keys_default_path_tlp {\l_keys_current_path_tlp /}
   },
   \c_keys_properties_path_tlp /.module:/.code:n = {
-    \keys_manage:n {
+    \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:x = {
         \exp_not:N \tlp_set:Nx \exp_not:N \l_keys_default_path_tlp
           {\l_keys_current_path_tlp /}
@@ -1675,24 +1688,24 @@
 % Pre-built lists of keys can be created for regular use.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.keys:n/.code:n = {
-    \keys_manage:n {
+    \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:n = {\keys_process:n {#1}}
     }
   },
   \c_keys_properties_path_tlp /.keys:x/.code:n = {
-    \keys_manage:n {
+    \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:x = {
         \exp_not:N \keys_process:n {#1}
       }
     }
   },
   \c_keys_properties_path_tlp /.keys:nn/.code:nn = {#1#2} {
-    \keys_manage:n {
+    \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:nn = {#1} {\keys_process:n {#2}}
     }
   },
   \c_keys_properties_path_tlp /.keys:nx/.code:nn = {#1#2} {
-    \keys_manage:n {
+    \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:x =
         {#1} {\exp_not:N \keys_process:n {#2}}
     }
@@ -1701,13 +1714,13 @@
 % Code can also be added to the above.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.put~keys~left:n/.code:n = {
-    \keys_manage:n {
+    \keys_manage_internal:n {
       \l_keys_current_path_tlp /.put~code~left:n =
         {\keys_process:n {#1}}
     }
   },
   \c_keys_properties_path_tlp /.put~keys~right:n/.code:n = {
-    \keys_manage:n {
+    \keys_manage_internal:n {
       \l_keys_current_path_tlp /.put~code~right:n =
         {\keys_process:n {#1}}
     }
@@ -1879,7 +1892,7 @@
 % Choices are handled in a slightly different way.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.choice:/.code:n = {
-    \keys_manage:n {
+    \keys_manage_internal:n {
       \l_keys_current_path_tlp /.cd:,
       .code:n = {
         \tlp_set:Nn \l_keys_current_choice_tlp {##1}
@@ -1900,7 +1913,7 @@
     \toks_set:Nn \l_keys_body_toks {#2}
     \int_zero:N \l_keys_current_choice_int
     \clist_map_function:nN {#1} \keys_choice_create:n
-    \keys_manage:n {
+    \keys_manage_internal:n {
       \l_keys_choice_path_tlp  /.choice:
     }
   },

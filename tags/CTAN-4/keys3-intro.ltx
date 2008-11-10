@@ -1,0 +1,378 @@
+\documentclass{ltugboat}
+\usepackage{url,underscore}
+\usepackage[final]{microtype}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Some (very simple) new commands are defined.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\providecommand*{\pkg}[1]{\textsf{#1}}
+\providecommand*{\opt}[1]{\texttt{#1}}
+\providecommand*{\file}[1]{\texttt{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Meta-data for this paper
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{\pkg{keys3}: Key management for \LaTeX3}
+\author{Joseph Wright}
+\address{%
+  Morning Star\\
+  2, Dowthorpe End\\
+  Earls Barton\\
+  Northampton NN6 0NH\\
+  United Kingdom}
+\netaddress{joseph.wright@morningstar2.co.uk}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The \pkg{keys3} package is an experimental implementation of
+key--value management using \pkg{expl3} syntax. The package is
+aimed at exploring how key--value methods might be used in
+\LaTeX3. This document introduces the methods of \pkg{keys3} by
+comparison to those of the existing key--value packages.
+\end{abstract}
+
+\section{Introduction}
+
+The \pkg{expl3} bundle provides a well-designed programming
+interface for \LaTeX, and will form the core of \LaTeX3. At
+present, key management in the \pkg{expl3} system is limited to
+parsing a key--value list into separated keys and values. The
+\pkg{keys3} package takes this base and extends it to examine
+the possibilities for rich key--value controls in \LaTeX3.
+
+The \pkg{keys3} package follows the model used by
+\pkg{pgfkeys}, although it is extended in a number of ways.
+Keys are created using a path-like naming scheme, for example:
+\begin{verbatim}
+  /module/key name = value
+\end{verbatim}
+This document highlights how to use the main features of
+\pkg{keys3}. It assumes some familiarity with the existing
+key-management packages (\pkg{keyval}, \pkg{xkeyval} and
+\pkg{kvoptions}), and where possible makes comparisons with the
+existing solutions.
+
+\section{The basics: a little like \pkg{keyval}}
+
+There are two basic steps to creating key--value entries in a
+package, defining keys (and code to handle the input) and
+setting keys. This basic functionality is provided in
+\pkg{keyval} by the \cs{define@key} and \cs{setkeys} macros:
+\begin{verbatim}
+  \define@key{family}{key one}{code}
+  \define@key{family}{key two}{more code}
+  \setkeys{family}{
+    key one = value one,
+    key two = value two
+  }
+\end{verbatim}
+Keys are created by the first macro, and set using the second.
+In contrast, in \pkg{keys3} keys are defined and set using the
+same function:
+\begin{verbatim}
+  \keys_manage:n {
+  /module/key one/.code:n = code,
+  /module/key two/.code:n = more code
+  }
+  \keys_manage:n {
+  /module/key one = value one,
+  /module/key two = value two
+  }
+\end{verbatim}
+This short example illustrates several points. In the
+\pkg{keys3} model, keys are divided by into modules (and
+possibly sub-modules), which correspond to key families in
+\pkg{keyval}. Keys are created and altered by setting one or
+more properties: here the \texttt{.code:n} property associates
+code with a key. As is the case when using \pkg{keyval}, this
+can create any arbitrary code with \verb|#1| containing the
+value given for the key.
+\begin{verbatim}
+  \keys_manage:n {
+  /module/key one/.code:n = You said `#1',
+  }
+  \keys_manage:n {
+  /module/key one = value one,
+  }
+\end{verbatim}
+prints ``You said `value one'\,''.
+
+\subsection{Code beyond \texttt{.code:n}}
+
+The \texttt{.code:n} property has a set of relatives which have
+no equivalent in \pkg{keyval}. Using \texttt{.code:n}, the code
+definition takes place without expansion (using \cs{def:Npn}).
+In contrast, \texttt{.code:x} caries out an expanded definition
+(using \cs{def:Npx}).
+
+Code can also be created with an arbitrary \TeX\ parameter
+definition. This is carried out using the \texttt{.code:nn} and
+\texttt{.code:nx} properties, for standard and expanded
+definitions.
+\begin{verbatim}
+  \keys_manage:n {
+  /module/key one/.code:nn = {#1 and #2}
+    {You said `#1' or perhaps `#2'},
+  /module/key one = value and one,
+  }
+\end{verbatim}
+will print ``You said `value' or perhaps `one'\,''.
+
+\subsection{Changing directory: a family affair}
+
+When using \pkg{keyval} or a derivative, all keys are created
+in a family. As was explained above, in \pkg{keys3} keys are
+divided into modules. Having to type the module for each key
+would be a problem, and so it is possible to ``change
+directory'' to use keys for a given module.
+\begin{verbatim}
+  \keys_manage:n {
+    /module/.cd:
+    key one/.code:n = code,
+    key two/.code:n = more code
+  }
+\end{verbatim}
+manages \texttt{/module/key one} and \texttt{/module/key two}.
+After a \texttt{.cd:}, it is still possible to access keys in
+other paths by giving the full key path starting
+``\texttt{/}''.
+
+\section{Making life easier: comparison to \pkg{kvoptions}
+  and \pkg{xkeyval}}
+
+\subsection{Adding properties}
+
+After a key has been created with \texttt{.code:n} (or a
+variant) it is possible to add additional properties to the
+key. There are three key properties here:
+\begin{itemize}
+  \item \texttt{.default:n}
+  \item \texttt{.value required:}
+  \item \texttt{.value forbidden:}
+\end{itemize}
+The \texttt{.default:n} property needs an argument. It is used
+when the user does not provide any input as the value:
+\begin{verbatim}
+  \keys_manage:n {
+    /module/.cd:,
+    key one/.code:n = Hello #1,
+    key one/.default:n = World,
+    key one,
+    key one = You,
+ }
+\end{verbatim}
+This will print ``Hello World'' followed by ``Hello you''. This
+property is used automatically when creating Boolean keys (see
+later).
+
+The properties \texttt{.value required:} and \texttt{.value
+forbidden:} work as might be expected. If set, they given an
+error if a value is given (\texttt{.value required:}) or given
+(\texttt{.value forbidden:}). For example, both attempts to set
+keys give an error:
+\begin{verbatim}
+  \keys_manage:n {
+    /module/.cd:,
+    key one/.code:n = Hello #1,
+    key one/.value required:
+    key one, % Error
+    key two/.code:n = Nothing here!,
+    key two/.value forbidden:,
+    key two= Data, % Error
+  }
+\end{verbatim}
+
+\subsection{Storage and Boolean keys}
+
+Two common types of key are storage keys (which keep the value
+given for later use) and Boolean keys (which set a switch).
+Both \pkg{kvoptions} and \pkg{xkeyval} provide methods for
+creating these type of keys. In \pkg{keys3}, both are also
+available easily. One important factor when creating these keys
+with \pkg{keys3} is the current module name. This can be used
+by the package, but is not detected automatically.  Thus the
+special key \texttt{/keys/current module:n} needs to set with
+the module name:
+\begin{verbatim}
+  keys_manage:n {
+    /keys/current module:n = MyModule
+  }
+\end{verbatim}
+
+Keys to set a storage tlp are created using the properties
+\texttt{.tlp:N} and \texttt{.tlp:c}. The \texttt{:N} property
+requires the full name of a tlp.
+\begin{verbatim}
+  keys_manage:n {
+    /module/.cd:,
+    key one/.tlp:N = \l_MyMacro_tlp,
+  }
+\end{verbatim}
+The \texttt{.tlp:c} constructs a tlp name starting \verb|l_|
+and ending \verb|_tlp|, and using the  argument and current
+module (if set).
+\begin{verbatim}
+  keys_manage:n {
+    /module/.cd:,
+    % Uses \l_MyMacro_tlp
+    key one/.tlp:c = MyMacro,
+    /keys/current module:n = module,
+    % Uses \l_module_MyMacro_tlp
+    key two/.tlp:c = MyOtherMacro,
+  }
+\end{verbatim}
+For integer values, the \verb|.int:N| and \verb|.int:c| 
+properties are also available. These work in the same way
+as the tlp versions.
+
+Creating Boolean keys works in the same way, with two
+variations \texttt{.boolean:N} and \texttt{.boolean:c}
+available. The later creates creates a Boolean of form
+\cs{l_<module>_<name>_bool}. A Boolean key acts as a simple
+choice, accepting only the values \texttt{true} and
+\texttt{false}.  The input is then used to set the \LaTeX3
+switch.
+\begin{verbatim}
+  keys_manage:n {
+    /module/.cd:,
+    key one/.boolean:N = \MyBool,
+    key one = true, % \MyBool = \c_true
+    key one = false, % \MyBool = \c_false
+    key one = rubbish, % Error
+  }
+\end{verbatim}
+As with \pkg{kvoptions} or \pkg{xkeyval}, the key name alone
+can be given, and is equivalent to giving the \texttt{true}
+value.
+
+It is sometimes useful to have a complementary key for a
+Boolean. The usual example is \texttt{final}, where a
+\texttt{draft} key should act in the opposite sense.  In
+\pkg{keys3}, this is achieved using the \texttt{.inverse key:n}
+property.
+\begin{verbatim}
+  keys_manage:n {
+    /module/.cd:,
+    final/.boolean:N = \FinalBool,
+    final/.inverse key:n = draft,
+    draft = false, % Same as:
+    final = true
+  }
+\end{verbatim}
+
+\subsection{Multiple choice time}
+
+The \pkg{xkeyval} package provides \cs{define@chociekey} to
+create a key which accepts only a given range of values. In
+\pkg{keys3}, two methods are available to achieve the same
+effect. It should be noted that all keys are case-sensitive in
+\pkg{keys3}, in contrast to \pkg{xkeyval}.
+
+In \pkg{keys3}, choices can be created using either the
+\verb|.choice:| or \verb|.choices:nn| properties.  The first of
+these makes the current key a choice, and leaves it to the
+programmer to create each choice key separately. This is
+therefore best suited when each choice is rather different.
+\begin{verbatim}
+  \keys_manage:n {
+    /module/.cd:
+    key one/.choice:,
+    key one/.cd:,
+      egg/.code:n = some code,
+      cheese/.code:n = different code,
+      ...
+  }
+\end{verbatim}
+
+On the other hand, the \verb|.choices:nn| property is intended
+to be useful when the choices are rather similar.  The tlp
+\cs{l_keys_current_choice_tlp}, which contains the choice name,
+can be used in the construction of csnames, \emph{etc}.
+\begin{verbatim}
+  \keys_manage:n {
+    /module/.cd:
+  key one/.choices:nn =
+     {egg,cheese,fish} {
+       You asked for
+       \l_keys_current_choice_tlp!
+      }
+ }
+\end{verbatim}
+
+It is possible to combine choices created in by the two
+methods. So a series of similar choices can be created using
+\verb|.choices:nn|, before making other possibilities directly
+as sub-keys of the parent.
+\begin{verbatim}
+  \keys_manage:n {
+    /module/.cd:
+  key one/.choices:nn =
+     {egg,cheese,fish} {
+       You asked for
+       \l_keys_current_choice_tlp!
+      },
+  key one/tomato/.code:n =
+    I don't have tomatoes
+ }
+\end{verbatim}
+
+\subsection{Into the unknown}
+
+Choices and Boolean keys take a fixed range of values, and so
+unknown values need special handling.  The package
+\pkg{xkeyval} handles these cases with the \texttt{+} variants
+of its macros. At the same time, completely unknown keys might
+be supplied; the only \pkg{keyval} derivative which handles
+these is \pkg{kvsetkeys}.  In \pkg{keys3}, both of these cases
+are controlled by creating an \texttt{unknown} sub-key:
+\begin{verbatim}
+  \keys_manage:n {
+    /module/.cd:,
+    unknown/.code:n = Error!,
+    key one/unknown/.code:n =
+      What? I only know
+      eggs, cheese, fish and
+      tomato!
+  }
+\end{verbatim}
+This creates a general error if any key inside \texttt{/module}
+is unknown, printing ``Error!''. For the choice \texttt{key
+one}, any unknown choice will print ``What?'' followed by the
+list of valid values. Any code can be used here, and so special
+handling (perhaps carrying out more work with the supplied
+value) can be included.
+
+\section{Beyond \pkg{(x)keyval}: ideas from \pkg{pgfkeys} and
+  beyond}
+
+Following the ideas of the \pkg{pgfkeys} package, \pkg{keys3}
+has a number of properties that are not available in
+\pkg{keyval}-based systems. The most significant of these is
+the \texttt{.keys:n} property, which in \pkg{pgfkeys} is
+referred to as \texttt{.style}. This allows a key to be used as
+an alias for one or more other keys. In this way, shortcuts to
+creating pre-defined groups of settings are available:
+\begin{verbatim}
+  \keys_manage:n {
+    /module/.cd:,
+    key one/.keys:n = {
+      key two = blue,
+      key three = italic,
+      key four = large
+    }
+  }
+\end{verbatim}
+In the example, if keys two to four control formatting of a
+text block, then setting key one will make the text blue,
+italic and large (assuming the other keys work in the obvious
+ways).
+
+Other properties are available in \pkg{kleys3} for controlling
+other aspects of key behaviour. The package documentation
+should be consulted for full details.
+
+\makesignature
+
+\end{document}

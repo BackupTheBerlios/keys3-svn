@@ -1,0 +1,1970 @@
+%\iffalse
+%% File: keys3.dtx Copyright (C) 2008 Joseph Wright
+%%
+%% It may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License (LPPL), either version 1.3c of this
+%% license or (at your option) any later version.  The latest version
+%% of this license is in the file
+%%
+%%    http://www.latex-project.org/lppl.txt
+%%
+%% -----------------------------------------------------------------------
+%<*driver|package>
+\RequirePackage{l3names}
+%</driver|package>
+%\fi
+\GetIdInfo$Id$
+  {Key management for LaTeX3}
+%\iffalse
+%<*driver>
+%\fi
+\ProvidesFile{\filename.\filenameext}
+  [\filedate\space v\fileversion\space\filedescription]
+%\iffalse
+\documentclass[full]{l3doc}
+\begin{document}
+\DocInput{\filename.\filenameext}
+\end{document}
+%</driver>
+% \fi
+%
+% \title{The \textsf{keys3} package^^A
+%   \thanks{This file has version number \fileversion, last
+%     revised \filedate.}\\
+% Key management for \LaTeX3}
+% \author{Joseph Wright^^A
+%   \thanks{E-mail: joseph.wright@morningstar2.co.uk}}
+% \date{\filedate}
+% \maketitle
+%
+%\section{Key management}
+%
+% The key--value method is a popular system for creating large numbers
+% of settings for controlling macro or package behaviour.  For the
+% user, the system normally results in input of the form
+%\begin{verbatim}
+%  \PackageControlMacro{
+%    key     = value,
+%    key two = value two
+%  }
+%\end{verbatim}
+% or
+%\begin{verbatim}
+%  \PackageMacro[
+%    key     = value,
+%    key two = value two
+%  ]{argument}.
+%\end{verbatim}
+% For the programmer, the original \textsf{keyval} package gives only
+% the most basic interface for this work.  All key macros have to be
+% created one at a time, and as a result the \textsf{kvoptions} and
+% \textsf{xkeyval} packages have been written to extend the ease of
+% creating keys.  However, the underlying model is rather inflexible.
+%
+% As an alternative, \textsf{pgfkeys} from the \textsf{pgf}/Ti\emph{k}z
+% bundle uses a ``file-like'' model for keys. In this model, each key
+% has one or more functions attached to define its action.  In
+% \textsf{pgfkeys} terminology, these are key \emph{handlers}. Keys can
+% be created and used using a unified interface:
+%\begin{verbatim}
+%  \pgfkeys{
+%    /path/key/.handler = code,
+%    /path/key          = value
+%  }
+%\end{verbatim}
+%
+% The \textsf{keys3} package is aimed at creating a high-level
+% programmers interface for key--value controls in \LaTeX3. Key
+% creation and control follows the \textsf{pgfkeys} closely, although
+% changes have been made to adhere to the new coding ideas of \LaTeX3,
+% and new functions have been added.  The \textsf{keys3} package is
+% \emph{not} a simple translation of \textsf{pgfkeys} to the new syntax.
+% In package internals have been written from the ground up, to better
+% enforce variable typing and to act in a know manner under failing
+% circumstances.
+%
+% In the \textsf{keys3} model, each key belongs to a module,
+% which may have one or more subdivisions. Each key then has
+% one or more properties which define how the key acts. The idea
+% of a single function for all key control is retained:
+%\begin{verbatim}
+%  \keys_manage:n{
+%    /module/key/.property     = code,
+%    /module/sub/key/.property = more code,
+%    /module/key               = value
+%  }
+%\end{verbatim}
+% The combination of all \m{module} parts up to the \m{key} is referred
+% to as the \emph{path} of the key.
+%
+%\subsection{Creating, retrieving and setting keys}
+%
+% The main interface for key management is the the \cs{keys_manage:n}
+% macro.  This can be used to create, retrieve and set keys, and is
+% therefore the preferred interface for the package.
+%
+% \begin{function}{%
+%   \keys_manage:n|
+%   \keys_manage_quick:n}
+%   \begin{syntax}
+%     "\keys_manage:n" \Arg{keyval list}
+%   \end{syntax}
+%   The main key management function, which parses over the <keyval
+%   list> and processes each key. The standard version removes leading
+%   and trailing spaces and checks catcodes for ungrouped ``|,|'' and
+%   ``|=|''. The |_quick| version omits these tests for speed, and is
+%   therefore more suited to creating keys inside code blocks.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_manage:nn|
+%   \keys_manage_quick:nn}
+%   \begin{syntax}
+%     "\keys_manage:nn" \Arg{path} \Arg{keyval list}
+%   \end{syntax}
+%   Versions of the above which include a <path> as an argument. These
+%   are faster versions of the |:n| macros when setting lots of keys
+%   separately and with known paths.
+% \end{function}
+%
+% Setting up and altering keys is carried out using one or more
+% properties (in \textsf{pgfkeys}, these are called handlers). In all
+% cases, \m{key} may be a full-qualified key with a path, or a partial
+% key to which the default path will be added. Notice that when a
+% single argument is required, the braces around the argument may be
+% omitted without any error arising.
+%
+% \begin{function}{%
+%   /.boolean:N|
+%   /.boolean:c}
+%   \begin{syntax}
+%     <key>/.boolean:N = <Boolean>
+%     <key>/.boolean:c = \Arg{name}
+%   \end{syntax}
+%   Creates <Boolean> switch, and uses the <key> to set the Boolean to
+%   |true| or |false|. Other input raises an error, but with a default
+%   value of |true| set. The behaviour with unknown values is altered
+%   by adding code to \texttt{<key>/unknown}. The |:c| variant uses a
+%   switch \cs{l_<module>_<name>_bool}, with <module> set as described
+%   in secion~\ref{sec:keys:prog}.
+% \end{function}
+%
+% \begin{function}{/.cd:}
+%   \begin{syntax}
+%     <key>/.cd:
+%   \end{syntax}
+%   Change the current path to <key>. Usually the first property used
+%   when setting up several keys.
+% \end{function}
+%
+% \begin{function}{/.choice:}
+%   \begin{syntax}
+%     <key>/.choice:
+%   \end{syntax}
+%   Makes <key> a choice key.  Each possible choice should be stored as
+%   a sub-key of <key>, \emph{i.e.} <key>/<choice>, and should have and
+%   action attached (|.code:n|, |.keys:n|, \emph{etc.}). The behaviour
+%   with unspecified values is altered by adding code to the
+%   \texttt{<key>/unknown} sub-key; initially, this raises an error if
+%   an unknown value is given.
+% \end{function}
+%
+% \begin{function}{/.choices:nn}
+%   \begin{syntax}
+%     <key>/.choices:nn = \Arg{choice list} \Arg{code}
+%   \end{syntax}
+%   For a comma-separated <choice list>, creates each <choice> as a
+%   sub-key of the current <key>. The <code> is associated with each
+%   <choice> as if |.code:n| had been run on each one. The <code> can
+%   access the choice made \emph{via} \cs{l_keys_current_choice_tlp}.
+%   The position of the <choice> in the <choice list> is available as
+%   \cs{l_keys_current_choice_int}.
+%   \begin{texnote}
+%     The role of \cs{l_keys_current_choice_tlp} and
+%     \cs{l_keys_current_choice_int} is similar to \cs{val} and \cs{nr}
+%     in the \textsf{xkeyval} manual for the description of
+%     \cs{define@chociekey}.
+%   \end{texnote}
+% \end{function}
+%
+% \begin{function}{%
+%   /.code:n|
+%   /.code:x}
+%   \begin{syntax}
+%     <key>/.code:n = \Arg{code}
+%   \end{syntax}
+%   Sets <key> to execute <code> when the key is called. The <code>
+%   will be passed a single argument |#1|. This property clears any
+%   others previously set for the key.
+% \end{function}
+%
+% \begin{function}{%
+%   /.code:nn|
+%   /.code:nx}
+%   \begin{syntax}
+%     <key>/.code:nn = \Arg{parameters} \Arg{code}
+%   \end{syntax}
+%   Sets <key> to execute <code> when the key is called. The function
+%   used will have \TeX\ <parameters>.
+% \end{function}
+%
+% \begin{function}{/.default:n}
+%   \begin{syntax}
+%     <key>/.default:n = \Arg{value}
+%   \end{syntax}
+%   Use <value> whenever <key> is given without a value.
+% \end{function}
+%
+% \begin{function}{/.equivalent~key:n}
+%   \begin{syntax}
+%     <key>/.equivalent~key:n = <key2>
+%   \end{syntax}
+%   Makes <key2> a key with equivalent meaning to <key>: intended to
+%   make creating alternative spellings or choices simple.
+% \end{function}
+% 
+% \begin{function}{%
+%   .int~to~key:N|
+%   .int~to~key:c}
+%   \begin{syntax}
+%     <key>/.int~to~key:N = <int>
+%   \end{syntax}
+%   Set <key> equal to the current contents of <int>.
+% \end{function}
+%
+% \begin{function}{.initial:n}
+%   \begin{syntax}
+%     <key>/.initial:n = \Arg{value}
+%   \end{syntax}
+%   Initialise <key> with <value>, until a second assignment is made.
+% \end{function}
+%
+% \begin{function}{/.inverse~key:n}
+%   \begin{syntax}
+%     <key>/.inverse key:n = \Arg{name}
+%   \end{syntax}
+%   Creates a new key <name> as an inverse of existing Boolean <key>.
+%   The inverse key will work in the opposite sense to the parent. Thus
+%   setting <name> to \texttt{true} is the same as setting <key> to
+%   \texttt{false}.
+% \end{function}
+%
+% \begin{function}{%
+%   .key~to~int:N|
+%   .key~to~int:c|
+%   .key~to~tlp:N|
+%   .key~to~tlp:c}
+%   \begin{syntax}
+%     <key>/.key~to~int:N = <int>
+%     <key>/.key~to~tlp:N = <tlp>
+%   \end{syntax}
+%   Set <int> or <tlp> equal to the current contents of <key>.
+% \end{function}
+%
+% \begin{function}{%
+%   /.keys:n|
+%   /.keys:x|
+%   /.keys:nn|
+%   /.keys:nx}
+%   \begin{syntax}
+%     <key>/.keys:n = \Arg{keyval list}
+%   \end{syntax}
+%   Defines a set of keys to be applied when <key> is called. The usual
+%   parameter |#1| is available.
+%   \begin{texnote}
+%     These are the \textsf{pgfkeys} |.style| handler and relatives.
+%  \end{texnote}
+% \end{function}
+%
+% \begin{function}{/.module:}
+%   \begin{syntax}
+%     <key>/.module:
+%   \end{syntax}
+%   Declares <key> as a module name: giving <key> alone is then the
+%   same as giving <key>/.cd:, but is a little faster.
+% \end{function}
+%
+% \begin{function}{%
+%   /.put~left:n|
+%   /.put~right:n}
+%   \begin{syntax}
+%     <key>/.put left:n = \Arg{value}
+%   \end{syntax}
+%   Adds <value> to data stored in <key>.
+% \end{function}
+%
+% \begin{function}{%
+%   /.put~code~left:n|
+%   /.put~code~right:n}
+%   \begin{syntax}
+%     <key>/.put code left:n = \Arg{code}
+%   \end{syntax}
+%   Adds <code> to <key> macro created by |.code:n|.
+% \end{function}
+%
+% \begin{function}{%
+%   /.put~keys~left:n|
+%   /.put~keys~right:n}
+%   \begin{syntax}
+%     <key>/.put code left:n = \Arg{keyval list}
+%   \end{syntax}
+%   Adds <keyval list> to <key> code created by |.keys:n|.
+% \end{function}
+%
+% \begin{function}{%
+%   /.show~code:|
+%   /.show:}
+%   \begin{syntax}
+%     <key>/.show code:
+%     <key>/.show:
+%   \end{syntax}
+%   Show the contents of the key macro itself or the hidden property
+%   storing |.code:n|. May be useful for debugging, but note that all
+%   |._cmd:w| keys have a delimited argument ending \cs{q_keys_stop}.
+% \end{function}
+%
+%
+% \begin{function}{%
+%   /.store~in~int:N|
+%   /.store~in~int:c}
+%   \begin{syntax}
+%     <key>/.store~in~int:N = <int>
+%     <key>/.store~in~int:c = \Arg{int}
+%   \end{syntax}
+%   When <key> is called, store the value in <int>. No check is made on the
+%   <int> at definition time: when the key is used, the value is stored
+%   with no checks. For the |:c| variant, an int of name
+%   \cs{l_<module>_<name>_int} is used for the storage. The <module>
+%   value is defined by |/keys/.current module:n| as described in
+%   section~\ref{sec:keys:prog}.
+% \end{function}
+%
+% \begin{function}{%
+%   /.store~in~tlp:N|
+%   /.store~in~tlp:c|
+%   /.store~in~tlp~x:N|
+%   /.store~in~tlp~x:c}
+%   \begin{syntax}
+%     <key>/.store~in~tlp:N = <tlp>
+%     <key>/.store~in~tlp:c = \Arg{name}
+%   \end{syntax}
+%   When <key> is called, store the value in <tlp>. The |tlp~x| variant
+%   expands the value at the point of storage. No check is made on the
+%   <tlp> at definition time: when the key is used, the value is stored
+%   with no checks. For the |:c| variant, a tlp of name
+%   \cs{l_<module>_<name>_tlp} is used for the storage. The <module>
+%   value is defined by |/keys/.current module:n| as described in
+%   section~\ref{sec:keys:prog}.
+% \end{function}
+%
+% \begin{function}{%
+%   .tlp~to~key:N|
+%   .tlp~to~key:c}
+%   \begin{syntax}
+%     <key>/.tlp~to~key:N = <tlp>
+%   \end{syntax}
+%   Set <key> equal to the current contents of <tlp>.
+% \end{function}
+%
+% \begin{function}{%
+%   /.try:n|
+%   /.retry:n}
+%   \begin{syntax}
+%     <key>/.try:n = \Arg{value}
+%   \end{syntax}
+%   Attempts to set <key> with <value>, with no errors occurring if the
+%   <key> is not defined.  |.retry:n| only attempts to set the key if
+%   a previous |.try:n| has failed.
+% \end{function}
+%
+%\subsubsection{Programmers keys}
+%\label{sec:keys:prog}
+%
+% As well as the pre-defined property and error keys, the key
+% |/keys/execute:n| is available to run arbitrary code. This can be
+% used to carry out any necessary definitions without leaving
+% \cs{keys_manage:n}.
+%
+% The key |/keys/current module:n| is used to set the name of the
+% current module for use with properties |.boolean:c| and
+% \texttt{.store in \ldots}. If this key has been set, the module 
+% name is used when creating |_bool| and |_tlp| storage.
+%\begin{verbatim}
+%  \keys_manage:n {
+%    /module/.cd:,
+%    key one/.boolean:c       = one,    % Uses \l_one_bool
+%    key two/.store in tlp:c  = two,    % Uses \l_two_tlp
+%    /keys/current module:n   = module,
+%    key three/.boolean:c     = three,  % Uses \l_module_three_bool
+%    key four/.store in tlp:c = four,   % Uses \l_module_four_tlp
+%  }
+%\end{verbatim}
+% As illustrated, an additional ``|_|'' is included in the name when a
+% module name is available.  The current module name is reset to no
+% value for each call to \cs{keys_manage:n}.
+%
+%\subsection{Creating choices}
+%
+% Choices can be created using either the |.choice:| or |.choices:nn|
+% properties.  The first of these makes the current key a choice, and
+% leaves it to the programmer to create each choice key separately. This
+% is therefore best suited when each choice is rather different.
+%\begin{verbatim}
+%  \keys_manage:n {
+%    /module/.cd:
+%    key/.choice:,
+%    key/.cd:,
+%      egg/.code:n = <some code>,
+%      cheese/.code:x = <some expanded code>,
+%      fish/.keys:n = <some extra keys>
+%  }
+%\end{verbatim}
+%
+% On the other hand, the |.choices:nn| property is intended to be
+% useful when the choices are rather similar.  The tlp
+% \cs{l_keys_current_choice_tlp}, which contains the choice name, can
+% be used in the construction of csnames, \emph{etc}.
+%\begin{verbatim}
+%  \keys_manage:n {
+%    /module/.cd:
+%    key/.choices:nn =
+%      {egg,cheese,fish}{You asked for \l_keys_current_choice_tlp!}
+%  }
+%\end{verbatim}
+%
+% Extra keys can be added to those generated by |.choices:nn| by creating
+% sub-keys of the choice key. Unknown values can also be handled using
+% the \texttt{unknown} choice.
+%\begin{verbatim}
+%  \keys_manage:n {
+%    /module/.cd:
+%    key/.choices:nn =
+%      {egg,cheese,fish}{You asked for \l_keys_current_choice_tlp!},
+%    key/unknown/.code:n =
+%      {I don't known \l_keys_current_choice_tlp}
+%  }
+%\end{verbatim}
+%
+%\subsection{Functions}
+%
+%\subsubsection{Public functions}
+%
+% Although \cs{keys_manage:n} can carry out all of the functions of the
+% package, some of the internal macros may be of more general use for
+% creating complex systems. A small number of non-specific macros are
+% also created.
+%
+% \begin{function}{%
+%   \quark_if_value_required:NTF|
+%   \quark_if_value_required:NT|
+%   \quark_if_value_required:NF}
+%   \begin{syntax}
+%     "\quark_if_value_required:NTF"
+%     ~~~~<token> \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Tests if <token> is equal to \cs{q_value_required}. The only
+%   functions which do not start with \cs{keys}.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_if_really_exist:cTF|
+%   \keys_if_really_exist:cT|
+%   \keys_if_really_exist:cF}
+%   \begin{syntax}
+%     "\keys_if_really_exist:cTF"
+%     ~~~~\Arg{key} \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Tests if <key> is known without adding anything to the hash table.
+% \end{function}
+%
+% In all cases, \m{key} should be a fully-qualified key name starting
+% with |/| and including the \m{module}, \emph{etc}.
+% 
+% \begin{function}{\keys_manage_internal:n}
+%   \begin{syntax}
+%     "\keys_manage_internal:n" \Arg{keyval list}
+%   \end{syntax}
+%   Private version of \cs{keys_manage:n} for internal use.
+% \end{function}
+%
+% \begin{function}{\keys_process:n}
+%   \begin{syntax}
+%     "\keys_process:n" \Arg{keyval list}
+%   \end{syntax}
+%   Common macro used by all key management functions to initiate key
+%   evaluation. Can be used to recursively set keys (see for example
+%   definition of |.keys:n|).
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_def:cn|
+%   \keys_def:co|
+%   \keys_def:cx}
+%   \begin{syntax}
+%     "\keys_def:cn" \Arg{key} \Arg{value}
+%   \end{syntax}
+%   Stores <value> in <key>: <value> should be a tlp-compatible
+%   argument.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_use:c}
+%   \begin{syntax}
+%     "\keys_use:c" \Arg{key}
+%   \end{syntax}
+%   Use the code stored in <key>.
+% \end{function}
+%
+%\subsubsection{Internal functions}
+%
+% \begin{function}{\keys_bool_new:c}
+%   \begin{syntax}
+%     "\keys_bool_new:c" \Arg{key}
+%   \end{syntax}
+%   Create a new Boolean <key> and sets to |true|.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_def_cmd:cn|
+%   \keys_def_cmd:cx}
+%   \begin{syntax}
+%     "\keys_def_cmd:cn" \Arg{key} \Arg{code}
+%   \end{syntax}
+%   Creates the internal |._cmd:w| propery  for <key>, with <code> as
+%   the definition and accepting one argument |#1|.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_def_cmd:cnn|
+%   \keys_def_cmd:cnx}
+%   \begin{syntax}
+%     "\keys_def_cmd:cnn" \Arg{key} \Arg{parameters} \Arg{code}
+%   \end{syntax}
+%   Creates the internal |._cmd:w| property  for <key>, with <code> as
+%   the definition and accepting arbitrary parameters as specified in
+%   <parameters>.
+% \end{function}
+%
+% \begin{function}{\keys_choice_create:n}
+%   \begin{syntax}
+%     "\keys_choice_create:n" \Arg{choice}
+%   \end{syntax}
+%   Creates a choice key from a list.
+% \end{function}
+%
+% \begin{function}{\keys_clear_properties:c}
+%   \begin{syntax}
+%     "\keys_clear_properties:c" \Arg{key}
+%   \end{syntax}
+%   Removes all existing internal properties from <key>.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_if_cmd_really_exist:cTF|
+%   \keys_if_cmd_really_exist:cT|
+%   \keys_if_cmd_really_exist:cF}
+%   \begin{syntax}
+%     "\keys_if_cmd_really_exist:cTF"
+%     ~~~~\Arg{key} \Arg{true code} \Arg{false code}
+%   \end{syntax}
+%   Tests if <key> |._cmd:w| property exists.
+% \end{function}
+%
+% \begin{function}{\keys_expand:n}
+%   \begin{syntax}
+%     "\keys_expand:n" \Arg{value}
+%   \end{syntax}
+%   Helper macro for expansion control.
+% \end{function}
+%
+% \begin{function}{\keys_let:cc}
+%   \begin{syntax}
+%     "\keys_let:cc" \Arg{key1} \Arg{key2}
+%   \end{syntax}
+%   Let <key1> to <key2>.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_manage_aux:nn|
+%   \keys_manage_aux:nnn}
+%   \begin{syntax}
+%     "\keys_manage_aux:nn" \Arg{current path} \Arg{keyval list}
+%     "\keys_manage_aux:nnn"
+%     ~~~~\Arg{current path} \Arg{new path} \Arg{keyval list}
+%   \end{syntax}
+%   Auxiliary function for \cs{keys_manage:n} and \cs{keys_manage:nn},
+%   respectively, used to preserve path information through nested
+%   calls.
+% \end{function}
+%
+% \begin{function}{\keys_module_name:}
+%   \begin{syntax}
+%     "\keys_module_name:"
+%   \end{syntax}
+%   Sets \cs{l_keys_tmpa_tlp} to hold the appropriate name for
+%   creating Boolean and tlp functions.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_path_add:w|
+%   \keys_path_add_aux:w}
+%   \begin{syntax}
+%     "\keys_path_add:w" <key> "\q_stop"
+%   \end{syntax}
+%   Adds a path to <key> if necessary.
+% \end{function}
+%
+% \begin{function}{\keys_parse:n}
+%   \begin{syntax}
+%     "\keys_parse:n" \Arg{keyval list}
+%   \end{syntax}
+%   The function to actually parse the user input.  Is \cs{let:NN} to
+%   one from \textsf{l3keyval}.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_process_elt:nn|
+%   \keys_process_elt:n|
+%   \keys_process_elt:}
+%   \begin{syntax}
+%     "\keys_process_elt:nn" \Arg{key} \Arg{value}
+%   \end{syntax}
+%   Receives <key> and <value> from \textsf{l3keyval} and carries out
+%   processing.  The |:n| variant is used to process keys with no
+%   <value>. The |:| version is used internally once some initial
+%   testing of the key--value combination has occurred.
+% \end{function}
+%
+% \begin{function}{\keys_put:ncn}
+%   \begin{syntax}
+%     "\keys_put:ncn" \Arg{position} \Arg{key} \Arg{data}
+%   \end{syntax}
+%   Add <data> to the <position> of the value stored in <key>.
+% \end{function}
+%
+% \begin{function}{\keys_put_code:nc}
+%   \begin{syntax}
+%     "\keys_put_code:nc" \Arg{position} \Arg{key}
+%   \end{syntax}
+%   Adds <value> to <position> of <key> |._cmd:w| macro.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_separate:|
+%   \keys_separate:w}
+%   \begin{syntax}
+%     "\keys_separate:"
+%     "\keys_separate:w" <key> / "\q_stop"
+%   \end{syntax}
+%   Separates <key> into a <path> and a <name>.
+% \end{function}
+%
+% \begin{function}{\keys_toks_new:cn}
+%   \begin{syntax}
+%     "\keys_toks_new:cn" \Arg{key} \Arg{tokens}
+%   \end{syntax}
+%   Create a new toks <key> and store <tokens>.
+% \end{function}
+%
+% \begin{function}{\keys_toks_set:Nc}
+%   \begin{syntax}
+%     "\keys_toks_set:Nc" <toks> \Arg{key}
+%   \end{syntax}
+%   Transfers the contents of <key> into <toks>.  Used for manipulation
+%   of the toks containing the current value. The <value> of <key>
+%   should be expandable.
+% \end{function}
+%
+% \begin{function}{%
+%   \keys_use_cmd:cn|
+%   \keys_use_cmd:c}
+%   \begin{syntax}
+%     "\keys_use_cmd:cn" \Arg{key} \Arg{argument}
+%   \end{syntax}
+%   Uses the internal |._cmd:w| key needed to execute the function of
+%   <key> on <argument>. The |.c| variant uses the current value,
+%   replacing it with an empty argument if it is equal to
+%   \cs{q_no_value}.
+% \end{function}
+%
+% Some functions are related to error-message creation.
+%
+% \begin{function}{\keys_err_new:cNnnn}
+%   \begin{syntax}
+%     "\keys_err_new:cNnnn" \Arg{error} <args>
+%     ~~~~\Arg{short text} \Arg{long text} \Arg{code}
+%   \end{syntax}
+%   Creates error message <error> taking <args> arguments, with text as
+%   specified and recovery <code>.
+% \end{function}
+%
+% \begin{function}{\keys_err_use:cw}
+%   \begin{syntax}
+%     "\keys_err_use:cw" \Arg{error}
+%   \end{syntax}
+%   Use <error> with any arguments required.
+% \end{function}
+%
+%\subsection{Variables and constants}
+%
+% \begin{variable}{\c_keys_cs_prefix_tlp}
+%   Constant that contains the prefix for the csnames used for all
+%   keys.
+%   \begin{texnote}
+%     The key macros are all of the form \cs{keys/<path>/<key>}, where
+%     <path> can be equal to <module> or may be more complex. The
+%     <property> keys are of form \cs{keys/<path>/<key>/.<property>}.
+%   \end{texnote}
+% \end{variable}
+%
+% \begin{variable}{\c_keys_root_tlp}
+%   Constant that contains the ``root path'' for keys.
+% \end{variable}
+%
+% \begin{variable}{%
+%   \c_keys_errors_path_tlp|
+%   \c_keys_properties_path_tlp|
+%   \c_keys_utilities_path_tlp}
+%   The paths of the error handling, property and utility keys.
+% \end{variable}
+%
+% \begin{variable}{\c_keys_err_tlp}
+%   Constant that contains the name of the error file in use.
+% \end{variable}
+%
+% \begin{variable}{%
+%   \l_keys_current_path_tlp|
+%   \l_keys_default_path_tlp|
+%   \l_keys_choice_path_tlp}
+%   The values of the current and default search paths, plus a saved
+%   value if a choice is being created.
+% \end{variable}
+%
+% \begin{variable}{%
+%   \l_keys_current_key_tlp|
+%   \l_keys_current_name_tlp}
+%   The values of current fully qualified key name (including path) and
+%   key name alone.
+% \end{variable}
+%
+% \begin{variable}{%
+%    \l_keys_current_value_toks|
+%    \l_keys_current_value_tlp}
+%   The current value of the key.
+%   \begin{texnote}
+%     The <value> of the key might contain anything. This is stored as
+%     a toks, but there are places where a single token test is needed:
+%     for that a tlp is also created. The tlp is never used for
+%     anything else: it is potentially ``funny''.
+%   \end{texnote}
+% \end{variable}
+%
+% \begin{variable}{\l_keys_current_module_tlp}
+%   The name of the current module.
+% \end{variable}
+%
+% \begin{variable}{%
+%   \l_keys_current_choice_tlp|
+%   \l_keys_current_choice_int}
+%   Marker information for choices.
+% \end{variable}
+%
+% \begin{variable}{%
+%   \q_keys_stop|
+%   \q_value_required}
+%   Two new quarks are required.
+%   \begin{texnote}
+%     The \cs{q_value_required} quark is available generally to
+%     indicate a value is needed for something, and has not been given.
+%      On the other hand, \cs{q_keys_stop} is private to this package:
+%     do not use it elsewhere.
+%   \end{texnote}
+% \end{variable}
+%
+% \begin{variable}{%
+%   \l_keys_args_toks|
+%   \l_keys_body_toks}
+%   Private storage areas used to add code to an existing key.
+% \end{variable}
+%
+% \begin{variable}{%
+%   \l_keys_err_boolean_expected_tlp|
+%   \l_keys_err_def_x_args_tlp|
+%   \l_keys_err_not_boolean_tlp|
+%   \l_keys_err_unknown_choice_tlp|
+%   \l_keys_err_unknown_key_tlp|
+%   \l_keys_err_value_ignored_tlp|
+%   \l_keys_err_value_required_tlp}
+%   Error message identifiers.
+% \end{variable}
+%
+% \begin{variable}{\l_keys_success_bool}
+%   Boolean for success.
+% \end{variable}
+%
+% \begin{variable}{\l_keys_tmpa_tlp}
+%   A scratch tlp.
+% \end{variable}
+%
+%\subsection{Internal properties}
+%
+% The private key properties are used internally by \textsf{keys3}.
+% They should not be addressed directly except from within the package.
+% All private properties contain ``|_|'' before the property name as a
+% reminder that they are internal.
+%
+% \begin{function}{/._args_toks}
+%   \begin{syntax}
+%   \end{syntax}
+%   Stores the arguments of a |.code:nn| or |.code:nx| property for use
+%   with |.code put left:n| and |.code put right:n|.
+% \end{function}
+%
+% \begin{function}{/._body_toks}
+%   \begin{syntax}
+%   \end{syntax}
+%   Stores the body of a |.code:nn| or |.code:nx| property for use with
+%   |.code put left:n| and |.code put right:n|.
+% \end{function}
+%
+% \begin{function}{/._boolean}
+%   \begin{syntax}
+%   \end{syntax}
+%   Stores the name of the switch used by a Boolean key, and also
+%   indicates that the <key> is a Boolean.
+% \end{function}
+%
+% \begin{function}{/._cmd:w}
+%   \begin{syntax}
+%   \end{syntax}
+%   Executes code stored for <key>.  The argument of the function is
+%   delimited by \cs{q_keys_stop}.
+% \end{function}
+%
+% \begin{function}{/._default_tlp}
+%   \begin{syntax}
+%   \end{syntax}
+%   Stores the default value for <key>.
+% \end{function}
+%
+% \begin{function}{/._forbidden_bool}
+%   \begin{syntax}
+%   \end{syntax}
+%   Indicates that a value is forbidden for <key>.
+% \end{function}
+%
+%\subsection{To think about}
+%
+% All keys created by \textsf{keys3} are case-sensitive. This is
+% particularly noticeable for choice keys, where \textsf{xkeyval}
+% provides both case-sensitive and case-insensitive variants.  Is there
+% a need for both types of choice, or is the convention that everything
+% is sensitive to case sufficient?
+%
+% Currently, |.add code:n| does not work cleanly with |.code:nx|. This
+% is because the current method used to add to commands uses the stored
+% body of the macro when complex arguments are present.  The handling
+% here is better than \textsf{pgfkeys}, as no error is raised. However,
+% a better method would be nice.  Ideas are welcome!
+%
+% The package makes it easy to create choices, but does not have an
+% equivalent to \textsf{xkeyval}'s \cs{define@cmdkeys} or
+% \cs{define@boolkeys} macros.  Is the extra ease of producing many
+% keys at once worth the additional complexity?  If so, what would be
+% suitable property names (suggestions |.multi set:n| and
+% |.multi bool:n| come to mind).
+%
+% Does the package need to provide something like
+% \cs{DisableKeyvalOption}? If so, does a method for globally disabling
+% keys need to be provided?
+%
+%\subsection{Implementation}
+%
+% The usual preliminaries.  The key--value parsing itself is handled by
+% \textsf{l3keyval}, which does the very low-level stuff so there is no
+% need to worry here.
+%    \begin{macrocode}
+%<*package>
+\ProvidesExplPackage
+  {\filename}{\filedate}{\fileversion}{\filedescription}
+\RequirePackage{l3keyval,l3messages,l3clist}
+%    \end{macrocode}
+%
+%\subsubsection{Variables and contrasts}
+%
+%\begin{macro}{\c_keys_cs_prefix_tlp}
+% First, the small number of constants needed are created. A prefix is
+% used to keep all of the actual key macros in one place.
+%    \begin{macrocode}
+\tlp_new:Nn \c_keys_cs_prefix_tlp {keys}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\c_keys_root_tlp}
+% The key root should have a clear name; like all of the key
+% macros, this does not include the prefix.
+%    \begin{macrocode}
+\tlp_new:Nn \c_keys_root_tlp {/}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\c_keys_errors_path_tlp}
+%\begin{macro}{\c_keys_properties_path_tlp}
+%\begin{macro}{\c_keys_utilities_path_tlp}
+% The locations of all of the keys used by \textsf{keys3}
+% itself.
+%    \begin{macrocode}
+\tlp_new:Nn \c_keys_errors_path_tlp {/keys/errors}
+\tlp_new:Nn \c_keys_properties_path_tlp {/keys/properties}
+\tlp_new:Nn \c_keys_utilities_path_tlp {/keys}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+% The package starts by creating a number of storage areas used during
+% key management.  Some of the typing here is problematic, as the
+% |value| of a key can contain arbitrary code including |#| characters.
+%  As far as possible, the key names (which should be strings) are
+% stored in tlps, whereas the values are stored in toks.  There are
+% some places where the values have to be transferred out: a dedicated
+% tlp is reserved for this purpose.
+%
+%\begin{macro}{\l_keys_current_path_tlp}
+%\begin{macro}{\l_keys_default_path_tlp}
+%\begin{macro}{\l_keys_choice_path_tlp}
+% The current and default paths can be stored as tlps. The default path
+% is then initialised as the key root.
+%    \begin{macrocode}
+\tlp_new:N \l_keys_current_path_tlp
+\tlp_new:N \l_keys_default_path_tlp
+\tlp_set_eq:NN \l_keys_default_path_tlp \c_keys_root_tlp
+\tlp_new:N \l_keys_choice_path_tlp
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\l_keys_current_key_tlp}
+%\begin{macro}{\l_keys_current_name_tlp}
+% The ``key'' tlp holds the full key name including the path. The
+% ``name'' tlp contains only the key name itself.
+%    \begin{macrocode}
+\tlp_new:N \l_keys_current_key_tlp
+\tlp_new:N \l_keys_current_default_tlp
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\l_keys_current_value_toks}
+%\begin{macro}{\l_keys_current_value_tlp}
+% For various reasons, a tlp is needed which points to the toks holding
+% the current value.  Do not use the tlp!
+%    \begin{macrocode}
+\toks_new:N \l_keys_current_value_toks
+\tlp_new:N \l_keys_current_value_tlp
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\l_keys_current_module_tlp}
+% The module name of the current module is stored here.
+%    \begin{macrocode}
+\tlp_new:N \l_keys_current_module_tlp
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\l_keys_current_choice_tlp}
+%\begin{macro}{\l_keys_current_choice_int}
+% Multiple choices need some storage
+%    \begin{macrocode}
+\tlp_new:N \l_keys_current_choice_tlp
+\int_new:N \l_keys_current_choice_int
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\q_keys_stop}
+%\begin{macro}{\q_value_required}
+% Two new quarks are needed.
+%    \begin{macrocode}
+\quark_new:N \q_keys_stop
+\quark_new:N \q_value_required
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\l_keys_args_toks}
+%\begin{macro}{\l_keys_body_toks}
+% Storage areas used to add code to an existing key.
+%    \begin{macrocode}
+\toks_new:N \l_keys_args_toks
+\toks_new:N \l_keys_body_toks
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\l_keys_success_bool}
+% A Boolean for trying keys.
+%    \begin{macrocode}
+\bool_new:N \l_keys_success_bool
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\l_keys_tmpa_tlp}
+% A scratch area.
+%    \begin{macrocode}
+\tlp_new:N \l_keys_tmpa_tlp
+%    \end{macrocode}
+%\end{macro}
+%
+%\subsubsection{Generally-available functions}
+%
+% A number of functions used internally to set keys are also part of
+% the user interface for others to use.
+%
+%\begin{macro}{\quark_if_value_required:NTF}
+%\begin{macro}{\quark_if_value_required:NT}
+%\begin{macro}{\quark_if_value_required:NF}
+% The quark test is the most basic function here: this is is exactly
+% what \textsf{l3quark} would do for functions of these names.
+%    \begin{macrocode}
+\def_long_test_function_new:npn {quark_if_value_required:N} #1 {
+  \if_meaning:NN \q_value_required #1}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_if_really_exist:cTF}
+%\begin{macro}{\keys_if_really_exist:cT}
+%\begin{macro}{\keys_if_really_exist:cF}
+% Check if a key exists without adding to the hash table.
+%    \begin{macrocode}
+\def_long_test_function_new:npn {keys_if_really_exist:c} #1 {
+  \if_cs_exist:w \c_keys_cs_prefix_tlp #1 \cs_end:
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+% A number of new functions are needed that simple add the key root to
+% the name provided and then use this as a csname for the underlying
+% function.
+%
+%\begin{macro}{\keys_use:c}
+%    \begin{macrocode}
+\def_new:Npn \keys_use:c #1 {
+  \use:c {\c_keys_cs_prefix_tlp #1}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_def:cn}
+%\begin{macro}{\keys_def:co}
+%\begin{macro}{\keys_def:cx}
+% Direct storage of data in keys.
+%    \begin{macrocode}
+\def_new:Npn \keys_def:cn #1#2 {
+  \def:cpn {\c_keys_cs_prefix_tlp #1} {#2}
+}
+\def_new:Npn \keys_def:co #1#2 {
+  \exp_args:Nno \keys_def:cn {#1} {#2}
+}
+\def_new:Npn \keys_def:cx #1#2 {
+  \def:cpx {\c_keys_cs_prefix_tlp #1} {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%\subsubsection{The key parsing system}
+%
+%\begin{macro}{\keys_parse:n}
+% The macro used to actually process the key--value input is taken from
+% \textsf{l3keyval}.  There are two possible options, and so at this
+% stage the macro is simply reserved.
+%    \begin{macrocode}
+\def_new:Npn \keys_parse:n #1 {\ERROR}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_manage:n}
+%\begin{macro}{\keys_manage_quick:n}
+%\begin{macro}{\keys_manage_internal:n}
+%\begin{macro}{\keys_manage_aux:nn}
+% The main key management macros both call the auxiliary function after
+% setting up the parser.  The expansion trick means a literal path is
+% sent to the later function, and so the default path can be redefined.
+%    \begin{macrocode}
+\def_new:Npn \keys_manage:n #1 {
+  \let:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
+  \tlp_clear:N \l_keys_current_module_tlp
+  \exp_args:No \keys_manage_aux:nn {\l_keys_default_path_tlp} {#1}
+}
+\def_new:Npn \keys_manage_quick:n #1 {
+  \let:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
+  \tlp_clear:N \l_keys_current_module_tlp
+  \exp_args:No \keys_manage_aux:nn {\l_keys_default_path_tlp} {#1}
+}
+\def_new:Npn \keys_manage_internal:n #1 {
+  \exp_args:No \keys_manage_aux:nn {\l_keys_default_path_tlp} {#1}
+}
+\def_new:Npn \keys_manage_aux:nn #1#2 {
+  \tlp_set:Nn \l_keys_default_path_tlp {\c_keys_root_tlp}
+  \keys_process:n {#2}
+  \tlp_set:Nn \l_keys_default_path_tlp {#1}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_manage:nn}
+%\begin{macro}{\keys_manage_quick:nn}
+%\begin{macro}{\keys_manage_aux:nnn}
+% This version uses the same tricks but includes the path as a second
+% argument.  When setting lots of keys separately, this is a little
+% faster than the key-based method.
+%    \begin{macrocode}
+\def_new:Npn \keys_manage:nn #1#2 {
+  \let:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
+  \exp_args:No \keys_manage_aux:nnn {\l_keys_default_path_tlp} {#1}
+    {#2}
+}
+\def_new:Npn \keys_manage_quick:nn #1#2 {
+  \let:NN \keys_parse:n \KV_parse_space_no_removal_no_sanitize:n
+  \exp_args:No \keys_manage_aux:nnn {\l_keys_default_path_tlp} {#1}
+    {#2}
+}
+\def_new:Npn \keys_manage_aux:nnn #1#2#3 {
+  \tlp_set:Nn \l_keys_default_path_tlp {#2}
+  \tlp_clear:N \l_keys_current_module_tlp
+  \keys_process:n {#3}
+  \tlp_set:Nn \l_keys_default_path_tlp {#1}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_process:n}
+% All of the management macros call this common parser. First, the key
+% processing macros are defined, then the appropriate parser is called.
+%    \begin{macrocode}
+\def_new:Npn \keys_process:n #1{
+  \let:NN \KV_key_value_elt:nn \keys_process_elt:nn
+  \let:NN \KV_key_no_value_elt:n \keys_process_elt:n
+  \keys_parse:n {#1}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_process_elt:n}
+% To keep things simple, the processor here simply uses the quark
+% \cs{q_no_value} in place of the value and calls the standard
+% function.
+%    \begin{macrocode}
+\def_new:Npn \keys_process_elt:n #1 {
+  \keys_process_elt:nn {#1} {\q_no_value}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_process_elt:nn}
+%\begin{macro}{\keys_process_elt:}
+% This is the engine room of the entire package. Each key is examined
+% here, and after possibly adding a path a number of properties are
+% checked for. First the package checks dedicated keys, then generic
+% handlers.
+%    \begin{macrocode}
+\tlp_new:Nn \c_keys_no_value_tlp {\c_keys_really_no_value_tlp}
+\tlp_new:N \c_keys_really_no_value_tlp
+\def_new:Npn \keys_process_elt:nn #1#2 {
+%    \end{macrocode}
+% Using |:Nx| here ensures that any nesting does not result in the tlp
+% containing non-text values.
+%    \begin{macrocode}
+  \tlp_set:Nx \l_keys_current_key_tlp {#1}
+  \exp_after:NN \keys_path_add:w \l_keys_current_key_tlp \q_stop
+  \toks_set:Nn \l_keys_current_value_toks {#2}
+%    \end{macrocode}
+% For the quark test, the ``funny'' tlp needs to be set.
+%    \begin{macrocode}
+  \def:Npx \l_keys_current_value_tlp
+    {\toks_use:N \l_keys_current_value_toks}
+  \quark_if_no_value:NT \l_keys_current_value_tlp {
+    \keys_if_really_exist:cT {\l_keys_current_key_tlp /._default_tlp} {
+      \keys_toks_set:Nc \l_keys_current_value_toks
+        {\l_keys_current_key_tlp /._default_tlp}
+%    \end{macrocode}
+% There is a second test to come, so the odd tlp needs to be
+% regenerated.
+%    \begin{macrocode}
+      \def:Npx \l_keys_current_value_tlp
+        {\toks_use:N \l_keys_current_value_toks}
+    }
+  }
+  \quark_if_value_required:NTF \l_keys_current_value_tlp {
+    \keys_err_use:cw {value_required} \l_keys_current_key_tlp
+  }{
+    \keys_if_really_exist:cTF
+      {\l_keys_current_key_tlp /._forbidden_bool} {
+      \keys_err_use:cw {value_forbidden} \l_keys_current_key_tlp
+    }{
+      \keys_process_elt:
+    }
+  }
+}
+%    \end{macrocode}
+% The key--value combination is at least valid for processing. The
+% first real test is to look for a code handling function for the key.
+% To keep things readable, this is a separate function.
+%    \begin{macrocode}
+\def_new:Npn \keys_process_elt: {
+  \keys_if_cmd_really_exist:cTF {\l_keys_current_key_tlp} {
+    \keys_use_cmd:c {\l_keys_current_key_tlp}
+  }{
+%    \end{macrocode}
+% Next a check for the key name being defined. If it is, a second check
+% is made to see if any value is available. If so, the key value is
+% used; in the other case, the current value is saved to the key.
+%    \begin{macrocode}
+    \keys_if_really_exist:cTF {\l_keys_current_key_tlp}{
+      \toks_if_empty:NTF \l_keys_current_value_toks {
+        \keys_use:c {\l_keys_current_key_tlp}
+      }{
+        \quark_if_no_value:NTF \l_keys_current_value_tlp {
+          \keys_use:c {\l_keys_current_key_tlp}
+        }{
+          \keys_def:co {\l_keys_current_key_tlp}
+            {\toks_use:N \l_keys_current_value_toks}
+        }
+      }
+    }{
+%    \end{macrocode}
+% If nothing has been found so far, the default properties need to be
+% examined.  First, the path and name of the key must be separated.
+% Generic property lists are then checked.
+%    \begin{macrocode}
+      \keys_separate:
+      \keys_if_cmd_really_exist:cTF {
+        \c_keys_properties_path_tlp / \l_keys_current_name_tlp
+        }{
+          \keys_use_cmd:c
+            {\c_keys_properties_path_tlp / \l_keys_current_name_tlp}
+        }{
+%    \end{macrocode}
+% Still no luck, and so the |unknown| paths are tried.
+%    \begin{macrocode}
+          \keys_if_cmd_really_exist:cTF {
+            \l_keys_current_path_tlp /unknown
+          }{
+            \keys_use_cmd:c
+              {\l_keys_current_path_tlp /unknown}
+          }{
+%    \end{macrocode}
+% Nothing: call error message.
+%    \begin{macrocode}
+            \keys_err_use:cw {unknown_key} \l_keys_current_key_tlp
+          }
+        }
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\subsubsection{Internal functions}
+%
+%\begin{macro}{\keys_path_add:w}
+%\begin{macro}{\keys_path_add_aux:w}
+% The code to check for a path looks for a |/| at the start of the key.
+%    \begin{macrocode}
+\def_new:Npn \keys_path_add:w {
+  \exp_after:NN \peek_meaning:NTF \c_keys_root_tlp {
+    \use_none_delimit_by_q_stop:w
+  }{
+    \keys_path_add_aux:w
+  }
+}
+\def_new:Npn \keys_path_add_aux:w #1 \q_stop {
+  \tlp_set:Nx \l_keys_current_key_tlp {\l_keys_default_path_tlp #1}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_bool_new:c}
+% Boolean value are always true here!
+%    \begin{macrocode}
+\def_new:Npn \keys_bool_new:c #1 {
+  \bool_new:c {\c_keys_cs_prefix_tlp #1}
+  \bool_set_true:c {\c_keys_cs_prefix_tlp #1}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_choice_create:n}
+% The system to create choices is quite simple.
+%    \begin{macrocode}
+\def_new:Npn \keys_choice_create:n #1 {
+  \int_incr:N \l_keys_current_choice_int
+  \keys_process:n {
+    \l_keys_choice_path_tlp /#1/.code:x = {
+      \exp_not:n {\int_set:Nn \l_keys_current_choice_int}
+        {\int_use:N \l_keys_current_choice_int}
+      \exp_not:n {\tlp_set:Nn \l_keys_current_choice_tlp} {#1}
+      \toks_use:N \l_keys_body_toks
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_clear_properties:c}
+% To avoid problem on redefinition, all properties are removed.
+%    \begin{macrocode}
+\def_new:Npn \keys_clear_properties:c #1 {
+  \let:cN {\c_keys_cs_prefix_tlp #1/._args_toks} \c_undefined
+  \let:cN {\c_keys_cs_prefix_tlp #1/._body_toks} \c_undefined
+  \let:cN {\c_keys_cs_prefix_tlp #1/._boolean} \c_undefined
+  \let:cN {\c_keys_cs_prefix_tlp #1/._cmd:w} \c_undefined
+  \let:cN {\c_keys_cs_prefix_tlp #1/._default_tlp} \c_undefined
+  \let:cN {\c_keys_cs_prefix_tlp #1/._forbidden_bool} \c_undefined
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_def_cmd:cn}
+%\begin{macro}{\keys_def_cmd:cx}
+%\begin{macro}{\keys_def_cmd:cnn}
+%\begin{macro}{\keys_def_cmd:cnx}
+% Creating the |._cmd:w| keys happens here.
+%    \begin{macrocode}
+\def_new:Npn \keys_def_cmd:cn #1#2 {
+  \keys_clear_properties:c {#1}
+  \def:cpn {\c_keys_cs_prefix_tlp #1/._cmd:w} ##1 \q_keys_stop {#2}
+}
+\def_new:Npn \keys_def_cmd:cx #1#2 {
+  \keys_clear_properties:c {#1}
+  \def:cpx {\c_keys_cs_prefix_tlp #1/._cmd:w} ##1 \q_keys_stop {#2}
+}
+\def_new:Npn \keys_def_cmd:cnn #1#2#3 {
+  \keys_clear_properties:c {#1}
+  \def:cpn {\c_keys_cs_prefix_tlp #1/._cmd:w} #2 \q_keys_stop {#3}
+  \keys_toks_new:cn {#1/._args_toks} {#2}
+  \keys_toks_new:cn {#1/._body_toks} {#3}
+}
+\def_new:Npn \keys_def_cmd:cnx #1#2#3 {
+  \keys_clear_properties:c {#1}
+  \def:cpx {\c_keys_cs_prefix_tlp #1/._cmd:w} #2 \q_keys_stop {#3}
+  \keys_toks_new:cn {#1/._args_toks} {#2}
+  \keys_toks_new:cn {#1/._body_toks} {
+    \exp_not:n{\keys_err_use:cw {def_x_args} \l_keys_current_key_tlp}
+    #3
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_if_cmd_really_exist:cTF}
+%\begin{macro}{\keys_if_cmd_really_exist:cT}
+%\begin{macro}{\keys_if_cmd_really_exist:cF}
+% A more specific version of an earlier test.
+%    \begin{macrocode}
+\def_long_test_function_new:npn {keys_if_cmd_really_exist:c} #1 {
+  \if_cs_exist:w \c_keys_cs_prefix_tlp #1 /._cmd:w \cs_end:
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_expand:n}
+% A helper for expansion.
+%    \begin{macrocode}
+\def_new:Npn \keys_expand:n #1 {
+  \keys_process:n {\l_keys_current_path_tlp = #1}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_let:cc}
+%    \begin{macrocode}
+\def_new:Npn \keys_let:cc #1#2 {
+  \let:cc {\c_keys_cs_prefix_tlp #1} {\c_keys_cs_prefix_tlp #2}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_module_name:}
+% The module name is needed in a few places.
+%    \begin{macrocode}
+\def_new:Npn \keys_module_name: {
+  \tlp_if_empty:NTF \l_keys_current_module_tlp {
+    \tlp_clear:N \l_keys_tmpa_tlp
+  }{
+    \tlp_set:Nx \l_keys_tmpa_tlp {\l_keys_current_module_tlp _}
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_put:ncn}
+%    \begin{macrocode}
+\def_new:Npn \keys_put:ncn #1#2#3 {
+  \use:c {tlp_put_#1:cn} {\c_keys_cs_prefix_tlp #2} {#3}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_put_code:nc}
+% A function to add code to an existing key function.  This is a rather
+% complex operation. If the key does not already exist, life is easy.
+% On the other hand, if the key has already been defined, the existing
+% definition is ``recovered'' to be patched. For keys with more than a
+% single argument, |._args_toks| contains the appropriate pattern with
+% the body in |._body_toks|.
+%    \begin{macrocode}
+\def_new:Npn \keys_put_code:nc #1#2 {
+  \keys_if_really_exist:cTF {\l_keys_current_path_tlp /._cmd:w}{
+    \keys_if_really_exist:cTF
+      {\l_keys_current_path_tlp /._args_toks}{
+      \toks_set_eq:Nc \l_keys_args_toks
+        {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._args_toks}
+      \toks_set_eq:Nc \l_keys_body_toks
+        {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._body_toks}
+    }{
+%    \end{macrocode}
+% With only one argument, the definition can be recovered out of the
+% function itself.
+%    \begin{macrocode}
+      \toks_set:Nn \l_keys_args_toks {##1}
+      \toks_set:Nn \l_keys_body_toks \exp_after:NN \exp_after:NN
+        \exp_after:NN {\cs:w \c_keys_cs_prefix_tlp
+        \l_keys_current_path_tlp /._cmd:w \cs_end: ##1 \q_keys_stop}
+    }
+%    \end{macrocode}
+% The new function can now be built; this is the only point where the
+% position of addition is important.
+%    \begin{macrocode}
+    \use:c {toks_put_#2:Nn} \l_keys_body_toks {#1}
+    \tlp_set:Nx \l_keys_tmpa_tlp {\toks_use:N \l_keys_args_toks}
+    \exp_args:NNOo \keys_def_cmd:cnx {\l_keys_current_path_tlp}
+      \l_keys_tmpa_tlp {\toks_use:N \l_keys_body_toks}
+  }{
+    \keys_def_cmd:cn {\l_keys_current_path_tlp} {#1}
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_toks_new:cn}
+%    \begin{macrocode}
+\def_new:Npn \keys_toks_new:cn #1#2 {
+  \toks_new:c {\c_keys_cs_prefix_tlp #1}
+  \toks_set:cn {\c_keys_cs_prefix_tlp #1} {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_toks_set:Nc}
+% Sets a toks to a key: not really intended for others to use. The
+% contents of the key should be expandable, or protected with
+% \cs{exp_not:E} or \cs{exp_not:n} otherwise (see for example the
+% definition of |.value forbidden:|.
+%    \begin{macrocode}
+\def_new:Npn \keys_toks_set:Nc #1#2 {
+  \toks_set:Nx #1 {\keys_use:c {#2}}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\keys_use_cmd:cn}
+%\begin{macro}{\keys_use_cmd:c}
+% Command keys are stored in a slightly odd fashion, and so this macro
+% uses them in a ``safe'' way.
+%    \begin{macrocode}
+\def_new:Npn \keys_use_cmd:c #1 {
+  \exp_args:Nno \keys_use_cmd:cn {#1}
+    {\toks_use:N \l_keys_current_value_toks}
+}
+\def_new:Npn \keys_use_cmd:cn #1#2 {
+  \quark_if_no_value:NTF \l_keys_current_value_tlp {
+    \keys_use:c {#1/._cmd:w} \q_keys_stop
+  }{
+    \keys_use:c {#1/._cmd:w} #2 \q_keys_stop
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_separate:}
+%\begin{macro}{\keys_separate:w}
+% A simple piece of recursion.
+%    \begin{macrocode}
+\def_new:Npn \keys_separate: {
+  \tlp_clear:N \l_keys_current_path_tlp
+  \exp_after:NN \keys_separate:w \l_keys_current_key_tlp / \q_stop
+}
+\def_new:Npn \keys_separate:w /#1/#2 \q_stop {
+  \tlist_if_empty:nTF {#2}{
+    \tlp_set:Nn \l_keys_current_name_tlp {#1}
+  }{
+     \tlp_put_right:Nn \l_keys_current_path_tlp {/#1}
+     \keys_separate:w /#2 \q_stop
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_try:}
+% Trying something without errors.
+%    \begin{macrocode}
+\def_new:Npn \keys_try: {
+  \keys_if_really_exist:cTF {\l_keys_current_path_tlp /._cmd:w} {
+    \quark_if_no_value:NT \l_keys_current_value_tlp {
+      \keys_if_really_exist:cT
+        {\l_keys_current_path_tlp /._default_tlp} {
+        \keys_toks_set:Nc \l_keys_current_value_toks
+          {\l_keys_current_path_tlp /._default_tlp}
+      }
+    }
+    \keys_use_cmd:c {\l_keys_current_path_tlp}
+    \bool_set_true:N \l_keys_success_bool
+  }{
+    \keys_if_really_exist:cTF {\l_keys_current_path_tlp} {
+      \quark_if_no_value:NTF \l_keys_current_value_tlp {
+        \keys_use:c {\l_keys_current_path_tlp}
+      }{
+        \tlp_set:co {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
+          {\toks_use:N \l_keys_current_value_toks}
+      }
+      \bool_set_true:N \l_keys_success_bool
+    }{
+      \bool_set_false:N \l_keys_success_bool
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_err_new:cNnnn}
+% To create new error messages, a utility function is handy.
+%    \begin{macrocode}
+\def_new:Npn \keys_err_new:cNnnn #1 {
+  \tlp_new:cn {l_keys_err_#1_tlp} {#1}
+  \exp_args:NNc \err_interrupt_new:NNNnnn \c_keys_err_tlp
+    {l_keys_err_#1_tlp}
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{\l_keys_err_unknown_key_tlp}
+%\begin{macro}{\l_keys_err_value_ignored_tlp}
+%\begin{macro}{\l_keys_err_value_required_tlp}
+%\begin{macro}{\l_keys_err_def_x_args_tlp}
+%\begin{macro}{\l_keys_err_boolean_expected_tlp}
+%\begin{macro}{\l_keys_err_not_boolean_tlp}
+%\begin{macro}{\l_keys_err_unknown_choice_tlp}
+% Text for package error messages is stored in |keys3.err|. The error
+% names do not need \cs{keys} at the start as they have to be in the
+% file.
+%    \begin{macrocode}
+\err_file_new:Nn \c_keys_err_tlp {keys3.err}
+\keys_err_new:cNnnn {unknown_key} 1
+  {The~key~`#1'~is~unknown~and~is~being~ignored}
+  {\err_help_return_or_X:}
+  {}
+\keys_err_new:cNnnn {value_required} 1
+  {The~key~`#1'~requires~a~value~and~is~being~ignored}
+  {\err_help_return_or_X:}
+  {}
+\keys_err_new:cNnnn {value_forbidden} 1
+  {The~key~`#1'~cannot~taken~a~value:~\iow_newline:~\text_put_sp:~
+   \text_put_sp:~the~one~given~is~being~ignored}
+  {\err_help_return_or_X:}
+  {}
+\keys_err_new:cNnnn {def_x_args} 1
+  {Key~`#1'~has~multiple~arguments~and~was~expanded:~\iow_newline:~
+   \text_put_sp:~\text_put_sp:~adding~code~may~give~incorrect~results}
+  {\err_help_return_or_X:}
+  {}
+\keys_err_new:cNnnn {boolean_expected} 2
+  {Key~`#1'~takes~the~Boolean~values~`true'~and~`false'~\iow_newline:~
+   \text_put_sp:~\text_put_sp:~only.~The~given~value~`#2'~is~ignored}
+  {\err_help_return_or_X:}
+  {}
+\keys_err_new:cNnnn {not_boolean} 1
+  {Key~`#1'~is~not~a~Boolean~key:~you~cannot~create~a~complement}
+  {\err_help_return_or_X:}
+  {}
+\keys_err_new:cNnnn {unknown_choice} 2
+  {Choice~`#2'~unknown~for~key~`#1':~\iow_newline:~\text_put_sp:~
+   \text_put_sp:~the~value~give~is~being~ignored}
+  {\err_help_return_or_X:}
+  {}
+\err_file_close:N \c_keys_err_tlp
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_err_use:cw}
+% A second utility to use errors.
+%    \begin{macrocode}
+\def_new:Npn \keys_err_use:cw #1 {
+  \exp_args:NNc \err_interrupt:NNw \c_keys_err_tlp {l_keys_err_#1_tlp}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\subsubsection{Property definitions}
+%
+% The |.code:n| and |.code:nn| properties have to be defined directly.
+%    \begin{macrocode}
+\keys_def_cmd:cn {\c_keys_properties_path_tlp /.code:n} {
+  \keys_def_cmd:cn {\l_keys_current_path_tlp} {#1}
+}
+\keys_def_cmd:cnn {\c_keys_properties_path_tlp /.code:nn} {#1#2} {
+  \keys_def_cmd:cnn {\l_keys_current_path_tlp} {#1} {#2}
+}
+%    \end{macrocode}
+%
+% The remaining definitions can all be carried out using the package
+% itself. Here, the |_quick| method is used as there is no need to
+% worry about spaces or catcodes.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+%    \end{macrocode}
+% First, an error is created for unknown keys: this should help to
+% prevent any odd internal errors.
+%    \begin{macrocode}
+  \c_keys_errors_path_tlp /unknown/.code:n = {
+    \keys_err_use:cw {unknown_key} \l_keys_current_key_tlp
+  },
+%    \end{macrocode}
+% The two |:x| definition methods need to be created.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.code:x/.code:n = {
+    \keys_def_cmd:cx {\l_keys_current_path_tlp} {#1}
+  },
+  \c_keys_properties_path_tlp /.code:nx/.code:nn = {#1#2} {
+    \keys_def_cmd:cnx {\l_keys_current_path_tlp} {#1} {#2}
+  },
+%    \end{macrocode}
+% The package itself will need to be able to add code to an existing
+% key, so the appropriate mechanism is created.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.put~code~right:n/.code:n = {
+    \keys_put_code:nc {#1} {right}
+  },
+  \c_keys_properties_path_tlp /.put~code~left:n/.code:n = {
+    \keys_put_code:nc {#1} {left}
+  },
+%    \end{macrocode}
+% Initial and default values can now be created.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.initial:n/.code:n = {
+    \keys_def:cn {\l_keys_current_path_tlp} {#1}
+  },
+  \c_keys_properties_path_tlp /.default:n/.code:n = {
+    \keys_def:cn {\l_keys_current_path_tlp /._default_tlp} {#1}
+  },
+%    \end{macrocode}
+% Values are either required or forbidden, with the appropriate error
+% messages. The \cs{q_value_required} quark must no be expanded but
+% must work in the quark test. Hence the expansion protect used here:
+% remember this is stored in a tlp!
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.value~required:/.code:n = {
+    \keys_def:cn {\l_keys_current_path_tlp /._default_tlp}
+      {\exp_not:E \q_value_required}
+  },
+  \c_keys_errors_path_tlp /value~required/.code:n = {
+    \keys_err_use:cw {value_required} \l_keys_current_key_tlp
+  },
+  \c_keys_properties_path_tlp /.value~forbidden:/.code:n = {
+    \keys_bool_new:c {\l_keys_current_path_tlp /._forbidden_bool}
+  },
+  \c_keys_errors_path_tlp /value~forbidden/.code:n = {
+    \keys_err_use:cw {value_forbidden} \l_keys_current_key_tlp
+  },
+%    \end{macrocode}
+% Being able to change path is pretty useful.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.cd:/.code:n = {
+    \tlp_set:Nx \l_keys_default_path_tlp {\l_keys_current_path_tlp /}
+  },
+  \c_keys_properties_path_tlp /.module:/.code:n = {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.code:x = {
+        \exp_not:N \tlp_set:Nx \exp_not:N \l_keys_default_path_tlp
+          {\l_keys_current_path_tlp /}
+      }
+    }
+  },
+%    \end{macrocode}
+% Pre-built lists of keys can be created for regular use.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.keys:n/.code:n = {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.code:n = {\keys_process:n {#1}}
+    }
+  },
+  \c_keys_properties_path_tlp /.keys:x/.code:n = {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.code:x = {
+        \exp_not:N \keys_process:n {#1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.keys:nn/.code:nn = {#1#2} {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.code:nn = {#1} {\keys_process:n {#2}}
+    }
+  },
+  \c_keys_properties_path_tlp /.keys:nx/.code:nn = {#1#2} {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.code:x =
+        {#1} {\exp_not:N \keys_process:n {#2}}
+    }
+  },
+%    \end{macrocode}
+% Code can also be added to the above.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.put~keys~left:n/.code:n = {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.put~code~left:n =
+        {\keys_process:n {#1}}
+    }
+  },
+  \c_keys_properties_path_tlp /.put~keys~right:n/.code:n = {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.put~code~right:n =
+        {\keys_process:n {#1}}
+    }
+  },
+%    \end{macrocode}
+% Transfer of data in and out.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.key~to~tlp:N/.code:n = {
+    \tlp_set_eq:Nc #1 {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
+  },
+  \c_keys_properties_path_tlp /.key~to~tlp:c/.code:n = {
+    \tlp_set_eq:cc {#1} {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
+  },
+  \c_keys_properties_path_tlp /.key~to~int:N/.code:n = {
+    \int_set_eq:Nc #1 {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
+  },
+  \c_keys_properties_path_tlp /.key~to~int:c/.code:n = {
+    \int_set_eq:cc {#1} {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
+  },
+  \c_keys_properties_path_tlp /.tlp~to~key:N/.code:n = {
+    \tlp_set_eq:cN {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} #1
+  },
+  \c_keys_properties_path_tlp /.tlp~to~key:c/.code:n = {
+    \tlp_set_eq:cc {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} {#1}
+  },
+  \c_keys_properties_path_tlp /.int~to~key:N/.code:n = {
+    \int_set_eq:cN {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} #1
+  },
+  \c_keys_properties_path_tlp /.int~to~key:c/.code:n = {
+    \int_set_eq:cc {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} {#1}
+  },
+%    \end{macrocode}
+% Adding to literal values is easier than adding to code.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.put~right:n/.code:n = {
+    \keys_put:ncn {right} {\l_keys_current_path_tlp} {#1}
+  },
+  \c_keys_properties_path_tlp /.put~left:n/.code:n = {
+    \keys_put:ncn {left} {\l_keys_current_path_tlp} {#1}
+  },
+%    \end{macrocode}
+% That is all of the lower-level things done.  Now use them to build
+% some higher-level functionality.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.store~in~tlp:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \tlp_set:Nn #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.store~in~tlp~x:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \tlp_set:Nx #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.store~in~tlp:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \tlp_set:cn {l_ \l_keys_tmpa_tlp #1_tlp} {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.store~in~tlp~x:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \tlp_set:Nx {l_ \l_keys_tmpa_tlp #1_tlp} {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.store~in~int:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \int_set:Nn #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.store~in~int:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \int_set:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
+      }
+    }
+  },
+%    \end{macrocode}
+% Boolean keys are created with a true default.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.boolean:N/.code:n = {
+    \cs_if_free:NT #1 {\bool_new:N #1}
+    \keys_process:n {
+      \l_keys_current_path_tlp /.code:n = {
+        \cs_if_really_exist:cTF {bool_set_##1:c} {
+          \use:c {bool_set_##1:N} #1
+        }{
+          \keys_err_use:cw {boolean_expected} \l_keys_current_key_tlp
+            {\toks_use:N \l_keys_current_value_toks}
+        }
+      },
+      \l_keys_current_path_tlp /.default:n = true
+    }
+  \keys_def:cn {\l_keys_current_path_tlp /._boolean} {\exp_not:N #1}
+  },
+%    \end{macrocode}
+% The |:c| variant has to create the appropriate name first.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.boolean:c/.code:n = {
+    \keys_module_name:
+    \cs_if_free:cT {l_ \l_keys_tmpa_tlp #1_bool} {
+      \bool_new:c {l_ \l_keys_tmpa_tlp #1_bool}
+    }
+    \keys_process:n {
+      \l_keys_current_path_tlp /.code:x = {
+        \exp_not:N \cs_if_really_exist:cTF {bool_set_##1:N} {
+          \exp_not:N \use:c {bool_set_##1:N}
+            \exp_not:d {\use:c {l_ \l_keys_tmpa_tlp #1 _bool}}
+        }{
+          \exp_not:n {
+            \keys_err_use:cw {boolean_expected}
+              \l_keys_current_key_tlp
+              {\toks_use:N \l_keys_current_value_toks}
+          }
+        }
+      },
+      \l_keys_current_path_tlp /.default:n = true
+    }
+  \keys_def:cx {\l_keys_current_path_tlp /._boolean}
+    {\exp_not:N \exp_not:N \exp_not:d
+      {\use:c {l_ \l_keys_tmpa_tlp #1_bool}}}
+  },
+%    \end{macrocode}
+% Creating an inverse needs a little work as the logic needs to be
+% reversed.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.inverse~key:n/.code:n = {
+    \keys_if_really_exist:cTF {\l_keys_current_path_tlp /._boolean} {
+      \tlp_set_eq:NN \l_keys_tmpa_tlp \l_keys_current_path_tlp
+      \tlp_set_eq:NN \l_keys_current_key_tlp \l_keys_current_path_tlp
+      \keys_separate:
+      \keys_process:n {
+        \l_keys_current_path_tlp /#1/.code:x = {
+          \exp_not:N \tlist_if_eq:nnTF {true} {##1} {
+            \exp_not:N \bool_set_false:N \keys_use:c
+              {\l_keys_tmpa_tlp /._boolean}
+          }{
+            \exp_not:N \tlist_if_eq:nnTF {false} {##1} {
+              \exp_not:N \bool_set_true:N \keys_use:c
+                {\l_keys_tmpa_tlp /._boolean}
+            }{
+              \exp_not:n {
+                \keys_err_use:cw {boolean_expected}
+                  \l_keys_current_key_tlp
+                  {\toks_use:N \l_keys_current_value_toks}
+              }
+            }
+          }
+        },
+        \l_keys_current_path_tlp /#1/.default:n = true
+      }
+    }{
+      \keys_err_use:cw {not_boolean} \l_keys_current_path_tlp
+    }
+  },
+%    \end{macrocode}
+% Choices are handled in a slightly different way.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.choice:/.code:n = {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.cd:,
+      .code:n = {
+        \tlp_set:Nn \l_keys_current_choice_tlp {##1}
+        \int_zero:N \l_keys_current_choice_int
+        \exp_args:No \keys_process:n  {\l_keys_current_key_tlp /##1}
+      },
+      unknown/.code:n = {
+        \keys_err_use:cw {unknown_choice} \l_keys_current_path_tlp
+          {\l_keys_current_name_tlp}
+      }
+    }
+  },
+%    \end{macrocode}
+% Multiple choices can also be created.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.choices:nn/.code:nn = {#1#2} {
+    \tlp_set_eq:NN \l_keys_choice_path_tlp \l_keys_current_path_tlp
+    \toks_set:Nn \l_keys_body_toks {#2}
+    \int_zero:N \l_keys_current_choice_int
+    \clist_map_function:nN {#1} \keys_choice_create:n
+    \keys_manage_internal:n {
+      \l_keys_choice_path_tlp  /.choice:
+    }
+  },
+%    \end{macrocode}
+% Different names for the same thing.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.equivalent~key:n/.code:n = {
+    \keys_if_really_exist:cT {\l_keys_current_path_tlp /._cmd:w} {
+      \tlp_set_eq:NN \l_keys_current_key_tlp \l_keys_current_path_tlp
+      \keys_separate:
+      \keys_let:cc {\l_keys_current_path_tlp /#1/._cmd:w}
+        {\l_keys_current_key_tlp /._cmd:w}
+    }
+  },
+%    \end{macrocode}
+% Expansion keys need to be available.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.expand:o/.code:n = {
+    \exp_args:No \keys_expand:n {#1}
+  },
+  \c_keys_properties_path_tlp /.expand:d/.code:n = {
+    \exp_args:NNo \exp_args:No \keys_expand:n {#1}
+  },
+  \c_keys_properties_path_tlp /.expand:x/.code:n = {
+    \exp_args:Nx \keys_expand:n {#1}
+  },
+%    \end{macrocode}
+% ``Trying'' a key.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.try:n/.code:n = {\keys_try:},
+  \c_keys_properties_path_tlp /.retry:n/.code:n = {
+    \bool_if:NF \l_keys_success_bool {\keys_try:}
+  },
+%    \end{macrocode}
+%
+% Some debugging keys.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.show~code:/.code:n = {
+    \cs_show:c {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._cmd:w}
+  },
+  \c_keys_properties_path_tlp /.show:/.code:n = {
+    \cs_show:c {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
+  },
+%    \end{macrocode}
+% Keys for programmers.
+%    \begin{macrocode}
+  \c_keys_utilities_path_tlp /execute:n/.code:n = {#1},
+  \c_keys_utilities_path_tlp /current~module:n/.store~in~tlp:N =
+    \l_keys_current_module_tlp
+}
+%</package>
+%    \end{macrocode}
+%
+%\Finale

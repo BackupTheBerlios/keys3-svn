@@ -263,6 +263,20 @@
 %     These are the \textsf{pgfkeys} |.style| handler and relatives.
 %  \end{texnote}
 % \end{function}
+% 
+% \begin{function}{%
+%   .let~to~func:N|
+%   .let~to~func:c}
+%   \begin{syntax}
+%     <key>/.let~to~func:N = <function>
+%   \end{syntax}
+%   When <key> is called, the argument will be \cs{let:NN} to
+%   <function>. The \texttt{:c} variant creates a function 
+%   \cs{<module>_<function>:w}, using the current <module> (if set)
+%   in the same way as the \texttt{.store~in} keys. Note that in this
+%   case the function created has a \texttt{:w} argument specifier, as
+%   \textsf{keys3} does not have any clue as to the arguments required.
+% \end{function}
 %
 % \begin{function}{/.module:}
 %   \begin{syntax}
@@ -1819,14 +1833,14 @@
 %    \end{macrocode}
 % Functions should not be stored in tlps.
 %    \begin{macrocode}
-  \c_keys_properties_path_tlp /.let:N/.code:n = {
+  \c_keys_properties_path_tlp /.let~to~func:N/.code:n = {
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:n = {
         \let:NN #1 ##1
       }
     }
   },
-  \c_keys_properties_path_tlp /.let:c/.code:n = {
+  \c_keys_properties_path_tlp /.let~to~func:c/.code:n = {
     \keys_module_name:
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:x = {

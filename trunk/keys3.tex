@@ -53,6 +53,12 @@
   key one = Hello World ,
 }
 
+\SetModuleKeys{
+  key x/.let:c = test,
+  key x = \cite ,
+}
+
+\expandafter\show\csname test:w\endcsname
 % Next, a key with arbitrary parameter format is created.
 \SetModuleKeys{
   key two/.code:nn = {#1 to #2} {You said `#1' to `#2'},

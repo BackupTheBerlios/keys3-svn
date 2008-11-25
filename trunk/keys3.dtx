@@ -1817,6 +1817,24 @@
     }
   },
 %    \end{macrocode}
+% Functions should not be stored in tlps.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.let:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \let:NN #1 ##1
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.let:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \let:cN {\l_keys_tmpa_tlp #1:w} ##1
+      }
+    }
+  },
+%    \end{macrocode} 
 % Boolean keys are created with a true default.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.boolean:N/.code:n = {

@@ -1,4 +1,6 @@
 \documentclass{ltugboat}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
 \usepackage{url,underscore}
 \usepackage[final]{microtype}
 
@@ -57,29 +59,29 @@ existing solutions.
 \section{The basics: a little like \pkg{keyval}}
 
 There are two basic steps to creating key--value entries in a
-package, defining keys (and code to handle the input) and
+package, defining keys (along with code to handle the input) and
 setting keys. This basic functionality is provided in
 \pkg{keyval} by the \cs{define@key} and \cs{setkeys} macros:
 \begin{verbatim}
-  \define@key{family}{key one}{code}
-  \define@key{family}{key two}{more code}
-  \setkeys{family}{
-    key one = value one,
-    key two = value two
-  }
+\define@key{family}{key one}{code}
+\define@key{family}{key two}{more code}
+\setkeys{family}{
+  key one = value one,
+  key two = value two
+}
 \end{verbatim}
 Keys are created by the first macro, and set using the second.
 In contrast, in \pkg{keys3} keys are defined and set using the
 same function:
 \begin{verbatim}
-  \keys_manage:n {
+\keys_manage:n {
   /module/key one/.code:n = code,
   /module/key two/.code:n = more code
-  }
-  \keys_manage:n {
+}
+\keys_manage:n {
   /module/key one = value one,
   /module/key two = value two
-  }
+}
 \end{verbatim}
 This short example illustrates several points. In the
 \pkg{keys3} model, keys are divided by into modules (and
@@ -90,12 +92,12 @@ code with a key. As is the case when using \pkg{keyval}, this
 can create any arbitrary code with \verb|#1| containing the
 value given for the key.
 \begin{verbatim}
-  \keys_manage:n {
+\keys_manage:n {
   /module/key one/.code:n = You said `#1',
-  }
-  \keys_manage:n {
+}
+\keys_manage:n {
   /module/key one = value one,
-  }
+}
 \end{verbatim}
 prints ``You said `value one'\,''.
 
@@ -103,20 +105,20 @@ prints ``You said `value one'\,''.
 
 The \texttt{.code:n} property has a set of relatives which have
 no equivalent in \pkg{keyval}. Using \texttt{.code:n}, the code
-definition takes place without expansion (using \cs{def:Npn}).
-In contrast, \texttt{.code:x} caries out an expanded definition
-(using \cs{def:Npx}).
+definition takes place without expansion (using \cs{def:Npn} = 
+\cs{def}).  In contrast, \texttt{.code:x} caries out an 
+expanded definition (using \cs{def:Npx} = \cs{edef}).
 
 Code can also be created with an arbitrary \TeX\ parameter
 definition. This is carried out using the \texttt{.code:nn} and
 \texttt{.code:nx} properties, for standard and expanded
-definitions.
+definitions, respectively.
 \begin{verbatim}
-  \keys_manage:n {
+\keys_manage:n {
   /module/key one/.code:nn = {#1 and #2}
     {You said `#1' or perhaps `#2'},
   /module/key one = value and one,
-  }
+}
 \end{verbatim}
 will print ``You said `value' or perhaps `one'\,''.
 
@@ -128,11 +130,11 @@ divided into modules. Having to type the module for each key
 would be a problem, and so it is possible to ``change
 directory'' to use keys for a given module.
 \begin{verbatim}
-  \keys_manage:n {
-    /module/.cd:
-    key one/.code:n = code,
-    key two/.code:n = more code
-  }
+\keys_manage:n {
+  /module/.cd:
+  key one/.code:n = code,
+  key two/.code:n = more code
+}
 \end{verbatim}
 manages \texttt{/module/key one} and \texttt{/module/key two}.
 After a \texttt{.cd:}, it is still possible to access keys in
@@ -155,13 +157,13 @@ key. There are three key properties here:
 The \texttt{.default:n} property needs an argument. It is used
 when the user does not provide any input as the value:
 \begin{verbatim}
-  \keys_manage:n {
-    /module/.cd:,
-    key one/.code:n = Hello #1,
-    key one/.default:n = World,
-    key one,
-    key one = You,
- }
+\keys_manage:n {
+  /module/.cd:,
+  key one/.code:n = Hello #1,
+  key one/.default:n = World,
+  key one,
+  key one = You,
+}
 \end{verbatim}
 This will print ``Hello World'' followed by ``Hello you''. This
 property is used automatically when creating Boolean keys (see
@@ -173,15 +175,15 @@ error if a value is given (\texttt{.value required:}) or given
 (\texttt{.value forbidden:}). For example, both attempts to set
 keys give an error:
 \begin{verbatim}
-  \keys_manage:n {
-    /module/.cd:,
-    key one/.code:n = Hello #1,
-    key one/.value required:
-    key one, % Error
-    key two/.code:n = Nothing here!,
-    key two/.value forbidden:,
-    key two= Data, % Error
-  }
+\keys_manage:n {
+  /module/.cd:,
+  key one/.code:n = Hello #1,
+  key one/.value required:
+  key one, % Error
+  key two/.code:n = Nothing here!,
+  key two/.value forbidden:,
+  key two = Data, % Error
+}
 \end{verbatim}
 
 \subsection{Storage and Boolean keys}
@@ -196,33 +198,34 @@ by the package, but is not detected automatically.  Thus the
 special key \texttt{/keys/current module:n} needs to set with
 the module name:
 \begin{verbatim}
-  keys_manage:n {
-    /keys/current module:n = MyModule
-  }
+\keys_manage:n {
+  /keys/current module:n = MyModule
+}
 \end{verbatim}
 
-Keys to set a storage tlp are created using the properties
-\texttt{.store in tlp:N} and \texttt{.store in tlp:c}. The 
-\texttt{:N} property requires the full name of a tlp.
+Keys to set a storage tlp (string) are created using the 
+properties \texttt{.store in tlp:N} and \texttt{.store in 
+tlp:c}. The \texttt{:N} property requires the full name of 
+a tlp.
 \begin{verbatim}
-  keys_manage:n {
-    /module/.cd:,
-    key one/.store in tlp:N = 
-      \l_MyMacro_tlp,
-  }
+\keys_manage:n {
+  /module/.cd:,
+  key one/.store in tlp:N = 
+    \l_MyMacro_tlp,
+}
 \end{verbatim}
 The \texttt{:c} variant constructs a tlp name starting 
 \verb|l_| and ending \verb|_tlp|, and using the  argument and 
 current module (if set).
 \begin{verbatim}
-  keys_manage:n {
-    /module/.cd:,
-    % Uses \l_MyMacro_tlp
-    key one/.store in tlp:c = MyMacro,
-    /keys/current module:n = module,
-    % Uses \l_module_MyMacro_tlp
-    key two/.store in tlp:c = MyOtherMacro,
-  }
+\keys_manage:n {
+  /module/.cd:,
+  % Uses \l_MyMacro_tlp
+  key one/.store in tlp:c = MyMacro,
+  /keys/current module:n = MyModule,
+  % Uses \l_MyModule_MyMacro_tlp
+  key two/.store in tlp:c = MyOtherMacro,
+}
 \end{verbatim}
 For integer values and toks, versions replacing \texttt{tlp} 
 with \texttt{int} or \texttt{toks} are available.  These work
@@ -236,13 +239,13 @@ choice, accepting only the values \texttt{true} and
 \texttt{false}.  The input is then used to set the \LaTeX3
 switch.
 \begin{verbatim}
-  keys_manage:n {
-    /module/.cd:,
-    key one/.boolean:N = \MyBool,
-    key one = true, % \MyBool = \c_true
-    key one = false, % \MyBool = \c_false
-    key one = rubbish, % Error
-  }
+\keys_manage:n {
+  /module/.cd:,
+  key one/.boolean:N = \MyBool,
+  key one = true, % \MyBool = \c_true
+  key one = false, % \MyBool = \c_false
+  key one = rubbish, % Error
+}
 \end{verbatim}
 As with \pkg{kvoptions} or \pkg{xkeyval}, the key name alone
 can be given, and is equivalent to giving the \texttt{true}
@@ -254,13 +257,13 @@ Boolean. The usual example is \texttt{final}, where a
 \pkg{keys3}, this is achieved using the \texttt{.inverse key:n}
 property.
 \begin{verbatim}
-  keys_manage:n {
-    /module/.cd:,
-    final/.boolean:N = \FinalBool,
-    final/.inverse key:n = draft,
-    draft = false, % Same as:
-    final = true
-  }
+\keys_manage:n {
+  /module/.cd:,
+  final/.boolean:N = \FinalBool,
+  final/.inverse key:n = draft,
+  draft = false, % Same as:
+  final = true
+}
 \end{verbatim}
 
 \subsection{Multiple choice time}
@@ -277,14 +280,14 @@ these makes the current key a choice, and leaves it to the
 programmer to create each choice key separately. This is
 therefore best suited when each choice is rather different.
 \begin{verbatim}
-  \keys_manage:n {
-    /module/.cd:
-    key one/.choice:,
-    key one/.cd:,
-      egg/.code:n = some code,
-      cheese/.code:n = different code,
-      ...
-  }
+\keys_manage:n {
+  /module/.cd:
+  key one/.choice:,
+  key one/.cd:,
+    egg/.code:n = some code,
+    cheese/.code:n = different code,
+    ...
+}
 \end{verbatim}
 
 On the other hand, the \verb|.choices:nn| property is intended
@@ -292,14 +295,14 @@ to be useful when the choices are rather similar.  The tlp
 \cs{l_keys_current_choice_tlp}, which contains the choice name,
 can be used in the construction of csnames, \emph{etc}.
 \begin{verbatim}
-  \keys_manage:n {
-    /module/.cd:
+\keys_manage:n {
+  /module/.cd:
   key one/.choices:nn =
-     {egg,cheese,fish} {
-       You asked for
-       \l_keys_current_choice_tlp!
-      }
- }
+    {egg,cheese,fish} {
+      You asked for
+      \l_keys_current_choice_tlp!
+    }
+}
 \end{verbatim}
 
 It is possible to combine choices created in by the two
@@ -307,13 +310,13 @@ methods. So a series of similar choices can be created using
 \verb|.choices:nn|, before making other possibilities directly
 as sub-keys of the parent.
 \begin{verbatim}
-  \keys_manage:n {
-    /module/.cd:
+\keys_manage:n {
+  /module/.cd:
   key one/.choices:nn =
-     {egg,cheese,fish} {
-       You asked for
-       \l_keys_current_choice_tlp!
-      },
+    {egg,cheese,fish} {
+      You asked for
+      \l_keys_current_choice_tlp!
+    },
   key one/tomato/.code:n =
     I don't have tomatoes
  }
@@ -329,14 +332,13 @@ be supplied; the only \pkg{keyval} derivative which handles
 these is \pkg{kvsetkeys}.  In \pkg{keys3}, both of these cases
 are controlled by creating an \texttt{unknown} sub-key:
 \begin{verbatim}
-  \keys_manage:n {
-    /module/.cd:,
-    unknown/.code:n = Error!,
-    key one/unknown/.code:n =
-      What? I only know
-      eggs, cheese, fish and
-      tomato!
-  }
+\keys_manage:n {
+  /module/.cd:,
+  unknown/.code:n = Error!,
+  key one/unknown/.code:n =
+    What? I only know egg
+    cheese, fish and tomato!
+}
 \end{verbatim}
 This creates a general error if any key inside \texttt{/module}
 is unknown, printing ``Error!''. For the choice \texttt{key
@@ -356,21 +358,21 @@ referred to as \texttt{.style}. This allows a key to be used as
 an alias for one or more other keys. In this way, shortcuts to
 creating pre-defined groups of settings are available:
 \begin{verbatim}
-  \keys_manage:n {
-    /module/.cd:,
-    key one/.keys:n = {
-      key two = blue,
-      key three = italic,
-      key four = large
-    }
+\keys_manage:n {
+  /module/.cd:,
+  key one/.keys:n = {
+    key two = blue,
+    key three = italic,
+    key four = large
   }
+}
 \end{verbatim}
 In the example, if keys two to four control formatting of a
 text block, then setting key one will make the text blue,
 italic and large (assuming the other keys work in the obvious
 ways).
 
-Other properties are available in \pkg{kleys3} for controlling
+Other properties are available in \pkg{keys3} for controlling
 other aspects of key behaviour. The package documentation
 should be consulted for full details.
 

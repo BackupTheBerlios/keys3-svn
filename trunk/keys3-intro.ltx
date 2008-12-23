@@ -353,14 +353,14 @@ value) can be included.
 Following the ideas of the \pkg{pgfkeys} package, \pkg{keys3}
 has a number of properties that are not available in
 \pkg{keyval}-based systems. The most significant of these is
-the \texttt{.keys:n} property, which in \pkg{pgfkeys} is
+the \texttt{.apply~keys:n} property, which in \pkg{pgfkeys} is
 referred to as \texttt{.style}. This allows a key to be used as
 an alias for one or more other keys. In this way, shortcuts to
 creating pre-defined groups of settings are available:
 \begin{verbatim}
 \keys_manage:n {
   /module/.cd:,
-  key one/.keys:n = {
+  key one/.apply~keys:n = {
     key two = blue,
     key three = italic,
     key four = large

@@ -53,12 +53,6 @@
   key one = Hello World ,
 }
 
-\SetModuleKeys{
-  key x/.let:c = test,
-  key x = \cite ,
-}
-
-\expandafter\show\csname test:w\endcsname
 % Next, a key with arbitrary parameter format is created.
 \SetModuleKeys{
   key two/.code:nn = {#1 to #2} {You said `#1' to `#2'},
@@ -144,19 +138,19 @@
   key ten = {things}{of course}
 }
 
-% Keys can be used to set other keys.  The various .set keys:
-% properties achieve this. The .set keys:nn and .set keys:nx
+% Keys can be used to set other keys.  The various .apply keys:
+% properties achieve this. The .apply keys:nn and .apply keys:nx
 % properties have two arguments, as they require the usual
 % parameter format.
 \SetModuleKeys{
-  key eleven/.keys:n = {key one = #1},
+  key eleven/.apply keys:n = {key one = #1},
   key eleven = Things
 }
 
 % Watch the spacing with multiple argument: you cannot have any spaces,
 % as it confuses the underlying system.
 \SetModuleKeys{
-  key twelve/.keys:nn =
+  key twelve/.apply keys:nn =
     {#1#2}{key one = {#1 and also #2}},
   key twelve = {Things}{more things} % No space here
 }
@@ -187,7 +181,7 @@
 }
 \tlpone
 \SetModuleKeys{
-  key seventeen/.store in tlp x:N = \tlpone,
+  key seventeen/.xstore in tlp:N = \tlpone,
   key seventeen = \demo
 }
 \renewcommand*{\demo}{DEF}

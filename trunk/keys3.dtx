@@ -133,6 +133,21 @@
 % key to which the default path will be added. Notice that when a
 % single argument is required, the braces around the argument may be
 % omitted without any error arising.
+% 
+% \begin{function}{%
+%   /.apply~keys:n|
+%   /.apply~keys:x|
+%   /.apply~keys:nn|
+%   /.apply~keys:nx}
+%   \begin{syntax}
+%     <key>/.apply~keys:n = \Arg{keyval list}
+%   \end{syntax}
+%   Defines a set of keys to be applied when <key> is called. The usual
+%   parameter |#1| is available.
+%   \begin{texnote}
+%     These are the \textsf{pgfkeys} |.style| handler and relatives.
+%  \end{texnote}
+% \end{function}
 %
 % \begin{function}{%
 %   /.boolean:N|
@@ -163,8 +178,8 @@
 %   \end{syntax}
 %   Makes <key> a choice key.  Each possible choice should be stored as
 %   a sub-key of <key>, \emph{i.e.} <key>/<choice>, and should have and
-%   action attached (|.code:n|, |.keys:n|, \emph{etc.}). The behaviour
-%   with unspecified values is altered by adding code to the
+%   action attached (|.code:n|, |.apply keys:n|, \emph{etc.}). The 
+%   behaviour with unspecified values is altered by adding code to the
 %   \texttt{<key>/unknown} sub-key; initially, this raises an error if
 %   an unknown value is given.
 % \end{function}
@@ -250,21 +265,6 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.keys:n|
-%   /.keys:x|
-%   /.keys:nn|
-%   /.keys:nx}
-%   \begin{syntax}
-%     <key>/.keys:n = \Arg{keyval list}
-%   \end{syntax}
-%   Defines a set of keys to be applied when <key> is called. The usual
-%   parameter |#1| is available.
-%   \begin{texnote}
-%     These are the \textsf{pgfkeys} |.style| handler and relatives.
-%  \end{texnote}
-% \end{function}
-% 
-% \begin{function}{%
 %   .let~to~func:N|
 %   .let~to~func:c}
 %   \begin{syntax}
@@ -308,9 +308,9 @@
 %   /.put~keys~left:n|
 %   /.put~keys~right:n}
 %   \begin{syntax}
-%     <key>/.put code left:n = \Arg{keyval list}
+%     <key>/.put keys left:n = \Arg{keyval list}
 %   \end{syntax}
-%   Adds <keyval list> to <key> code created by |.keys:n|.
+%   Adds <keyval list> to <key> code created by |.apply~keys:n|.
 % \end{function}
 %
 % \begin{function}{%
@@ -344,13 +344,13 @@
 % \begin{function}{%
 %   /.store~in~tlp:N|
 %   /.store~in~tlp:c|
-%   /.store~in~tlp~x:N|
-%   /.store~in~tlp~x:c}
+%   /.xstore~in~tlp:N|
+%   /.xstore~in~tlp:c}
 %   \begin{syntax}
 %     <key>/.store~in~tlp:N = <tlp>
 %     <key>/.store~in~tlp:c = \Arg{name}
 %   \end{syntax}
-%   When <key> is called, store the value in <tlp>. The |tlp~x| variant
+%   When <key> is called, store the value in <tlp>. The |xstore| variant
 %   expands the value at the point of storage. No check is made on the
 %   <tlp> at definition time: when the key is used, the value is stored
 %   with no checks. For the |:c| variant, a tlp of name
@@ -366,9 +366,9 @@
 %     <key>/.store~in~toks:N = <toks>
 %     <key>/.store~in~toks:c = \Arg{toks}
 %   \end{syntax}
-%   When <key> is called, store the value in <toks>. No check is made on the
-%   <int> at definition time: when the key is used, the value is stored
-%   with no checks. For the |:c| variant, a toks of name
+%   When <key> is called, store the value in <toks>. No check is made on 
+%   the <int> at definition time: when the key is used, the value is 
+%   stored  with no checks. For the |:c| variant, a toks of name
 %   \cs{l_<module>_<name>_toks} is used for the storage. The <module>
 %   value is defined by |/keys/.current module:n| as described in
 %   section~\ref{sec:keys:prog}.
@@ -431,9 +431,9 @@
 %    /module/.cd:
 %    key/.choice:,
 %    key/.cd:,
-%      egg/.code:n = <some code>,
-%      cheese/.code:x = <some expanded code>,
-%      fish/.keys:n = <some extra keys>
+%      egg/.code:n        = <some code>,
+%      cheese/.code:x     = <some expanded code>,
+%      fish/.apply keys:n = <some extra keys>
 %  }
 %\end{verbatim}
 %
@@ -510,7 +510,7 @@
 %   \end{syntax}
 %   Common macro used by all key management functions to initiate key
 %   evaluation. Can be used to recursively set keys (see for example
-%   definition of |.keys:n|).
+%   definition of |.apply keys:n|).
 % \end{function}
 %
 % \begin{function}{%
@@ -1037,7 +1037,8 @@
 % what \textsf{l3quark} would do for functions of these names.
 %    \begin{macrocode}
 \def_long_test_function_new:npn {quark_if_value_required:N} #1 {
-  \if_meaning:NN \q_value_required #1}
+  \if_meaning:NN \q_value_required #1
+}
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
@@ -1704,24 +1705,24 @@
 %    \end{macrocode}
 % Pre-built lists of keys can be created for regular use.
 %    \begin{macrocode}
-  \c_keys_properties_path_tlp /.keys:n/.code:n = {
+  \c_keys_properties_path_tlp /.apply~keys:n/.code:n = {
     \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:n = {\keys_process:n {#1}}
     }
   },
-  \c_keys_properties_path_tlp /.keys:x/.code:n = {
+  \c_keys_properties_path_tlp /.apply~keys:x/.code:n = {
     \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:x = {
         \exp_not:N \keys_process:n {#1}
       }
     }
   },
-  \c_keys_properties_path_tlp /.keys:nn/.code:nn = {#1#2} {
+  \c_keys_properties_path_tlp /.apply~keys:nn/.code:nn = {#1#2} {
     \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:nn = {#1} {\keys_process:n {#2}}
     }
   },
-  \c_keys_properties_path_tlp /.keys:nx/.code:nn = {#1#2} {
+  \c_keys_properties_path_tlp /.apply~keys:nx/.code:nn = {#1#2} {
     \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:x =
         {#1} {\exp_not:N \keys_process:n {#2}}
@@ -1777,7 +1778,7 @@
       }
     }
   },
-  \c_keys_properties_path_tlp /.store~in~tlp~x:N/.code:n = {
+  \c_keys_properties_path_tlp /.xstore~in~tlp:N/.code:n = {
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:n = {
         \tlp_set:Nx #1 {##1}
@@ -1792,7 +1793,7 @@
       }
     }
   },
-  \c_keys_properties_path_tlp /.store~in~tlp~x:c/.code:n = {
+  \c_keys_properties_path_tlp /.xstore~in~tlp:c/.code:n = {
     \keys_module_name:
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:x = {

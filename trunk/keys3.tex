@@ -43,7 +43,7 @@
 \begin{document}
 
 % Everything is done internally using \cs:w ... \cs_end:, and so you
-% can create keys without needing \CodeStart ... \CodeStop
+% can create keys without needing \ExplSyntaxOn ... \ExplSyntaxOff
 
 % The first key is very simple, it just prints the users input. Notice
 % that the surrounding spaces are removed, but the internal space is
@@ -64,7 +64,6 @@
 \SetKeys{
   module name/key one = Something else
 }
-
 
 % A module can be declared using the ".module:" property. The
 % module name then acts as a ".cd:" property.

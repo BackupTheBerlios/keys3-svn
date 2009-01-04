@@ -331,12 +331,27 @@
 %   /.store~in~int:c}
 %   \begin{syntax}
 %     <key>/.store~in~int:N = <int>
-%     <key>/.store~in~int:c = \Arg{int}
+%     <key>/.store~in~int:c = \Arg{name}
 %   \end{syntax}
 %   When <key> is called, store the value in <int>. No check is made on the
 %   <int> at definition time: when the key is used, the value is stored
 %   with no checks. For the |:c| variant, an int of name
 %   \cs{l_<module>_<name>_int} is used for the storage. The <module>
+%   value is defined by |/keys/.current module:n| as described in
+%   section~\ref{sec:keys:prog}.
+% \end{function}
+% 
+% \begin{function}{%
+%   /.store~in~skip:N|
+%   /.store~in~skip:c}
+%   \begin{syntax}
+%     <key>/.store~in~skip:N = <skip>
+%     <key>/.store~in~skip:c = \Arg{name}
+%   \end{syntax}
+%   When <key> is called, store the value in <skip>. No check is made on
+%   the <skip> at definition time: when the key is used, the value is 
+%   stored with no checks. For the |:c| variant, a skip of name
+%   \cs{l_<module>_<name>_skip} is used for the storage. The <module>
 %   value is defined by |/keys/.current module:n| as described in
 %   section~\ref{sec:keys:prog}.
 % \end{function}
@@ -364,7 +379,7 @@
 %   /.store~in~toks:c}
 %   \begin{syntax}
 %     <key>/.store~in~toks:N = <toks>
-%     <key>/.store~in~toks:c = \Arg{toks}
+%     <key>/.store~in~toks:c = \Arg{name}
 %   \end{syntax}
 %   When <key> is called, store the value in <toks>. No check is made on 
 %   the <int> at definition time: when the key is used, the value is 
@@ -1813,6 +1828,21 @@
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:x = {
         \exp_not:N \int_set:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.store~in~skip:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \skip_set:Nn #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.store~in~skip:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \skip_set:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
       }
     }
   },

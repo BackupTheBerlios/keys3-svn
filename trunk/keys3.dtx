@@ -569,6 +569,16 @@
 %   \end{syntax}
 %   Create a new Boolean <key> and sets to |true|.
 % \end{function}
+% 
+% \begin{function}{%
+%   \keys_boolean:nN|
+%   \keys_boolean:nc}
+%   \begin{syntax}
+%     "\keys_boolean:nN" \arg{set} <bool>
+%   \end{syntax}
+%   Use <bool> as a switch key, with <set> as either set or gset as
+%   appropriate.
+% \end{function}
 %
 % \begin{function}{%
 %   \keys_def_cmd:cn|
@@ -1346,6 +1356,53 @@
 }
 %    \end{macrocode}
 %\end{macro}
+%\begin{macro}{\keys_boolean:nN}
+%\begin{macro}{\keys_boolean:nc}
+% To allow code-sharing for switch control.
+%    \begin{macrocode}
+\def_new:Npn \keys_boolean:nN #1#2 {
+  \cs_if_free:NT #1 {\bool_new:N #2}
+  \keys_process:n {
+    \l_keys_current_path_tlp /.code:n = {
+      \cs_if_really_exist:cTF {bool_set_##1:c} {
+        \use:c {bool_#1_##1:N} #2
+      }{
+        \keys_err_use:cw {boolean_expected} \l_keys_current_key_tlp
+          {\toks_use:N \l_keys_current_value_toks}
+      }
+    },
+    \l_keys_current_path_tlp /.default:n = true
+  }
+  \keys_def:cn {\l_keys_current_path_tlp /._boolean} {\exp_not:N #2}
+}
+\def_new:Npn \keys_boolean:nc #1#2 {
+  \keys_module_name:
+  \cs_if_free:cT {l_ \l_keys_tmpa_tlp #2_bool} {
+    \bool_new:c {l_ \l_keys_tmpa_tlp #2_bool}
+  }
+  \keys_process:n {
+    \l_keys_current_path_tlp /.code:x = {
+      \exp_not:N \cs_if_really_exist:cTF {bool_set_##1:N} {
+        \exp_not:N \use:c {bool_#1_##1:N}
+          \exp_not:d {\use:c {l_ \l_keys_tmpa_tlp #2 _bool}}
+      }{
+        \exp_not:n {
+          \keys_err_use:cw {boolean_expected}
+            \l_keys_current_key_tlp
+            {\toks_use:N \l_keys_current_value_toks}
+        }
+      }
+    },
+    \l_keys_current_path_tlp /.default:n = true
+  }
+  \keys_def:cx {\l_keys_current_path_tlp /._boolean} {
+    \exp_not:N \exp_not:N \exp_not:d
+      {\use:c {l_ \l_keys_tmpa_tlp #2_bool}}
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
 %\begin{macro}{\keys_choice_create:n}
 % The system to create choices is quite simple.
 %    \begin{macrocode}
@@ -1917,88 +1974,19 @@
 % Boolean keys are created with a true default.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.boolean:N/.code:n = {
-    \cs_if_free:NT #1 {\bool_new:N #1}
-    \keys_process:n {
-      \l_keys_current_path_tlp /.code:n = {
-        \cs_if_really_exist:cTF {bool_set_##1:c} {
-          \use:c {bool_set_##1:N} #1
-        }{
-          \keys_err_use:cw {boolean_expected} \l_keys_current_key_tlp
-            {\toks_use:N \l_keys_current_value_toks}
-        }
-      },
-      \l_keys_current_path_tlp /.default:n = true
-    }
-  \keys_def:cn {\l_keys_current_path_tlp /._boolean} {\exp_not:N #1}
+    \keys_boolean:nN {set} #1
   },
-%    \end{macrocode}
-% The |:c| variant has to create the appropriate name first.
-%    \begin{macrocode}
   \c_keys_properties_path_tlp /.boolean:c/.code:n = {
-    \keys_module_name:
-    \cs_if_free:cT {l_ \l_keys_tmpa_tlp #1_bool} {
-      \bool_new:c {l_ \l_keys_tmpa_tlp #1_bool}
-    }
-    \keys_process:n {
-      \l_keys_current_path_tlp /.code:x = {
-        \exp_not:N \cs_if_really_exist:cTF {bool_set_##1:N} {
-          \exp_not:N \use:c {bool_set_##1:N}
-            \exp_not:d {\use:c {l_ \l_keys_tmpa_tlp #1 _bool}}
-        }{
-          \exp_not:n {
-            \keys_err_use:cw {boolean_expected}
-              \l_keys_current_key_tlp
-              {\toks_use:N \l_keys_current_value_toks}
-          }
-        }
-      },
-      \l_keys_current_path_tlp /.default:n = true
-    }
-  \keys_def:cx {\l_keys_current_path_tlp /._boolean}
-    {\exp_not:N \exp_not:N \exp_not:d
-      {\use:c {l_ \l_keys_tmpa_tlp #1_bool}}}
+    \keys_boolean:nc {set} {#1}
   },
 %    \end{macrocode}
 % Once again global versions.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.gboolean:N/.code:n = {
-    \cs_if_free:NT #1 {\bool_new:N #1}
-    \keys_process:n {
-      \l_keys_current_path_tlp /.code:n = {
-        \cs_if_really_exist:cTF {bool_gset_##1:c} {
-          \use:c {bool_gset_##1:N} #1
-        }{
-          \keys_err_use:cw {boolean_expected} \l_keys_current_key_tlp
-            {\toks_use:N \l_keys_current_value_toks}
-        }
-      },
-      \l_keys_current_path_tlp /.default:n = true
-    }
-  \keys_def:cn {\l_keys_current_path_tlp /._boolean} {\exp_not:N #1}
+    \keys_boolean:nN {gset} #1
   },
   \c_keys_properties_path_tlp /.gboolean:c/.code:n = {
-    \keys_module_name:
-    \cs_if_free:cT {l_ \l_keys_tmpa_tlp #1_bool} {
-      \bool_new:c {l_ \l_keys_tmpa_tlp #1_bool}
-    }
-    \keys_process:n {
-      \l_keys_current_path_tlp /.code:x = {
-        \exp_not:N \cs_if_really_exist:cTF {bool_gset_##1:N} {
-          \exp_not:N \use:c {bool_gset_##1:N}
-            \exp_not:d {\use:c {l_ \l_keys_tmpa_tlp #1 _bool}}
-        }{
-          \exp_not:n {
-            \keys_err_use:cw {boolean_expected}
-              \l_keys_current_key_tlp
-              {\toks_use:N \l_keys_current_value_toks}
-          }
-        }
-      },
-      \l_keys_current_path_tlp /.default:n = true
-    }
-  \keys_def:cx {\l_keys_current_path_tlp /._boolean}
-    {\exp_not:N \exp_not:N \exp_not:d
-      {\use:c {l_ \l_keys_tmpa_tlp #1_bool}}}
+    \keys_boolean:nc {gset} {#1}
   },
 %    \end{macrocode}
 % Creating an inverse needs a little work as the logic needs to be

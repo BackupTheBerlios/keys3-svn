@@ -328,7 +328,9 @@
 %
 % \begin{function}{%
 %   /.store~in~int:N|
-%   /.store~in~int:c}
+%   /.store~in~int:c|
+%   /.gstore~in~int:N|
+%   /.gstore~in~int:c}
 %   \begin{syntax}
 %     <key>/.store~in~int:N = <int>
 %     <key>/.store~in~int:c = \Arg{name}
@@ -338,12 +340,14 @@
 %   with no checks. For the |:c| variant, an int of name
 %   \cs{l_<module>_<name>_int} is used for the storage. The <module>
 %   value is defined by |/keys/.current module:n| as described in
-%   section~\ref{sec:keys:prog}.
+%   section~\ref{sec:keys:prog}. The |g| variants are global.
 % \end{function}
 % 
 % \begin{function}{%
 %   /.store~in~skip:N|
-%   /.store~in~skip:c}
+%   /.store~in~skip:c|
+%   /.gstore~in~skip:N|
+%   /.gstore~in~skip:c}
 %   \begin{syntax}
 %     <key>/.store~in~skip:N = <skip>
 %     <key>/.store~in~skip:c = \Arg{name}
@@ -353,14 +357,18 @@
 %   stored with no checks. For the |:c| variant, a skip of name
 %   \cs{l_<module>_<name>_skip} is used for the storage. The <module>
 %   value is defined by |/keys/.current module:n| as described in
-%   section~\ref{sec:keys:prog}.
+%   section~\ref{sec:keys:prog}. The |g| variants are global.
 % \end{function}
 %
 % \begin{function}{%
 %   /.store~in~tlp:N|
 %   /.store~in~tlp:c|
 %   /.xstore~in~tlp:N|
-%   /.xstore~in~tlp:c}
+%   /.xstore~in~tlp:c|
+%   /.gstore~in~tlp:N|
+%   /.gstore~in~tlp:c|
+%   /.xgstore~in~tlp:N|
+%   /.xgstore~in~tlp:c}
 %   \begin{syntax}
 %     <key>/.store~in~tlp:N = <tlp>
 %     <key>/.store~in~tlp:c = \Arg{name}
@@ -371,12 +379,15 @@
 %   with no checks. For the |:c| variant, a tlp of name
 %   \cs{l_<module>_<name>_tlp} is used for the storage. The <module>
 %   value is defined by |/keys/.current module:n| as described in
-%   section~\ref{sec:keys:prog}.
+%   section~\ref{sec:keys:prog}. The |g| variants are global, while the
+%   |x| variants expand the content given before storing.
 % \end{function}
 % 
 % \begin{function}{%
 %   /.store~in~toks:N|
-%   /.store~in~toks:c}
+%   /.store~in~toks:c|
+%   /.gstore~in~toks:N|
+%   /.gstore~in~toks:c}
 %   \begin{syntax}
 %     <key>/.store~in~toks:N = <toks>
 %     <key>/.store~in~toks:c = \Arg{name}
@@ -386,7 +397,7 @@
 %   stored  with no checks. For the |:c| variant, a toks of name
 %   \cs{l_<module>_<name>_toks} is used for the storage. The <module>
 %   value is defined by |/keys/.current module:n| as described in
-%   section~\ref{sec:keys:prog}.
+%   section~\ref{sec:keys:prog}. The |g| variants are global.
 % \end{function}
 %
 % \begin{function}{%
@@ -1859,6 +1870,84 @@
     \keys_process:n {
       \c_keys_properties_path_tlp /.code:x = {
         \exp_not:N \toks_set:cn {l_ \l_keys_tmpa_tlp #1_toks} {##1}
+      }
+    }
+  },
+%    \end{macrocode}
+% Global versions of all of the above storage properties.
+%    \begin{macrocode}
+  \c_keys_properties_path_tlp /.gstore~in~tlp:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \tlp_gset:Nn #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.xgstore~in~tlp:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \tlp_gset:Nx #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.gstore~in~tlp:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \tlp_gset:cn {l_ \l_keys_tmpa_tlp #1_tlp} {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.xgstore~in~tlp:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \tlp_gset:Nx {l_ \l_keys_tmpa_tlp #1_tlp} {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.gstore~in~int:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \int_gset:Nn #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.gstore~in~int:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \int_gset:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.gstore~in~skip:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \skip_gset:Nn #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.gstore~in~skip:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \skip_gset:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.gstore~in~toks:N/.code:n = {
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:n = {
+        \toks_gset:Nn #1 {##1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.gstore~in~toks:c/.code:n = {
+    \keys_module_name:
+    \keys_process:n {
+      \c_keys_properties_path_tlp /.code:x = {
+        \exp_not:N \toks_gset:cn {l_ \l_keys_tmpa_tlp #1_toks} {##1}
       }
     }
   },

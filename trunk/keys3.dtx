@@ -704,6 +704,15 @@
 %   \end{syntax}
 %   Separates <key> into a <path> and a <name>.
 % \end{function}
+% 
+% \begin{function}{%
+%   \keys_store:NN|
+%   \keys_store:NN}
+%   \begin{syntax}
+%     "\keys_store:NN" <func> <store>
+%   \end{syntax}
+%   Used to store argument of <key> using <func> into <store>.
+% \end{function}
 %
 % \begin{function}{\keys_toks_new:cn}
 %   \begin{syntax}
@@ -1486,6 +1495,47 @@
 }
 %    \end{macrocode}
 %\end{macro}
+%\begin{macro}{\keys_separate:}
+%\begin{macro}{\keys_separate:w}
+% A simple piece of recursion.
+%    \begin{macrocode}
+\def_new:Npn \keys_separate: {
+  \tlp_clear:N \l_keys_current_path_tlp
+  \exp_after:NN \keys_separate:w \l_keys_current_key_tlp / \q_stop
+}
+\def_new:Npn \keys_separate:w /#1/#2 \q_stop {
+  \tlist_if_empty:nTF {#2}{
+    \tlp_set:Nn \l_keys_current_name_tlp {#1}
+  }{
+     \tlp_put_right:Nn \l_keys_current_path_tlp {/#1}
+     \keys_separate:w /#2 \q_stop
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_store:NN}
+%\begin{macro}{\keys_store:Nc}
+% Generic storage functions.
+%    \begin{macrocode}
+\def_new:Npn \keys_store:NN #1#2 {
+  \keys_process:n {
+    \c_keys_properties_path_tlp /.code:n = {
+      #1 #2 {##1}
+    }
+  }
+}
+\def_new:Npn \keys_store:Nc #1#2 {
+  \keys_module_name:
+  \keys_process:n {
+    \c_keys_properties_path_tlp /.code:x = {
+      \exp_not:N #1 {l_ \l_keys_tmpa_tlp #2_tlp} {##1}
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
 %\begin{macro}{\keys_toks_new:cn}
 %    \begin{macrocode}
 \def_new:Npn \keys_toks_new:cn #1#2 {
@@ -1519,25 +1569,6 @@
     \keys_use:c {#1/._cmd:w} \q_keys_stop
   }{
     \keys_use:c {#1/._cmd:w} #2 \q_keys_stop
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_separate:}
-%\begin{macro}{\keys_separate:w}
-% A simple piece of recursion.
-%    \begin{macrocode}
-\def_new:Npn \keys_separate: {
-  \tlp_clear:N \l_keys_current_path_tlp
-  \exp_after:NN \keys_separate:w \l_keys_current_key_tlp / \q_stop
-}
-\def_new:Npn \keys_separate:w /#1/#2 \q_stop {
-  \tlist_if_empty:nTF {#2}{
-    \tlp_set:Nn \l_keys_current_name_tlp {#1}
-  }{
-     \tlp_put_right:Nn \l_keys_current_path_tlp {/#1}
-     \keys_separate:w /#2 \q_stop
   }
 }
 %    \end{macrocode}
@@ -1802,157 +1833,67 @@
 % some higher-level functionality.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.store~in~tlp:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \tlp_set:Nn #1 {##1}
-      }
-    }
+    \keys_store:NN \tlp_set:Nn #1
   },
   \c_keys_properties_path_tlp /.xstore~in~tlp:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \tlp_set:Nx #1 {##1}
-      }
-    }
+    \keys_store:NN \tlp_set:Nx #1
   },
   \c_keys_properties_path_tlp /.store~in~tlp:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \tlp_set:cn {l_ \l_keys_tmpa_tlp #1_tlp} {##1}
-      }
-    }
+    \keys_store:Nc \tlp_set:cn {#1}
   },
   \c_keys_properties_path_tlp /.xstore~in~tlp:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \tlp_set:Nx {l_ \l_keys_tmpa_tlp #1_tlp} {##1}
-      }
-    }
+    \keys_store:Nc \tlp_set:cx {#1}
   },
   \c_keys_properties_path_tlp /.store~in~int:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \int_set:Nn #1 {##1}
-      }
-    }
+    \keys_store:NN \int_set:Nn #1
   },
   \c_keys_properties_path_tlp /.store~in~int:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \int_set:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
-      }
-    }
+    \keys_store:Nc \int_set:cn {#1}
   },
   \c_keys_properties_path_tlp /.store~in~skip:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \skip_set:Nn #1 {##1}
-      }
-    }
+    \keys_store:NN \skip_set:Nn #1
   },
   \c_keys_properties_path_tlp /.store~in~skip:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \skip_set:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
-      }
-    }
+    \keys_store:Nc \skip_set:cn {#1}
   },
   \c_keys_properties_path_tlp /.store~in~toks:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \toks_set:Nn #1 {##1}
-      }
-    }
+    \keys_store:NN \toks_set:Nn #1
   },
   \c_keys_properties_path_tlp /.store~in~toks:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \toks_set:cn {l_ \l_keys_tmpa_tlp #1_toks} {##1}
-      }
-    }
+    \keys_store:Nc \toks_set:cn {#1}
   },
 %    \end{macrocode}
 % Global versions of all of the above storage properties.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.gstore~in~tlp:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \tlp_gset:Nn #1 {##1}
-      }
-    }
+    \keys_store:NN \tlp_gset:Nn #1
   },
   \c_keys_properties_path_tlp /.xgstore~in~tlp:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \tlp_gset:Nx #1 {##1}
-      }
-    }
+    \keys_store:NN \tlp_gset:Nx #1
   },
   \c_keys_properties_path_tlp /.gstore~in~tlp:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \tlp_gset:cn {l_ \l_keys_tmpa_tlp #1_tlp} {##1}
-      }
-    }
+    \keys_store:Nc \tlp_gset:cn {#1}
   },
   \c_keys_properties_path_tlp /.xgstore~in~tlp:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \tlp_gset:Nx {l_ \l_keys_tmpa_tlp #1_tlp} {##1}
-      }
-    }
+    \keys_store:Nc \tlp_gset:cx {#1}
   },
   \c_keys_properties_path_tlp /.gstore~in~int:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \int_gset:Nn #1 {##1}
-      }
-    }
+    \keys_store:NN \int_gset:Nn #1
   },
   \c_keys_properties_path_tlp /.gstore~in~int:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \int_gset:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
-      }
-    }
+    \keys_store:Nc \int_gset:cn {#1}
   },
   \c_keys_properties_path_tlp /.gstore~in~skip:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \skip_gset:Nn #1 {##1}
-      }
-    }
+    \keys_store:NN \skip_gset:Nn #1
   },
   \c_keys_properties_path_tlp /.gstore~in~skip:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \skip_gset:cn {l_ \l_keys_tmpa_tlp #1_int} {##1}
-      }
-    }
+    \keys_store:Nc \skip_gset:cn {#1}
   },
   \c_keys_properties_path_tlp /.gstore~in~toks:N/.code:n = {
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:n = {
-        \toks_gset:Nn #1 {##1}
-      }
-    }
+    \keys_store:NN \toks_gset:Nn #1
   },
   \c_keys_properties_path_tlp /.gstore~in~toks:c/.code:n = {
-    \keys_module_name:
-    \keys_process:n {
-      \c_keys_properties_path_tlp /.code:x = {
-        \exp_not:N \toks_gset:cn {l_ \l_keys_tmpa_tlp #1_toks} {##1}
-      }
-    }
+    \keys_store:Nc \toks_gset:cn {#1}
   },
 %    \end{macrocode}
 % Functions should not be stored in tlps.

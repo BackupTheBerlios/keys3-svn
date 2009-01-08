@@ -135,10 +135,10 @@
 % omitted without any error arising.
 % 
 % \begin{function}{%
-%   /.apply~keys:n|
-%   /.apply~keys:x|
-%   /.apply~keys:nn|
-%   /.apply~keys:nx}
+%   .apply~keys:n|
+%   .apply~keys:x|
+%   .apply~keys:nn|
+%   .apply~keys:nx}
 %   \begin{syntax}
 %     <key>/.apply~keys:n = \Arg{keyval list}
 %   \end{syntax}
@@ -150,10 +150,10 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.boolean:N|
-%   /.boolean:c|
-%   /.gboolean:N|
-%   /.gboolean:c}
+%   .boolean:N|
+%   .boolean:c|
+%   .gboolean:N|
+%   .gboolean:c}
 %   \begin{syntax}
 %     <key>/.boolean:N = <Boolean>
 %     <key>/.boolean:c = \Arg{name}
@@ -167,7 +167,7 @@
 %   globally.
 % \end{function}
 %
-% \begin{function}{/.cd:}
+% \begin{function}{.cd:}
 %   \begin{syntax}
 %     <key>/.cd:
 %   \end{syntax}
@@ -175,7 +175,7 @@
 %   when setting up several keys.
 % \end{function}
 %
-% \begin{function}{/.choice:}
+% \begin{function}{.choice:}
 %   \begin{syntax}
 %     <key>/.choice:
 %   \end{syntax}
@@ -187,7 +187,7 @@
 %   an unknown value is given.
 % \end{function}
 %
-% \begin{function}{/.choices:nn}
+% \begin{function}{.choices:nn}
 %   \begin{syntax}
 %     <key>/.choices:nn = \Arg{choice list} \Arg{code}
 %   \end{syntax}
@@ -206,8 +206,8 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.code:n|
-%   /.code:x}
+%   .code:n|
+%   .code:x}
 %   \begin{syntax}
 %     <key>/.code:n = \Arg{code}
 %   \end{syntax}
@@ -217,8 +217,8 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.code:nn|
-%   /.code:nx}
+%   .code:nn|
+%   .code:nx}
 %   \begin{syntax}
 %     <key>/.code:nn = \Arg{parameters} \Arg{code}
 %   \end{syntax}
@@ -226,19 +226,29 @@
 %   used will have \TeX\ <parameters>.
 % \end{function}
 %
-% \begin{function}{/.default:n}
+% \begin{function}{.default:n}
 %   \begin{syntax}
 %     <key>/.default:n = \Arg{value}
 %   \end{syntax}
 %   Use <value> whenever <key> is given without a value.
 % \end{function}
 %
-% \begin{function}{/.equivalent~key:n}
+% \begin{function}{.equivalent~key:n}
 %   \begin{syntax}
 %     <key>/.equivalent~key:n = <key2>
 %   \end{syntax}
 %   Makes <key2> a key with equivalent meaning to <key>: intended to
 %   make creating alternative spellings or choices simple.
+% \end{function}
+% 
+% \begin{function}{%
+%   .expand:o|
+%   .expand:d|
+%   .expand:x}
+%   \begin{syntax}
+%     <key>/.expand:o = \Arg{value}
+%   \end{syntax}
+%   Expand the given argument once (|o|), twice (|d|) or fully (|x|).
 % \end{function}
 % 
 % \begin{function}{.initial:n}
@@ -248,7 +258,7 @@
 %   Initialise <key> with <value>, until a second assignment is made.
 % \end{function}
 %
-% \begin{function}{/.inverse~key:n}
+% \begin{function}{.inverse~key:n}
 %   \begin{syntax}
 %     <key>/.inverse key:n = \Arg{name}
 %   \end{syntax}
@@ -281,7 +291,7 @@
 %   \textsf{keys3} does not have any clue as to the arguments required.
 % \end{function}
 %
-% \begin{function}{/.module:}
+% \begin{function}{.module:}
 %   \begin{syntax}
 %     <key>/.module:
 %   \end{syntax}
@@ -290,8 +300,8 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.put~left:n|
-%   /.put~right:n}
+%   .put~left:n|
+%   .put~right:n}
 %   \begin{syntax}
 %     <key>/.put left:n = \Arg{value}
 %   \end{syntax}
@@ -299,8 +309,8 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.put~code~left:n|
-%   /.put~code~right:n}
+%   .put~code~left:n|
+%   .put~code~right:n}
 %   \begin{syntax}
 %     <key>/.put code left:n = \Arg{code}
 %   \end{syntax}
@@ -308,8 +318,8 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.put~keys~left:n|
-%   /.put~keys~right:n}
+%   .put~keys~left:n|
+%   .put~keys~right:n}
 %   \begin{syntax}
 %     <key>/.put keys left:n = \Arg{keyval list}
 %   \end{syntax}
@@ -317,8 +327,8 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.show~code:|
-%   /.show:}
+%   .show~code:|
+%   .show:}
 %   \begin{syntax}
 %     <key>/.show code:
 %     <key>/.show:
@@ -330,10 +340,10 @@
 %
 %
 % \begin{function}{%
-%   /.store~in~int:N|
-%   /.store~in~int:c|
-%   /.gstore~in~int:N|
-%   /.gstore~in~int:c}
+%   .store~in~int:N|
+%   .store~in~int:c|
+%   .gstore~in~int:N|
+%   .gstore~in~int:c}
 %   \begin{syntax}
 %     <key>/.store~in~int:N = <int>
 %     <key>/.store~in~int:c = \Arg{name}
@@ -347,10 +357,10 @@
 % \end{function}
 % 
 % \begin{function}{%
-%   /.store~in~skip:N|
-%   /.store~in~skip:c|
-%   /.gstore~in~skip:N|
-%   /.gstore~in~skip:c}
+%   .store~in~skip:N|
+%   .store~in~skip:c|
+%   .gstore~in~skip:N|
+%   .gstore~in~skip:c}
 %   \begin{syntax}
 %     <key>/.store~in~skip:N = <skip>
 %     <key>/.store~in~skip:c = \Arg{name}
@@ -364,14 +374,14 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.store~in~tlp:N|
-%   /.store~in~tlp:c|
-%   /.xstore~in~tlp:N|
-%   /.xstore~in~tlp:c|
-%   /.gstore~in~tlp:N|
-%   /.gstore~in~tlp:c|
-%   /.xgstore~in~tlp:N|
-%   /.xgstore~in~tlp:c}
+%   .store~in~tlp:N|
+%   .store~in~tlp:c|
+%   .estore~in~tlp:N|
+%   .estore~in~tlp:c|
+%   .gstore~in~tlp:N|
+%   .gstore~in~tlp:c|
+%   .xstore~in~tlp:N|
+%   .xstore~in~tlp:c}
 %   \begin{syntax}
 %     <key>/.store~in~tlp:N = <tlp>
 %     <key>/.store~in~tlp:c = \Arg{name}
@@ -382,15 +392,16 @@
 %   with no checks. For the |:c| variant, a tlp of name
 %   \cs{l_<module>_<name>_tlp} is used for the storage. The <module>
 %   value is defined by |/keys/.current module:n| as described in
-%   section~\ref{sec:keys:prog}. The |g| variants are global, while the
-%   |x| variants expand the content given before storing.
+%   section~\ref{sec:keys:prog}. the variant forms follow the \TeX\
+%   convention for \cs{def}: |e| = expanded, |g|  = global, |x| = global
+%   and expanded.
 % \end{function}
 % 
 % \begin{function}{%
-%   /.store~in~toks:N|
-%   /.store~in~toks:c|
-%   /.gstore~in~toks:N|
-%   /.gstore~in~toks:c}
+%   .store~in~toks:N|
+%   .store~in~toks:c|
+%   .gstore~in~toks:N|
+%   .gstore~in~toks:c}
 %   \begin{syntax}
 %     <key>/.store~in~toks:N = <toks>
 %     <key>/.store~in~toks:c = \Arg{name}
@@ -413,8 +424,8 @@
 % \end{function}
 %
 % \begin{function}{%
-%   /.try:n|
-%   /.retry:n}
+%   .try:n|
+%   .retry:n}
 %   \begin{syntax}
 %     <key>/.try:n = \Arg{value}
 %   \end{syntax}
@@ -1892,13 +1903,13 @@
   \c_keys_properties_path_tlp /.store~in~tlp:N/.code:n = {
     \keys_store:NN \tlp_set:Nn #1
   },
-  \c_keys_properties_path_tlp /.xstore~in~tlp:N/.code:n = {
+  \c_keys_properties_path_tlp /.estore~in~tlp:N/.code:n = {
     \keys_store:NN \tlp_set:Nx #1
   },
   \c_keys_properties_path_tlp /.store~in~tlp:c/.code:n = {
     \keys_store:Nc \tlp_set:cn {#1}
   },
-  \c_keys_properties_path_tlp /.xstore~in~tlp:c/.code:n = {
+  \c_keys_properties_path_tlp /.estore~in~tlp:c/.code:n = {
     \keys_store:Nc \tlp_set:cx {#1}
   },
   \c_keys_properties_path_tlp /.store~in~int:N/.code:n = {
@@ -1925,13 +1936,13 @@
   \c_keys_properties_path_tlp /.gstore~in~tlp:N/.code:n = {
     \keys_store:NN \tlp_gset:Nn #1
   },
-  \c_keys_properties_path_tlp /.xgstore~in~tlp:N/.code:n = {
+  \c_keys_properties_path_tlp /.xstore~in~tlp:N/.code:n = {
     \keys_store:NN \tlp_gset:Nx #1
   },
   \c_keys_properties_path_tlp /.gstore~in~tlp:c/.code:n = {
     \keys_store:Nc \tlp_gset:cn {#1}
   },
-  \c_keys_properties_path_tlp /.xgstore~in~tlp:c/.code:n = {
+  \c_keys_properties_path_tlp /.xstore~in~tlp:c/.code:n = {
     \keys_store:Nc \tlp_gset:cx {#1}
   },
   \c_keys_properties_path_tlp /.gstore~in~int:N/.code:n = {

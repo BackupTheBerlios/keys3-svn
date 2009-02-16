@@ -1557,8 +1557,8 @@
 %    \begin{macrocode}
     \use:c {toks_put_#2:Nn} \l_keys_body_toks {#1}
     \tlp_set:Nx \l_keys_tmpa_tlp {\toks_use:N \l_keys_args_toks}
-    \exp_args:NNOo \keys_def_cmd:cnx {\l_keys_current_path_tlp}
-      \l_keys_tmpa_tlp {\toks_use:N \l_keys_body_toks}
+    \exp_args:NNoo \keys_def_cmd:cnx {\l_keys_current_path_tlp}
+      {\l_keys_tmpa_tlp} {\toks_use:N \l_keys_body_toks}
   }{
     \keys_def_cmd:cn {\l_keys_current_path_tlp} {#1}
   }

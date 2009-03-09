@@ -609,9 +609,9 @@
 %   Creates a choice key from a list.
 % \end{function}
 %
-% \begin{function}{\keys_clear_properties:c}
+% \begin{function}{\keys_clear_properties:n}
 %   \begin{syntax}
-%     "\keys_clear_properties:c" \Arg{key}
+%     "\keys_clear_properties:n" \Arg{key}
 %   \end{syntax}
 %   Removes all existing internal properties from <key>.
 % \end{function}
@@ -895,10 +895,12 @@
 %   Stores the default value for <key>.
 % \end{function}
 %
-% \begin{function}{/._forbidden_bool}
+% \begin{function}{%
+%   /._forbidden_bool|
+%   /._required_bool}
 %   \begin{syntax}
 %   \end{syntax}
-%   Indicates that a value is forbidden for <key>.
+%   Indicates that a value is forbidden or required for <key>.
 % \end{function}
 %
 %\subsection{To think about}
@@ -1384,18 +1386,24 @@
 }
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\keys_clear_properties:c}
+%\begin{macro}{\keys_clear_properties:n}
+%\begin{macro}{\keys_undefine:n}
 % To avoid problem on redefinition, all properties are removed.
 %    \begin{macrocode}
-\cs_new:Npn \keys_clear_properties:c #1 {
-  \let:cN {\c_keys_cs_prefix_tlp #1/._args_toks} \c_undefined
-  \let:cN {\c_keys_cs_prefix_tlp #1/._body_toks} \c_undefined
-  \let:cN {\c_keys_cs_prefix_tlp #1/._boolean} \c_undefined
-  \let:cN {\c_keys_cs_prefix_tlp #1/._cmd:w} \c_undefined
-  \let:cN {\c_keys_cs_prefix_tlp #1/._default_tlp} \c_undefined
-  \let:cN {\c_keys_cs_prefix_tlp #1/._forbidden_bool} \c_undefined
+\cs_new:NNn \keys_clear_properties:n 1 {
+  \keys_undefine:n { #1/._args_toks }
+  \keys_undefine:n { #1/._body_toks }
+  \keys_undefine:n { #1/._boolean }     
+  \keys_undefine:n { #1/._cmd:w }      
+  \keys_undefine:n { #1/._default_tlp }  
+  \keys_undefine:n { #1/._forbidden_bool } 
+  \keys_undefine:n { #1/._required_bool }
+}
+\cs_new:NNn \keys_undefine:n 1 {
+  \cs_set_eq:cN { \c_keys_cs_prefix_tlp #1 } \c_undefined
 }
 %    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %\begin{macro}{\keys_def_cmd:cn}
 %\begin{macro}{\keys_def_cmd:cx}
@@ -1404,21 +1412,21 @@
 % Creating the |._cmd:w| keys happens here.
 %    \begin{macrocode}
 \cs_new:Npn \keys_def_cmd:cn #1#2 {
-  \keys_clear_properties:c {#1}
+  \keys_clear_properties:n {#1}
   \cs_set:cpn {\c_keys_cs_prefix_tlp #1/._cmd:w} ##1 \q_keys_stop {#2}
 }
 \cs_new:Npn \keys_def_cmd:cx #1#2 {
-  \keys_clear_properties:c {#1}
+  \keys_clear_properties:n {#1}
   \cs_set:cpx {\c_keys_cs_prefix_tlp #1/._cmd:w} ##1 \q_keys_stop {#2}
 }
 \cs_new:Npn \keys_def_cmd:cnn #1#2#3 {
-  \keys_clear_properties:c {#1}
+  \keys_clear_properties:n {#1}
   \cs_set:cpn {\c_keys_cs_prefix_tlp #1/._cmd:w} #2 \q_keys_stop {#3}
   \keys_toks_new:cn {#1/._args_toks} {#2}
   \keys_toks_new:cn {#1/._body_toks} {#3}
 }
 \cs_new:Npn \keys_def_cmd:cnx #1#2#3 {
-  \keys_clear_properties:c {#1}
+  \keys_clear_properties:n {#1}
   \cs_set:cpx {\c_keys_cs_prefix_tlp #1/._cmd:w} #2 \q_keys_stop {#3}
   \keys_toks_new:cn {#1/._args_toks} {#2}
   \keys_toks_new:cn {#1/._body_toks} {

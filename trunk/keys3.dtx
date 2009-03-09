@@ -531,9 +531,9 @@
 %   Private version of \cs{keys_manage:n} for internal use.
 % \end{function}
 %
-% \begin{function}{\keys_process:n}
+% \begin{function}{\keys_parse_list:n}
 %   \begin{syntax}
-%     "\keys_process:n" \Arg{keyval list}
+%     "\keys_parse_list:n" \Arg{keyval list}
 %   \end{syntax}
 %   Common macro used by all key management functions to initiate key
 %   evaluation. Can be used to recursively set keys (see for example
@@ -660,11 +660,11 @@
 % \end{function}
 %
 % \begin{function}{%
-%   \keys_process_elt:nn|
-%   \keys_process_elt:n|
+%   \keys_value_elt:nn|
+%   \keys_no_value_elt:n|
 %   \keys_process_elt:}
 %   \begin{syntax}
-%     "\keys_process_elt:nn" \Arg{key} \Arg{value}
+%     "\keys_value_elt:nn" \Arg{key} \Arg{value}
 %   \end{syntax}
 %   Receives <key> and <value> from \textsf{l3keyval} and carries out
 %   processing.  The |:n| variant is used to process keys with no
@@ -712,9 +712,9 @@
 %   Create a new toks <key> and store <tokens>.
 % \end{function}
 %
-% \begin{function}{\keys_toks_set:Nc}
+% \begin{function}{\keys_toks_set:Nn}
 %   \begin{syntax}
-%     "\keys_toks_set:Nc" <toks> \Arg{key}
+%     "\keys_toks_set:Nn" <toks> \Arg{key}
 %   \end{syntax}
 %   Transfers the contents of <key> into <toks>.  Used for manipulation
 %   of the toks containing the current value. The <value> of <key>
@@ -1053,7 +1053,7 @@
 }
 \cs_new:NNn \keys_manage_aux:nn 2 {
   \tlp_set_eq:NN \l_keys_default_path_tlp \c_keys_root_tlp
-  \keys_process:n {#2}
+  \keys_parse_list:n {#2}
   \tlp_set:Nn \l_keys_default_path_tlp {#1}
 }
 \exp_def_form:nnn { keys_manage_aux } { nn } { Vn }
@@ -1082,7 +1082,7 @@
 \cs_new:NNn \keys_manage_aux:nnn 3 {
   \tlp_set:Nn \l_keys_default_path_tlp {#2}
   \tlp_clear:N \l_keys_current_module_tlp
-  \keys_process:n {#3}
+  \keys_parse_list:n {#3}
   \tlp_set:Nn \l_keys_default_path_tlp {#1}
 }
 \cs_new:NNn \keys_manage_aux:Vnn 3 {
@@ -1124,7 +1124,7 @@
 % A helper for expansion.
 %    \begin{macrocode}
 \cs_new:NNn \keys_expand:n 1 {
-  \keys_process:n { \l_keys_current_path_tlp = #1 }
+  \keys_parse_list:n { \l_keys_current_path_tlp = #1 }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1147,12 +1147,41 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\keys_no_value_elt:n}
+%\begin{macro}{\keys_value_elt:nn}
+% The two functions passed to \textsf{l3keyval} to actually act on each
+% key found.
+%    \begin{macrocode}
+\cs_new:NNn \keys_no_value_elt:n 1 {
+  \bool_set_true:N \l_keys_no_value_bool
+  \keys_process_elt:nn {#1} { }
+}
+\cs_new:NNn \keys_value_elt:nn 2 {
+  \bool_set_false:N \l_keys_no_value_bool
+  \keys_process_elt:nn {#1} {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}{\keys_parse:n}
 % The macro used to actually process the key--value input is taken from
 % \textsf{l3keyval}.  There are two possible options, and so at this
 % stage the macro is simply reserved.
 %    \begin{macrocode}
 \cs_new:NNn \keys_parse:n 1 {\ERROR}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_parse_list:n}
+% All of the management macros call this common parser. First, the key
+% processing macros are defined, then the appropriate parser is called.
+%    \begin{macrocode}
+\cs_new:NNn \keys_parse_list:n 1 {
+  \let:NN \KV_key_value_elt:nn \keys_value_elt:nn
+  \let:NN \KV_key_no_value_elt:n \keys_no_value_elt:n
+  \keys_parse:n {#1}
+}
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1177,6 +1206,38 @@
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\keys_process_elt:nn}
+% The key processor starts by storing the given key name and value, and
+% adding a path to the former if necessary. There is then potentially a
+% need to fill in a default value before checking for required or 
+% forbidden values.
+%    \begin{macrocode}
+\cs_new:NNn \keys_process_elt:nn 2 {
+  \tlp_set:Nx \l_keys_current_key_full_tlp {#1}
+  \toks_set:Nn \l_keys_current_value_toks {#2}
+  \keys_path_add:N \l_keys_current_key_full_tlp
+  \bool_if:NT \l_keys_no_value_bool {
+    \keys_if_really_exist:nT 
+      { \l_keys_current_key_full_tlp /._default_tlp } {
+      \keys_toks_set:Nn \l_keys_current_value_toks
+        { \l_keys_current_key_full_tlp /._default_tlp }
+    }
+  }
+  \keys_if_really_exist:nTF
+    {\l_keys_current_key_full_tlp /._required_bool} {
+    \keys_err_use:cw {value_required} \l_keys_current_key_full_tlp
+  }{
+    \keys_if_really_exist:nTF
+      {\l_keys_current_key_full_tlp /._forbidden_bool} {
+      \keys_err_use:cw {value_forbidden} \l_keys_current_key_full_tlp
+    }{
+      \keys_process_elt:
+    }
+  }
+}
+%    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\keys_put:nnn}
@@ -1243,6 +1304,15 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\keys_toks_set:Nn}
+% Sets a toks to a key.
+%    \begin{macrocode}
+\cs_new:NNn \keys_toks_set:Nn 2 {
+  \exp_args:NNv \toks_set:Nn #1 { \c_keys_cs_prefix_tlp #2 }
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\keys_undefine:n}
 % To remove a key.
 %    \begin{macrocode}
@@ -1263,62 +1333,6 @@
 %
 %------
 %
-%\begin{macro}{\keys_process:n}
-% All of the management macros call this common parser. First, the key
-% processing macros are defined, then the appropriate parser is called.
-%    \begin{macrocode}
-\cs_new:Npn \keys_process:n #1{
-  \let:NN \KV_key_value_elt:nn \keys_process_elt:nn
-  \let:NN \KV_key_no_value_elt:n \keys_process_elt:n
-  \keys_parse:n {#1}
-}
-%    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\keys_process_elt:n}
-%\begin{macro}{\keys_process_elt:nn}
-% 
-%    \begin{macrocode}
-\cs_new:NNn \keys_process_elt:n 1 {
-  \bool_set_true:N \l_keys_no_value_bool
-  \keys_process_elt_tmp:nn {#1} { }
-}
-\cs_new:NNn \keys_process_elt:nn 2 {
-  \bool_set_false:N \l_keys_no_value_bool
-  \keys_process_elt_tmp:nn {#1} {#2}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_process_elt:nn}
-%\begin{macro}{\keys_process_elt:}
-% This is the engine room of the entire package. Each key is examined
-% here, and after possibly adding a path a number of properties are
-% checked for. First the package checks dedicated keys, then generic
-% handlers.
-%    \begin{macrocode}
-\cs_new:Npn \keys_process_elt_tmp:nn #1#2 {
-  \tlp_set:Nx \l_keys_current_key_full_tlp {#1}
-  \keys_path_add:N \l_keys_current_key_full_tlp
-  \toks_set:Nn \l_keys_current_value_toks {#2}
-  \bool_if:NT \l_keys_no_value_bool {
-    \keys_if_really_exist:nT {\l_keys_current_key_full_tlp /._default_tlp} {
-      \keys_toks_set:Nc \l_keys_current_value_toks
-        {\l_keys_current_key_full_tlp /._default_tlp}
-    }
-  }
-  \keys_if_really_exist:nTF
-    {\l_keys_current_key_full_tlp /._required_bool} {
-    \keys_err_use:cw {value_required} \l_keys_current_key_full_tlp
-  }{
-    \keys_if_really_exist:nTF
-      {\l_keys_current_key_full_tlp /._forbidden_bool} {
-      \keys_err_use:cw {value_forbidden} \l_keys_current_key_full_tlp
-    }{
-      \keys_process_elt:
-    }
-  }
-}
-%    \end{macrocode}
 % The key--value combination is at least valid for processing. The
 % first real test is to look for a code handling function for the key.
 % To keep things readable, this is a separate function.
@@ -1375,10 +1389,6 @@
   }
 }
 %    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%
-%\subsubsection{Internal functions}
 %
 %\begin{macro}{\keys_boolean:nN}
 %\begin{macro}{\keys_boolean:nc}
@@ -1386,7 +1396,7 @@
 %    \begin{macrocode}
 \cs_new:Npn \keys_boolean:nN #1#2 {
   \cs_if_free:NT #1 {\bool_new:N #2}
-  \keys_process:n {
+  \keys_parse_list:n {
     \l_keys_current_path_tlp /.code:n = {
       \cs_if_really_exist:cTF {bool_set_##1:c} {
         \use:c {bool_#1_##1:N} #2
@@ -1404,7 +1414,7 @@
   \cs_if_free:cT {l_ \l_keys_tmpa_tlp #2_bool} {
     \bool_new:c {l_ \l_keys_tmpa_tlp #2_bool}
   }
-  \keys_process:n {
+  \keys_parse_list:n {
     \l_keys_current_path_tlp /.code:x = {
       \exp_not:N \cs_if_really_exist:cTF {bool_set_##1:N} {
         \exp_not:N \use:c {bool_#1_##1:N}
@@ -1432,7 +1442,7 @@
 %    \begin{macrocode}
 \cs_new:Npn \keys_choice_create:n #1 {
   \int_incr:N \l_keys_current_choice_int
-  \keys_process:n {
+  \keys_parse_list:n {
     \l_keys_choice_path_tlp /#1/.code:x = {
       \exp_not:n {\int_set:Nn \l_keys_current_choice_int}
         {\int_use:N \l_keys_current_choice_int}
@@ -1535,7 +1545,7 @@
 % Generic storage functions.
 %    \begin{macrocode}
 \cs_new:Npn \keys_store:NN #1#2 {
-  \keys_process:n {
+  \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:n = {
       #1 #2 {##1}
     }
@@ -1543,7 +1553,7 @@
 }
 \cs_new:Npn \keys_store:Nc #1#2 {
   \keys_module_name:
-  \keys_process:n {
+  \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:x = {
       \exp_not:N #1 {l_ \l_keys_tmpa_tlp #2_tlp} {##1}
     }
@@ -1551,17 +1561,6 @@
 }
 %    \end{macrocode}
 %\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_toks_set:Nc}
-% Sets a toks to a key: not really intended for others to use. The
-% contents of the key should be expandable, or protected with
-% \cs{exp_not:E} or \cs{exp_not:n} otherwise (see for example the
-% definition of |.value forbidden:|.
-%    \begin{macrocode}
-\cs_new:Npn \keys_toks_set:Nc #1#2 {
-  \toks_set:Nx #1 {\keys_use:n {#2}}
-}
-%    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\keys_use_cmd:cn}
 %\begin{macro}{\keys_use_cmd:c}
@@ -1590,7 +1589,7 @@
     \bool_if:NT \l_keys_no_value_bool {
       \keys_if_really_exist:nT
         {\l_keys_current_path_tlp /._default_tlp} {
-        \keys_toks_set:Nc \l_keys_current_value_toks
+        \keys_toks_set:Nn \l_keys_current_value_toks
           {\l_keys_current_path_tlp /._default_tlp}
       }
     }
@@ -1773,25 +1772,25 @@
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.apply~keys:n/.code:n = {
     \keys_manage_internal:n {
-      \l_keys_current_path_tlp /.code:n = {\keys_process:n {#1}}
+      \l_keys_current_path_tlp /.code:n = {\keys_parse_list:n {#1}}
     }
   },
   \c_keys_properties_path_tlp /.apply~keys:x/.code:n = {
     \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:x = {
-        \exp_not:N \keys_process:n {#1}
+        \exp_not:N \keys_parse_list:n {#1}
       }
     }
   },
   \c_keys_properties_path_tlp /.apply~keys:nn/.code:nn = {#1#2} {
     \keys_manage_internal:n {
-      \l_keys_current_path_tlp /.code:nn = {#1} {\keys_process:n {#2}}
+      \l_keys_current_path_tlp /.code:nn = {#1} {\keys_parse_list:n {#2}}
     }
   },
   \c_keys_properties_path_tlp /.apply~keys:nx/.code:nn = {#1#2} {
     \keys_manage_internal:n {
       \l_keys_current_path_tlp /.code:x =
-        {#1} {\exp_not:N \keys_process:n {#2}}
+        {#1} {\exp_not:N \keys_parse_list:n {#2}}
     }
   },
 %    \end{macrocode}
@@ -1800,13 +1799,13 @@
   \c_keys_properties_path_tlp /.put~keys~left:n/.code:n = {
     \keys_manage_internal:n {
       \l_keys_current_path_tlp /.put~code~left:n =
-        {\keys_process:n {#1}}
+        {\keys_parse_list:n {#1}}
     }
   },
   \c_keys_properties_path_tlp /.put~keys~right:n/.code:n = {
     \keys_manage_internal:n {
       \l_keys_current_path_tlp /.put~code~right:n =
-        {\keys_process:n {#1}}
+        {\keys_parse_list:n {#1}}
     }
   },
 %    \end{macrocode}
@@ -1904,7 +1903,7 @@
 % Functions should not be stored in tlps.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.let~to~func:N/.code:n = {
-    \keys_process:n {
+    \keys_parse_list:n {
       \c_keys_properties_path_tlp /.code:n = {
         \let:NN #1 ##1
       }
@@ -1912,7 +1911,7 @@
   },
   \c_keys_properties_path_tlp /.let~to~func:c/.code:n = {
     \keys_module_name:
-    \keys_process:n {
+    \keys_parse_list:n {
       \c_keys_properties_path_tlp /.code:x = {
         \exp_not:N \let:cN {\l_keys_tmpa_tlp #1:w} ##1
       }
@@ -1945,7 +1944,7 @@
       \tlp_set_eq:NN \l_keys_tmpa_tlp \l_keys_current_path_tlp
       \tlp_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp
       \keys_separate_path:
-      \keys_process:n {
+      \keys_parse_list:n {
         \l_keys_current_path_tlp /#1/.code:x = {
           \exp_not:N \tlist_if_eq:nnTF {true} {##1} {
             \exp_not:N \bool_set_false:N \keys_use:n
@@ -1978,7 +1977,7 @@
       .code:n = {
         \tlp_set:Nn \l_keys_current_choice_tlp {##1}
         \int_zero:N \l_keys_current_choice_int
-        \exp_args:No \keys_process:n  {\l_keys_current_key_full_tlp /##1}
+        \exp_args:No \keys_parse_list:n {\l_keys_current_key_full_tlp /##1}
       },
       unknown/.code:n = {
         \keys_err_use:cw {unknown_choice} \l_keys_current_path_tlp

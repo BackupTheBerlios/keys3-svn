@@ -641,19 +641,6 @@
 %   Let <key1> to <key2>.
 % \end{function}
 %
-% \begin{function}{%
-%   \keys_manage_aux:nn|
-%   \keys_manage_aux:nnn}
-%   \begin{syntax}
-%     "\keys_manage_aux:nn" \Arg{current path} \Arg{keyval list}
-%     "\keys_manage_aux:nnn"
-%     ~~~~\Arg{current path} \Arg{new path} \Arg{keyval list}
-%   \end{syntax}
-%   Auxiliary function for \cs{keys_manage:n} and \cs{keys_manage:nn},
-%   respectively, used to preserve path information through nested
-%   calls.
-% \end{function}
-%
 % \begin{function}{\keys_module_name:}
 %   \begin{syntax}
 %     "\keys_module_name:"
@@ -1047,6 +1034,72 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\subsection{Functions}
+%
+%\begin{macro}{\keys_manage:n}
+%\begin{macro}{\keys_manage_quick:n}
+%\begin{macro}{\keys_manage_internal:n}
+%\begin{macro}[aux]{\keys_manage_aux:nn}
+%\begin{macro}[aux]{\keys_manage_aux:Vn}
+% The main key management macros both call the auxiliary function after
+% setting up the parser.  The expansion trick means a literal path is
+% sent to the later function, and so the default path can be redefined.
+%    \begin{macrocode}
+\cs_new:NNn \keys_manage:n 1 {
+  \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
+  \tlp_clear:N \l_keys_current_module_tlp
+  \keys_manage_internal:n {#1}
+}
+\cs_new:NNn \keys_manage_quick:n 1 {
+  \let:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
+  \tlp_clear:N \l_keys_current_module_tlp
+  \keys_manage_internal:n {#1}
+}
+\cs_new:NNn \keys_manage_internal:n 1 {
+  \keys_manage_aux:Vn \l_keys_default_path_tlp {#1}
+}
+\cs_new:NNn \keys_manage_aux:nn 2 {
+  \tlp_set_eq:NN \l_keys_default_path_tlp \c_keys_root_tlp
+  \keys_process:n {#2}
+  \tlp_set:Nn \l_keys_default_path_tlp {#1}
+}
+\exp_def_form:nnn { keys_manage_aux } { nn } { Vn }
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_manage:nn}
+%\begin{macro}{\keys_manage_quick:nn}
+%\begin{macro}[aux]{\keys_manage_aux:nnn}
+%\begin{macro}[aux]{\keys_manage_aux:Vnn}
+% This version uses the same tricks but includes the path as a second
+% argument.  When setting lots of keys separately, this is a little
+% faster than the key-based method.
+%    \begin{macrocode}
+\cs_new:NNn \keys_manage:nn 2 {
+  \let:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
+  \keys_manage_aux:Vnn \l_keys_default_path_tlp {#1} {#2}
+}
+\cs_new:NNn \keys_manage_quick:nn 2 {
+  \let:NN \keys_parse:n \KV_parse_space_no_removal_no_sanitize:n
+  \keys_manage_aux:Vnn \l_keys_default_path_tlp {#1} {#2}
+}
+\cs_new:NNn \keys_manage_aux:nnn 3 {
+  \tlp_set:Nn \l_keys_default_path_tlp {#2}
+  \tlp_clear:N \l_keys_current_module_tlp
+  \keys_process:n {#3}
+  \tlp_set:Nn \l_keys_default_path_tlp {#1}
+}
+\exp_def_form:nnn { keys_manage_aux } { nnn } { Vnn }
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+
+%
 %\begin{macro}{\keys_if_really_exist:cTF}
 %\begin{macro}{\keys_if_really_exist:cT}
 %\begin{macro}{\keys_if_really_exist:cF}
@@ -1059,10 +1112,6 @@
 %\end{macro}
 %\end{macro}
 %\end{macro}
-%
-% A number of new functions are needed that simple add the key root to
-% the name provided and then use this as a csname for the underlying
-% function.
 %
 %\begin{macro}{\keys_use:c}
 %    \begin{macrocode}
@@ -1090,8 +1139,6 @@
 %\end{macro}
 %\end{macro}
 %
-%\subsubsection{The key parsing system}
-%
 %\begin{macro}{\keys_parse:n}
 % The macro used to actually process the key--value input is taken from
 % \textsf{l3keyval}.  There are two possible options, and so at this
@@ -1099,64 +1146,6 @@
 %    \begin{macrocode}
 \cs_new:Npn \keys_parse:n #1 {\ERROR}
 %    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\keys_manage:n}
-%\begin{macro}{\keys_manage_quick:n}
-%\begin{macro}{\keys_manage_internal:n}
-%\begin{macro}{\keys_manage_aux:nn}
-% The main key management macros both call the auxiliary function after
-% setting up the parser.  The expansion trick means a literal path is
-% sent to the later function, and so the default path can be redefined.
-%    \begin{macrocode}
-\cs_new:Npn \keys_manage:n #1 {
-  \let:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
-  \tlp_clear:N \l_keys_current_module_tlp
-  \exp_args:No \keys_manage_aux:nn {\l_keys_default_path_tlp} {#1}
-}
-\cs_new:Npn \keys_manage_quick:n #1 {
-  \let:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
-  \tlp_clear:N \l_keys_current_module_tlp
-  \exp_args:No \keys_manage_aux:nn {\l_keys_default_path_tlp} {#1}
-}
-\cs_new:Npn \keys_manage_internal:n #1 {
-  \exp_args:No \keys_manage_aux:nn {\l_keys_default_path_tlp} {#1}
-}
-\cs_new:Npn \keys_manage_aux:nn #1#2 {
-  \tlp_set:Nn \l_keys_default_path_tlp {\c_keys_root_tlp}
-  \keys_process:n {#2}
-  \tlp_set:Nn \l_keys_default_path_tlp {#1}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_manage:nn}
-%\begin{macro}{\keys_manage_quick:nn}
-%\begin{macro}{\keys_manage_aux:nnn}
-% This version uses the same tricks but includes the path as a second
-% argument.  When setting lots of keys separately, this is a little
-% faster than the key-based method.
-%    \begin{macrocode}
-\cs_new:Npn \keys_manage:nn #1#2 {
-  \let:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
-  \exp_args:No \keys_manage_aux:nnn {\l_keys_default_path_tlp} {#1}
-    {#2}
-}
-\cs_new:Npn \keys_manage_quick:nn #1#2 {
-  \let:NN \keys_parse:n \KV_parse_space_no_removal_no_sanitize:n
-  \exp_args:No \keys_manage_aux:nnn {\l_keys_default_path_tlp} {#1}
-    {#2}
-}
-\cs_new:Npn \keys_manage_aux:nnn #1#2#3 {
-  \tlp_set:Nn \l_keys_default_path_tlp {#2}
-  \tlp_clear:N \l_keys_current_module_tlp
-  \keys_process:n {#3}
-  \tlp_set:Nn \l_keys_default_path_tlp {#1}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %\end{macro}
 %\begin{macro}{\keys_process:n}
 % All of the management macros call this common parser. First, the key

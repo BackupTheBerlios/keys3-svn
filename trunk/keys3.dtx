@@ -1120,6 +1120,21 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\keys_default_add:}
+% Copies the default value to the current one if needed.
+%    \begin{macrocode}
+\cs_new:NNn \keys_default_add: 0 {
+  \bool_if:NT \l_keys_no_value_bool {
+    \keys_if_really_exist:nT 
+      { \l_keys_current_key_full_tlp /._default_tlp } {
+      \keys_toks_set:Nn \l_keys_current_value_toks
+        { \l_keys_current_key_full_tlp /._default_tlp }
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\keys_expand:n}
 % A helper for expansion.
 %    \begin{macrocode}
@@ -1143,6 +1158,17 @@
 %    \begin{macrocode}
 \def_long_test_function_new:npn { keys_if_really_exist:n } #1 {
   \if_cs_exist:w \c_keys_cs_prefix_tlp #1 \cs_end:
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}[TF]{\keys_if_value:n}
+% Used for required and forbidden values.
+%    \begin{macrocode}
+\def_long_test_function_new:npn { keys_if_value:n } #1 {
+  \if_cs_exist:w 
+    \c_keys_cs_prefix_tlp \l_keys_current_key_full_tlp /._ #1 _bool 
+  \cs_end:
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1218,20 +1244,16 @@
   \tlp_set:Nx \l_keys_current_key_full_tlp {#1}
   \toks_set:Nn \l_keys_current_value_toks {#2}
   \keys_path_add:N \l_keys_current_key_full_tlp
-  \bool_if:NT \l_keys_no_value_bool {
-    \keys_if_really_exist:nT 
-      { \l_keys_current_key_full_tlp /._default_tlp } {
-      \keys_toks_set:Nn \l_keys_current_value_toks
-        { \l_keys_current_key_full_tlp /._default_tlp }
+  \keys_default_add:
+  \keys_if_value:nTF { required } {
+    \bool_if:NT \l_keys_no_value_bool {
+      \keys_err_use:n { value_required }
     }
-  }
-  \keys_if_really_exist:nTF
-    { \l_keys_current_key_full_tlp /._required_bool } {
-    \keys_err_use:cw { value_required } \l_keys_current_key_full_tlp
   }{
-    \keys_if_really_exist:nTF
-      { \l_keys_current_key_full_tlp /._forbidden_bool } {
-      \keys_err_use:cw { value_forbidden } \l_keys_current_key_full_tlp
+    \keys_if_value:nTF { forbidden } {
+      \bool_if:NF \l_keys_no_value_bool {
+        \keys_err_use:n { value_forbidden }
+      }
     }{
       \keys_process_elt:
     }
@@ -1258,7 +1280,7 @@
   \exp_after:NN \keys_separate_path:w \l_keys_current_key_full_tlp 
     / \q_stop
 }
-\cs_new:Npn \keys_separate_path:w /#1/#2 \q_stop {
+\cs_new:Npn \keys_separate_path:w / #1 / #2 \q_stop {
   \tlist_if_empty:nTF {#2} {
     \tlp_set:Nn \l_keys_current_key_name_tlp {#1}
   }{
@@ -1677,12 +1699,18 @@
 %\end{macro}
 %\end{macro}
 %\begin{macro}{\keys_err_use:cw}
+%%\begin{macro}{\keys_err_use:n}
 % A second utility to use errors.
 %    \begin{macrocode}
 \cs_new:Npn \keys_err_use:cw #1 {
   \exp_args:NNc \err_interrupt:NNw \c_keys_err_tlp {l_keys_err_#1_tlp}
 }
+\cs_new:NNn \keys_err_use:n 1 {
+  \exp_args:NNc \err_interrupt:NNw \c_keys_err_tlp {l_keys_err_#1_tlp}
+     \l_keys_current_key_full_tlp
+}
 %    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %
 %\subsubsection{Property definitions}

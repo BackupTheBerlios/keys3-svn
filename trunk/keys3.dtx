@@ -513,12 +513,9 @@
 % creating complex systems. A small number of non-specific macros are
 % also created.
 %
-% \begin{function}{%
-%   \keys_if_really_exist:cTF|
-%   \keys_if_really_exist:cT|
-%   \keys_if_really_exist:cF}
+% \begin{function}{\keys_if_really_exist:n / (TF)}
 %   \begin{syntax}
-%     "\keys_if_really_exist:cTF"
+%     "\keys_if_really_exist:nTF"
 %     ~~~~\Arg{key} \Arg{true code} \Arg{false code}
 %   \end{syntax}
 %   Tests if <key> is known without adding anything to the hash table.
@@ -544,20 +541,18 @@
 % \end{function}
 %
 % \begin{function}{%
-%   \keys_def:cn|
-%   \keys_def:co|
-%   \keys_def:cx}
+%   \keys_set:nn|
+%   \keys_set:nx}
 %   \begin{syntax}
-%     "\keys_def:cn" \Arg{key} \Arg{value}
+%     "\keys_set:nn" \Arg{key} \Arg{value}
 %   \end{syntax}
 %   Stores <value> in <key>: <value> should be a tlp-compatible
 %   argument.
 % \end{function}
 %
-% \begin{function}{%
-%   \keys_use:c}
+% \begin{function}{\keys_use:n}
 %   \begin{syntax}
-%     "\keys_use:c" \Arg{key}
+%     "\keys_use:n" \Arg{key}
 %   \end{syntax}
 %   Use the code stored in <key>.
 % \end{function}
@@ -1092,51 +1087,44 @@
   \keys_process:n {#3}
   \tlp_set:Nn \l_keys_default_path_tlp {#1}
 }
-\exp_def_form:nnn { keys_manage_aux } { nnn } { Vnn }
+\cs_new:NNn \keys_manage_aux:Vnn 3 {
+  \exp_args:NV \keys_manage_aux:nnn #1 {#2} {#3}
+}
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %\end{macro}
 %\end{macro}
-
 %
-%\begin{macro}{\keys_if_really_exist:cTF}
-%\begin{macro}{\keys_if_really_exist:cT}
-%\begin{macro}{\keys_if_really_exist:cF}
+%\begin{macro}[TF]{\keys_if_really_exist:n}
 % Check if a key exists without adding to the hash table.
 %    \begin{macrocode}
-\def_long_test_function_new:npn {keys_if_really_exist:c} #1 {
+\def_long_test_function_new:npn { keys_if_really_exist:n } #1 {
   \if_cs_exist:w \c_keys_cs_prefix_tlp #1 \cs_end:
 }
 %    \end{macrocode}
 %\end{macro}
+%
+%\begin{macro}{\keys_set:nn}
+%\begin{macro}{\keys_set:nx}
+% Direct storage of data in keys.
+%    \begin{macrocode}
+\cs_new:NNn \keys_set:nn 2 {
+  \tlp_set:cn { \c_keys_cs_prefix_tlp #1 } {#2}
+}
+\cs_new:NNn \keys_set:nx 2 {
+  \tlp_set:cx { \c_keys_cs_prefix_tlp #1 } {#2}
+}
+%    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\keys_use:c}
+%\begin{macro}{\keys_use:n}
 %    \begin{macrocode}
-\cs_new:Npn \keys_use:c #1 {
-  \use:c {\c_keys_cs_prefix_tlp #1}
+\cs_new:NNn \keys_use:n 1 {
+  \use:c { \c_keys_cs_prefix_tlp #1 }
 }
 %    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\keys_def:cn}
-%\begin{macro}{\keys_def:co}
-%\begin{macro}{\keys_def:cx}
-% Direct storage of data in keys.
-%    \begin{macrocode}
-\cs_new:Npn \keys_def:cn #1#2 {
-  \cs_set:cpn {\c_keys_cs_prefix_tlp #1} {#2}
-}
-\cs_new:Npn \keys_def:co #1#2 {
-  \exp_args:Nno \keys_def:cn {#1} {#2}
-}
-\cs_new:Npn \keys_def:cx #1#2 {
-  \cs_set:cpx {\c_keys_cs_prefix_tlp #1} {#2}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\keys_parse:n}
@@ -1185,16 +1173,16 @@
   \exp_after:NN \keys_path_add:w \l_keys_current_key_full_tlp \q_stop
   \toks_set:Nn \l_keys_current_value_toks {#2}
   \bool_if:NT \l_keys_no_value_bool {
-    \keys_if_really_exist:cT {\l_keys_current_key_full_tlp /._default_tlp} {
+    \keys_if_really_exist:nT {\l_keys_current_key_full_tlp /._default_tlp} {
       \keys_toks_set:Nc \l_keys_current_value_toks
         {\l_keys_current_key_full_tlp /._default_tlp}
     }
   }
-  \keys_if_really_exist:cTF
+  \keys_if_really_exist:nTF
     {\l_keys_current_key_full_tlp /._required_bool} {
     \keys_err_use:cw {value_required} \l_keys_current_key_full_tlp
   }{
-    \keys_if_really_exist:cTF
+    \keys_if_really_exist:nTF
       {\l_keys_current_key_full_tlp /._forbidden_bool} {
       \keys_err_use:cw {value_forbidden} \l_keys_current_key_full_tlp
     }{
@@ -1216,15 +1204,15 @@
 % is made to see if any value is available. If so, the key value is
 % used; in the other case, the current value is saved to the key.
 %    \begin{macrocode}
-    \keys_if_really_exist:cTF {\l_keys_current_key_full_tlp}{
+    \keys_if_really_exist:nTF {\l_keys_current_key_full_tlp}{
       \toks_if_empty:NTF \l_keys_current_value_toks {
-        \keys_use:c {\l_keys_current_key_full_tlp}
+        \keys_use:n {\l_keys_current_key_full_tlp}
       }{
         \bool_if:NTF \l_keys_no_value_bool {
-          \keys_use:c {\l_keys_current_key_full_tlp}
+          \keys_use:n {\l_keys_current_key_full_tlp}
         }{
-          \keys_def:co {\l_keys_current_key_full_tlp}
-            {\toks_use:N \l_keys_current_value_toks}
+          \keys_set:nx { \l_keys_current_key_full_tlp }
+            { \toks_use:N \l_keys_current_value_toks }
         }
       }
     }{
@@ -1307,7 +1295,7 @@
     },
     \l_keys_current_path_tlp /.default:n = true
   }
-  \keys_def:cn {\l_keys_current_path_tlp /._boolean} {\exp_not:N #2}
+  \keys_set:nn {\l_keys_current_path_tlp /._boolean} {\exp_not:N #2}
 }
 \cs_new:Npn \keys_boolean:nc #1#2 {
   \keys_module_name:
@@ -1329,7 +1317,7 @@
     },
     \l_keys_current_path_tlp /.default:n = true
   }
-  \keys_def:cx {\l_keys_current_path_tlp /._boolean} {
+  \keys_set:nx {\l_keys_current_path_tlp /._boolean} {
     \exp_not:N \exp_not:N \exp_not:d
       {\use:c {l_ \l_keys_tmpa_tlp #2_bool}}
   }
@@ -1461,8 +1449,8 @@
 % the body in |._body_toks|.
 %    \begin{macrocode}
 \cs_new:Npn \keys_put_code:nc #1#2 {
-  \keys_if_really_exist:cTF {\l_keys_current_path_tlp /._cmd:w}{
-    \keys_if_really_exist:cTF
+  \keys_if_really_exist:nTF {\l_keys_current_path_tlp /._cmd:w}{
+    \keys_if_really_exist:nTF
       {\l_keys_current_path_tlp /._args_toks}{
       \toks_set_eq:Nc \l_keys_args_toks
         {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._args_toks}
@@ -1548,7 +1536,7 @@
 % definition of |.value forbidden:|.
 %    \begin{macrocode}
 \cs_new:Npn \keys_toks_set:Nc #1#2 {
-  \toks_set:Nx #1 {\keys_use:c {#2}}
+  \toks_set:Nx #1 {\keys_use:n {#2}}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1563,9 +1551,9 @@
 }
 \cs_new:Npn \keys_use_cmd:cn #1#2 {
   \bool_if:NTF \l_keys_no_value_bool {
-    \keys_use:c {#1/._cmd:w} \q_keys_stop
+    \keys_use:n {#1/._cmd:w} \q_keys_stop
   }{
-    \keys_use:c {#1/._cmd:w} #2 \q_keys_stop
+    \keys_use:n {#1/._cmd:w} #2 \q_keys_stop
   }
 }
 %    \end{macrocode}
@@ -1575,9 +1563,9 @@
 % Trying something without errors.
 %    \begin{macrocode}
 \cs_new:Npn \keys_try: {
-  \keys_if_really_exist:cTF {\l_keys_current_path_tlp /._cmd:w} {
+  \keys_if_really_exist:nTF {\l_keys_current_path_tlp /._cmd:w} {
     \bool_if:NT \l_keys_no_value_bool {
-      \keys_if_really_exist:cT
+      \keys_if_really_exist:nT
         {\l_keys_current_path_tlp /._default_tlp} {
         \keys_toks_set:Nc \l_keys_current_value_toks
           {\l_keys_current_path_tlp /._default_tlp}
@@ -1587,9 +1575,9 @@
     \keys_use_cmd:c {\l_keys_current_path_tlp}
     \bool_set_true:N \l_keys_success_bool
   }{
-    \keys_if_really_exist:cTF {\l_keys_current_path_tlp} {
+    \keys_if_really_exist:nTF {\l_keys_current_path_tlp} {
       \bool_if:NTF \l_keys_no_value_bool {
-        \keys_use:c {\l_keys_current_path_tlp}
+        \keys_use:n {\l_keys_current_path_tlp}
       }{
         \tlp_set:co {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
           {\toks_use:N \l_keys_current_value_toks}
@@ -1722,10 +1710,10 @@
 % Initial and default values can now be created.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.initial:n/.code:n = {
-    \keys_def:cn {\l_keys_current_path_tlp} {#1}
+    \keys_set:nn {\l_keys_current_path_tlp} {#1}
   },
   \c_keys_properties_path_tlp /.default:n/.code:n = {
-    \keys_def:cn {\l_keys_current_path_tlp /._default_tlp} {#1}
+    \keys_set:nn {\l_keys_current_path_tlp /._default_tlp} {#1}
   },
 %    \end{macrocode}
 % Values are either required or forbidden, with the appropriate error
@@ -1930,18 +1918,18 @@
 % reversed.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.inverse~key:n/.code:n = {
-    \keys_if_really_exist:cTF {\l_keys_current_path_tlp /._boolean} {
+    \keys_if_really_exist:nTF {\l_keys_current_path_tlp /._boolean} {
       \tlp_set_eq:NN \l_keys_tmpa_tlp \l_keys_current_path_tlp
       \tlp_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp
       \keys_separate:
       \keys_process:n {
         \l_keys_current_path_tlp /#1/.code:x = {
           \exp_not:N \tlist_if_eq:nnTF {true} {##1} {
-            \exp_not:N \bool_set_false:N \keys_use:c
+            \exp_not:N \bool_set_false:N \keys_use:n
               {\l_keys_tmpa_tlp /._boolean}
           }{
             \exp_not:N \tlist_if_eq:nnTF {false} {##1} {
-              \exp_not:N \bool_set_true:N \keys_use:c
+              \exp_not:N \bool_set_true:N \keys_use:n
                 {\l_keys_tmpa_tlp /._boolean}
             }{
               \exp_not:n {
@@ -1991,7 +1979,7 @@
 % Different names for the same thing.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.equivalent~key:n/.code:n = {
-    \keys_if_really_exist:cT {\l_keys_current_path_tlp /._cmd:w} {
+    \keys_if_really_exist:nT {\l_keys_current_path_tlp /._cmd:w} {
       \tlp_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp
       \keys_separate:
       \keys_let:cc {\l_keys_current_path_tlp /#1/._cmd:w}

@@ -514,18 +514,6 @@
 % also created.
 %
 % \begin{function}{%
-%   \quark_if_value_required:NTF|
-%   \quark_if_value_required:NT|
-%   \quark_if_value_required:NF}
-%   \begin{syntax}
-%     "\quark_if_value_required:NTF"
-%     ~~~~<token> \Arg{true code} \Arg{false code}
-%   \end{syntax}
-%   Tests if <token> is equal to \cs{q_value_required}. The only
-%   functions which do not start with \cs{keys}.
-% \end{function}
-%
-% \begin{function}{%
 %   \keys_if_really_exist:cTF|
 %   \keys_if_really_exist:cT|
 %   \keys_if_really_exist:cF}
@@ -760,9 +748,7 @@
 %     "\keys_use_cmd:cn" \Arg{key} \Arg{argument}
 %   \end{syntax}
 %   Uses the internal |._cmd:w| key needed to execute the function of
-%   <key> on <argument>. The |.c| variant uses the current value,
-%   replacing it with an empty argument if it is equal to
-%   \cs{q_no_value}.
+%   <key> on <argument>.
 % \end{function}
 %
 % Some functions are related to error-message creation.
@@ -839,16 +825,8 @@
 %   Marker information for choices.
 % \end{variable}
 %
-% \begin{variable}{%
-%   \q_keys_stop|
-%   \q_value_required}
-%   Two new quarks are required.
-%   \begin{texnote}
-%     The \cs{q_value_required} quark is available generally to
-%     indicate a value is needed for something, and has not been given.
-%      On the other hand, \cs{q_keys_stop} is private to this package:
-%     do not use it elsewhere.
-%   \end{texnote}
+% \begin{variable}{\q_keys_stop}
+%   A private quark.
 % \end{variable}
 %
 % \begin{variable}{%
@@ -1033,6 +1011,12 @@
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
+%\begin{macro}{\l_keys_no_value_bool}
+% To indicate that no value has been given.
+%    \begin{macrocode}
+\bool_new:N \l_keys_no_value_bool
+%    \end{macrocode}
+%\end{macro}
 %\begin{macro}{\q_keys_stop}
 %\begin{macro}{\q_value_required}
 % Two new quarks are needed.
@@ -1205,14 +1189,19 @@
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\keys_process_elt:n}
-% To keep things simple, the processor here simply uses the quark
-% \cs{q_no_value} in place of the value and calls the standard
-% function.
+%\begin{macro}{\keys_process_elt:nn}
+% 
 %    \begin{macrocode}
-\cs_new:Npn \keys_process_elt:n #1 {
-  \keys_process_elt:nn {#1} {\q_no_value}
+\cs_new:NNn \keys_process_elt:n 1 {
+  \bool_set_true:N \l_keys_no_value_bool
+  \keys_process_elt_tmp:nn {#1} { }
+}
+\cs_new:NNn \keys_process_elt:nn 2 {
+  \bool_set_false:N \l_keys_no_value_bool
+  \keys_process_elt_tmp:nn {#1} {#2}
 }
 %    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %\begin{macro}{\keys_process_elt:nn}
 %\begin{macro}{\keys_process_elt:}
@@ -1221,33 +1210,18 @@
 % checked for. First the package checks dedicated keys, then generic
 % handlers.
 %    \begin{macrocode}
-\tlp_new:Nn \c_keys_no_value_tlp {\c_keys_really_no_value_tlp}
-\tlp_new:N \c_keys_really_no_value_tlp
-\cs_new:Npn \keys_process_elt:nn #1#2 {
-%    \end{macrocode}
-% Using |:Nx| here ensures that any nesting does not result in the tlp
-% containing non-text values.
-%    \begin{macrocode}
+\cs_new:Npn \keys_process_elt_tmp:nn #1#2 {
   \tlp_set:Nx \l_keys_current_key_full_tlp {#1}
   \exp_after:NN \keys_path_add:w \l_keys_current_key_full_tlp \q_stop
   \toks_set:Nn \l_keys_current_value_toks {#2}
-%    \end{macrocode}
-% For the quark test, the ``funny'' tlp needs to be set.
-%    \begin{macrocode}
-  \tlp_set:Nx \l_keys_current_value_tlp
-    {\toks_use:N \l_keys_current_value_toks}
-  \quark_if_no_value:NT \l_keys_current_value_tlp {
+  \bool_if:NT \l_keys_no_value_bool {
     \keys_if_really_exist:cT {\l_keys_current_key_full_tlp /._default_tlp} {
       \keys_toks_set:Nc \l_keys_current_value_toks
         {\l_keys_current_key_full_tlp /._default_tlp}
-%    \end{macrocode}
-% There is a second test to come, so the odd tlp needs to be
-% regenerated.
-%    \begin{macrocode}
-      \tlp_set:Nx \l_keys_current_value_tlp
-        {\toks_use:N \l_keys_current_value_toks}
     }
   }
+  \tlp_set:Nx \l_keys_current_value_tlp
+    {\toks_use:N \l_keys_current_value_toks}
   \quark_if_value_required:NTF \l_keys_current_value_tlp {
     \keys_err_use:cw {value_required} \l_keys_current_key_full_tlp
   }{
@@ -1277,7 +1251,7 @@
       \toks_if_empty:NTF \l_keys_current_value_toks {
         \keys_use:c {\l_keys_current_key_full_tlp}
       }{
-        \quark_if_no_value:NTF \l_keys_current_value_tlp {
+        \bool_if:NTF \l_keys_no_value_bool {
           \keys_use:c {\l_keys_current_key_full_tlp}
         }{
           \keys_def:co {\l_keys_current_key_full_tlp}
@@ -1613,7 +1587,7 @@
     {\toks_use:N \l_keys_current_value_toks}
 }
 \cs_new:Npn \keys_use_cmd:cn #1#2 {
-  \quark_if_no_value:NTF \l_keys_current_value_tlp {
+  \bool_if:NTF \l_keys_no_value_bool {
     \keys_use:c {#1/._cmd:w} \q_keys_stop
   }{
     \keys_use:c {#1/._cmd:w} #2 \q_keys_stop
@@ -1627,7 +1601,7 @@
 %    \begin{macrocode}
 \cs_new:Npn \keys_try: {
   \keys_if_really_exist:cTF {\l_keys_current_path_tlp /._cmd:w} {
-    \quark_if_no_value:NT \l_keys_current_value_tlp {
+    \bool_if:NT \l_keys_no_value_bool {
       \keys_if_really_exist:cT
         {\l_keys_current_path_tlp /._default_tlp} {
         \keys_toks_set:Nc \l_keys_current_value_toks
@@ -1639,7 +1613,7 @@
     \bool_set_true:N \l_keys_success_bool
   }{
     \keys_if_really_exist:cTF {\l_keys_current_path_tlp} {
-      \quark_if_no_value:NTF \l_keys_current_value_tlp {
+      \bool_if:NTF \l_keys_no_value_bool {
         \keys_use:c {\l_keys_current_path_tlp}
       }{
         \tlp_set:co {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}

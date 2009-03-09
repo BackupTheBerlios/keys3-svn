@@ -1144,6 +1144,48 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\keys_find_code_full:}
+%\begin{macro}{\keys_find_code_name:}
+% Two functions to find something to process the key value given. First,
+% a search is made for either a command property for the key, or a 
+% function for the key itself. If that fails, the generic handlers are 
+% used after separating out the key name and key path.
+%    \begin{macrocode}
+\cs_new:NNn \keys_find_code_full: 0 {
+  \keys_if_cmd_really_exist:nTF { \l_keys_current_key_full_tlp } {
+    \keys_use_cmd:c { \l_keys_current_key_full_tlp }
+  }{
+    \keys_if_really_exist:nTF { \l_keys_current_key_full_tlp } {
+      \bool_if:NTF \l_keys_no_value_bool {
+        \keys_use:n { \l_keys_current_key_full_tlp }
+      }{
+        \keys_set:nx { \l_keys_current_key_full_tlp }
+          { \toks_use:N \l_keys_current_value_toks }
+      }
+    }{
+      \keys_find_code_name:
+    }
+  }
+}
+\cs_new:NNn \keys_find_code_name: 0 {
+  \keys_separate_path:
+  \keys_if_cmd_really_exist:nTF
+    { \c_keys_properties_path_tlp / \l_keys_current_key_name_tlp } {
+    \keys_use_cmd:c  
+      {\c_keys_properties_path_tlp / \l_keys_current_key_name_tlp}
+  }{
+    \keys_if_cmd_really_exist:nTF 
+      { \l_keys_current_path_tlp / unknown } {
+      \keys_use_cmd:c { \l_keys_current_path_tlp / unknown }
+    }{
+      \keys_err_use:n { unknown_key }
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}[TF]{\keys_if_cmd_really_exist:n}
 % A dedicated check for the |._cmd:w| property key.
 %    \begin{macrocode}
@@ -1255,7 +1297,7 @@
         \keys_err_use:n { value_forbidden }
       }
     }{
-      \keys_process_elt:
+      \keys_find_code_full:
     }
   }
 }
@@ -1354,63 +1396,6 @@
 %\end{macro}
 %
 %------
-%
-% The key--value combination is at least valid for processing. The
-% first real test is to look for a code handling function for the key.
-% To keep things readable, this is a separate function.
-%    \begin{macrocode}
-\cs_new:Npn \keys_process_elt: {
-  \keys_if_cmd_really_exist:nTF {\l_keys_current_key_full_tlp} {
-    \keys_use_cmd:c {\l_keys_current_key_full_tlp}
-  }{
-%    \end{macrocode}
-% Next a check for the key name being defined. If it is, a second check
-% is made to see if any value is available. If so, the key value is
-% used; in the other case, the current value is saved to the key.
-%    \begin{macrocode}
-    \keys_if_really_exist:nTF {\l_keys_current_key_full_tlp}{
-      \toks_if_empty:NTF \l_keys_current_value_toks {
-        \keys_use:n {\l_keys_current_key_full_tlp}
-      }{
-        \bool_if:NTF \l_keys_no_value_bool {
-          \keys_use:n {\l_keys_current_key_full_tlp}
-        }{
-          \keys_set:nx { \l_keys_current_key_full_tlp }
-            { \toks_use:N \l_keys_current_value_toks }
-        }
-      }
-    }{
-%    \end{macrocode}
-% If nothing has been found so far, the default properties need to be
-% examined.  First, the path and name of the key must be separated.
-% Generic property lists are then checked.
-%    \begin{macrocode}
-      \keys_separate_path:
-      \keys_if_cmd_really_exist:nTF {
-        \c_keys_properties_path_tlp / \l_keys_current_key_name_tlp
-        }{
-          \keys_use_cmd:c
-            {\c_keys_properties_path_tlp / \l_keys_current_key_name_tlp}
-        }{
-%    \end{macrocode}
-% Still no luck, and so the |unknown| paths are tried.
-%    \begin{macrocode}
-          \keys_if_cmd_really_exist:nTF {
-            \l_keys_current_path_tlp /unknown
-          }{
-            \keys_use_cmd:c
-              {\l_keys_current_path_tlp /unknown}
-          }{
-%    \end{macrocode}
-% Nothing: call error message.
-%    \begin{macrocode}
-            \keys_err_use:cw {unknown_key} \l_keys_current_key_full_tlp
-          }
-        }
-    }
-  }
-}
-%    \end{macrocode}
 %
 %\begin{macro}{\keys_boolean:nN}
 %\begin{macro}{\keys_boolean:nc}

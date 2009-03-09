@@ -1226,12 +1226,12 @@
     }
   }
   \keys_if_really_exist:nTF
-    {\l_keys_current_key_full_tlp /._required_bool} {
-    \keys_err_use:cw {value_required} \l_keys_current_key_full_tlp
+    { \l_keys_current_key_full_tlp /._required_bool } {
+    \keys_err_use:cw { value_required } \l_keys_current_key_full_tlp
   }{
     \keys_if_really_exist:nTF
-      {\l_keys_current_key_full_tlp /._forbidden_bool} {
-      \keys_err_use:cw {value_forbidden} \l_keys_current_key_full_tlp
+      { \l_keys_current_key_full_tlp /._forbidden_bool } {
+      \keys_err_use:cw { value_forbidden } \l_keys_current_key_full_tlp
     }{
       \keys_process_elt:
     }
@@ -1305,7 +1305,7 @@
 %\end{macro}
 %
 %\begin{macro}{\keys_toks_set:Nn}
-% Sets a toks to a key.
+% Sets a toks to the content of a key.
 %    \begin{macrocode}
 \cs_new:NNn \keys_toks_set:Nn 2 {
   \exp_args:NNv \toks_set:Nn #1 { \c_keys_cs_prefix_tlp #2 }

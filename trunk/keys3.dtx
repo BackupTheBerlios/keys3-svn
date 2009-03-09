@@ -1020,13 +1020,10 @@
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\q_keys_stop}
-%\begin{macro}{\q_value_required}
-% Two new quarks are needed.
+% A private quark is needed.
 %    \begin{macrocode}
 \quark_new:N \q_keys_stop
-\quark_new:N \q_value_required
 %    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %\begin{macro}{\l_keys_args_toks}
 %\begin{macro}{\l_keys_body_toks}
@@ -1050,24 +1047,6 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%\subsubsection{Generally-available functions}
-%
-% A number of functions used internally to set keys are also part of
-% the user interface for others to use.
-%
-%\begin{macro}{\quark_if_value_required:NTF}
-%\begin{macro}{\quark_if_value_required:NT}
-%\begin{macro}{\quark_if_value_required:NF}
-% The quark test is the most basic function here: this is is exactly
-% what \textsf{l3quark} would do for functions of these names.
-%    \begin{macrocode}
-\def_long_test_function_new:npn {quark_if_value_required:N} #1 {
-  \if_meaning:NN \q_value_required #1
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
 %\begin{macro}{\keys_if_really_exist:cTF}
 %\begin{macro}{\keys_if_really_exist:cT}
 %\begin{macro}{\keys_if_really_exist:cF}
@@ -1222,9 +1201,8 @@
         {\l_keys_current_key_full_tlp /._default_tlp}
     }
   }
-  \tlp_set:Nx \l_keys_current_value_tlp
-    {\toks_use:N \l_keys_current_value_toks}
-  \quark_if_value_required:NTF \l_keys_current_value_tlp {
+  \keys_if_really_exist:cTF
+    {\l_keys_current_key_full_tlp /._required_bool} {
     \keys_err_use:cw {value_required} \l_keys_current_key_full_tlp
   }{
     \keys_if_really_exist:cTF
@@ -1762,13 +1740,10 @@
   },
 %    \end{macrocode}
 % Values are either required or forbidden, with the appropriate error
-% messages. The \cs{q_value_required} quark must no be expanded but
-% must work in the quark test. Hence the expansion protect used here:
-% remember this is stored in a tlp!
+% messages. 
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.value~required:/.code:n = {
-    \keys_def:cn {\l_keys_current_path_tlp /._default_tlp}
-      {\exp_not:E \q_value_required}
+    \keys_bool_new:c {\l_keys_current_path_tlp /._required_bool}
   },
   \c_keys_errors_path_tlp /value~required/.code:n = {
     \keys_err_use:cw {value_required} \l_keys_current_key_full_tlp

@@ -302,33 +302,6 @@
 % \end{function}
 %
 % \begin{function}{%
-%   .put~left:n|
-%   .put~right:n}
-%   \begin{syntax}
-%     <key>/.put left:n = \Arg{value}
-%   \end{syntax}
-%   Adds <value> to data stored in <key>.
-% \end{function}
-%
-% \begin{function}{%
-%   .put~code~left:n|
-%   .put~code~right:n}
-%   \begin{syntax}
-%     <key>/.put code left:n = \Arg{code}
-%   \end{syntax}
-%   Adds <code> to <key> macro created by |.code:n|.
-% \end{function}
-%
-% \begin{function}{%
-%   .put~keys~left:n|
-%   .put~keys~right:n}
-%   \begin{syntax}
-%     <key>/.put keys left:n = \Arg{keyval list}
-%   \end{syntax}
-%   Adds <keyval list> to <key> code created by |.apply~keys:n|.
-% \end{function}
-%
-% \begin{function}{%
 %   .show~code:|
 %   .show:}
 %   \begin{syntax}
@@ -339,7 +312,6 @@
 %   storing |.code:n|. May be useful for debugging, but note that all
 %   |._cmd:w| keys have a delimited argument ending \cs{q_keys_stop}.
 % \end{function}
-%
 %
 % \begin{function}{%
 %   .store~in~int:N|
@@ -505,258 +477,15 @@
 %\end{verbatim}
 %
 %\subsection{Functions}
-%
-%\subsubsection{Public functions}
-%
-% Although \cs{keys_manage:n} can carry out all of the functions of the
-% package, some of the internal macros may be of more general use for
-% creating complex systems. A small number of non-specific macros are
-% also created.
-%
-% \begin{function}{\keys_if_really_exist:n / (TF)}
-%   \begin{syntax}
-%     "\keys_if_really_exist:nTF"
-%     ~~~~\Arg{key} \Arg{true code} \Arg{false code}
-%   \end{syntax}
-%   Tests if <key> is known without adding anything to the hash table.
-% \end{function}
-%
-% In all cases, \m{key} should be a fully-qualified key name starting
-% with |/| and including the \m{module}, \emph{etc}.
 % 
-% \begin{function}{\keys_manage_internal:n}
-%   \begin{syntax}
-%     "\keys_manage_internal:n" \Arg{keyval list}
-%   \end{syntax}
-%   Private version of \cs{keys_manage:n} for internal use.
-% \end{function}
-%
-% \begin{function}{\keys_parse_list:n}
-%   \begin{syntax}
-%     "\keys_parse_list:n" \Arg{keyval list}
-%   \end{syntax}
-%   Common macro used by all key management functions to initiate key
-%   evaluation. Can be used to recursively set keys (see for example
-%   definition of |.apply keys:n|).
-% \end{function}
-%
-% \begin{function}{%
-%   \keys_set:nn|
-%   \keys_set:nx}
-%   \begin{syntax}
-%     "\keys_set:nn" \Arg{key} \Arg{value}
-%   \end{syntax}
-%   Stores <value> in <key>: <value> should be a tlp-compatible
-%   argument.
-% \end{function}
-%
-% \begin{function}{\keys_use:n}
-%   \begin{syntax}
-%     "\keys_use:n" \Arg{key}
-%   \end{syntax}
-%   Use the code stored in <key>.
-% \end{function}
-%
-%\subsubsection{Internal functions}
-%
-% \begin{function}{\keys_bool_new:n}
-%   \begin{syntax}
-%     "\keys_bool_new:n" \Arg{key}
-%   \end{syntax}
-%   Create a new Boolean <key> and sets to |true|.
-% \end{function}
-% 
-% \begin{function}{%
-%   \keys_boolean:nN|
-%   \keys_boolean:nc}
-%   \begin{syntax}
-%     "\keys_boolean:nN" \Arg{set} <bool>
-%   \end{syntax}
-%   Use <bool> as a switch key, with <set> as either set or gset as
-%   appropriate.
-% \end{function}
-%
-% \begin{function}{%
-%   \keys_def_cmd:cn|
-%   \keys_def_cmd:cx}
-%   \begin{syntax}
-%     "\keys_def_cmd:cn" \Arg{key} \Arg{code}
-%   \end{syntax}
-%   Creates the internal |._cmd:w| propery  for <key>, with <code> as
-%   the definition and accepting one argument |#1|.
-% \end{function}
-%
-% \begin{function}{%
-%   \keys_def_cmd:cnn|
-%   \keys_def_cmd:cnx}
-%   \begin{syntax}
-%     "\keys_def_cmd:cnn" \Arg{key} \Arg{parameters} \Arg{code}
-%   \end{syntax}
-%   Creates the internal |._cmd:w| property  for <key>, with <code> as
-%   the definition and accepting arbitrary parameters as specified in
-%   <parameters>.
-% \end{function}
-%
-% \begin{function}{\keys_choice_create:n}
-%   \begin{syntax}
-%     "\keys_choice_create:n" \Arg{choice}
-%   \end{syntax}
-%   Creates a choice key from a list.
-% \end{function}
-%
-% \begin{function}{\keys_clear_properties:n}
-%   \begin{syntax}
-%     "\keys_clear_properties:n" \Arg{key}
-%   \end{syntax}
-%   Removes all existing internal properties from <key>.
-% \end{function}
-%
-% \begin{function}{\keys_if_cmd_really_exist:n / (TF) }
-%   \begin{syntax}
-%     "\keys_if_cmd_really_exist:nTF"
-%     ~~~~\Arg{key} \Arg{true code} \Arg{false code}
-%   \end{syntax}
-%   Tests if <key> |._cmd:w| property exists.
-% \end{function}
-%
-% \begin{function}{\keys_expand:n}
-%   \begin{syntax}
-%     "\keys_expand:n" \Arg{value}
-%   \end{syntax}
-%   Helper macro for expansion control.
-% \end{function}
-%
-% \begin{function}{\keys_set_eq:nn}
-%   \begin{syntax}
-%     "\keys_set_eq:nn" \Arg{key1} \Arg{key2}
-%   \end{syntax}
-%   Let <key1> to <key2>.
-% \end{function}
-%
-% \begin{function}{\keys_module_name:}
-%   \begin{syntax}
-%     "\keys_module_name:"
-%   \end{syntax}
-%   Sets \cs{l_keys_tmpa_tlp} to hold the appropriate name for
-%   creating Boolean and tlp functions.
-% \end{function}
-%
-% \begin{function}{%
-%   \keys_path_add:N|
-%   \keys_path_add:w}
-%   \begin{syntax}
-%     "\keys_path_add:N" <tlp>
-%     "\keys_path_add:w" <key> "\q_stop"
-%   \end{syntax}
-%   Adds a path to <key> (stored in <tlp>) if necessary.
-% \end{function}
-%
-% \begin{function}{\keys_parse:n}
-%   \begin{syntax}
-%     "\keys_parse:n" \Arg{keyval list}
-%   \end{syntax}
-%   The function to actually parse the user input.  Is \cs{let:NN} to
-%   one from \textsf{l3keyval}.
-% \end{function}
-%
-% \begin{function}{%
-%   \keys_value_elt:nn|
-%   \keys_no_value_elt:n|
-%   \keys_process_elt:}
-%   \begin{syntax}
-%     "\keys_value_elt:nn" \Arg{key} \Arg{value}
-%   \end{syntax}
-%   Receives <key> and <value> from \textsf{l3keyval} and carries out
-%   processing.  The |:n| variant is used to process keys with no
-%   <value>. The |:| version is used internally once some initial
-%   testing of the key--value combination has occurred.
-% \end{function}
-%
-% \begin{function}{\keys_put:nnn}
-%   \begin{syntax}
-%     "\keys_put:nnn" \Arg{position} \Arg{key} \Arg{data}
-%   \end{syntax}
-%   Add <data> to the <position> of the value stored in <key>.
-% \end{function}
-%
-% \begin{function}{\keys_put_code:nc}
-%   \begin{syntax}
-%     "\keys_put_code:nc" \Arg{position} \Arg{key}
-%   \end{syntax}
-%   Adds <value> to <position> of <key> |._cmd:w| macro.
-% \end{function}
-%
-% \begin{function}{%
-%   \keys_separate_path:|
-%   \keys_separate_path:w}
-%   \begin{syntax}
-%     "\keys_separate_path:"
-%     "\keys_separate_path:w" <key> / "\q_stop"
-%   \end{syntax}
-%   Separates <key> into a <path> and a <name>.
-% \end{function}
-% 
-% \begin{function}{%
-%   \keys_store:NN|
-%   \keys_store:Nc}
-%   \begin{syntax}
-%     "\keys_store:NN" <func> <store>
-%   \end{syntax}
-%   Used to store argument of <key> using <func> into <store>.
-% \end{function}
-%
-% \begin{function}{\keys_toks_new:nn}
-%   \begin{syntax}
-%     "\keys_toks_new:nn" \Arg{key} \Arg{tokens}
-%   \end{syntax}
-%   Create a new toks <key> and store <tokens>.
-% \end{function}
-%
-% \begin{function}{\keys_toks_set:Nn}
-%   \begin{syntax}
-%     "\keys_toks_set:Nn" <toks> \Arg{key}
-%   \end{syntax}
-%   Transfers the contents of <key> into <toks>.  Used for manipulation
-%   of the toks containing the current value. The <value> of <key>
-%   should be expandable.
-% \end{function}
-%
-% \begin{function}{%
-%   \keys_use_cmd:cn|
-%   \keys_use_cmd:c}
-%   \begin{syntax}
-%     "\keys_use_cmd:cn" \Arg{key} \Arg{argument}
-%   \end{syntax}
-%   Uses the internal |._cmd:w| key needed to execute the function of
-%   <key> on <argument>.
-% \end{function}
-%
-% Some functions are related to error-message creation.
-%
-% \begin{function}{\keys_err_new:cNnnn}
-%   \begin{syntax}
-%     "\keys_err_new:cNnnn" \Arg{error} <args>
-%     ~~~~\Arg{short text} \Arg{long text} \Arg{code}
-%   \end{syntax}
-%   Creates error message <error> taking <args> arguments, with text as
-%   specified and recovery <code>.
-% \end{function}
-%
-% \begin{function}{\keys_err_use:cw}
-%   \begin{syntax}
-%     "\keys_err_use:cw" \Arg{error}
-%   \end{syntax}
-%   Use <error> with any arguments required.
-% \end{function}
-%
 %\subsection{Variables and constants}
 %
 % \begin{variable}{\c_keys_cs_prefix_tlp}
 %   Constant that contains the prefix for the csnames used for all
 %   keys.
 %   \begin{texnote}
-%     The key macros are all of the form \cs{keys/<path>/<key>}, where
-%     <path> can be equal to <module> or may be more complex. The
+%     The key macros are all of the form \cs{keys-root/<path>/<key>}, 
+%     where  <path> can be equal to <module> or may be more complex. The
 %     <property> keys are of form \cs{keys/<path>/<key>/.<property>}.
 %   \end{texnote}
 % \end{variable}
@@ -805,16 +534,6 @@
 %   Marker information for choices.
 % \end{variable}
 %
-% \begin{variable}{\q_keys_stop}
-%   A private quark.
-% \end{variable}
-%
-% \begin{variable}{%
-%   \l_keys_args_toks|
-%   \l_keys_body_toks}
-%   Private storage areas used to add code to an existing key.
-% \end{variable}
-%
 % \begin{variable}{%
 %   \l_keys_err_boolean_expected_tlp|
 %   \l_keys_err_def_x_args_tlp|
@@ -840,20 +559,6 @@
 % They should not be addressed directly except from within the package.
 % All private properties contain ``|_|'' before the property name as a
 % reminder that they are internal.
-%
-% \begin{function}{/._args_toks}
-%   \begin{syntax}
-%   \end{syntax}
-%   Stores the arguments of a |.code:nn| or |.code:nx| property for use
-%   with |.code put left:n| and |.code put right:n|.
-% \end{function}
-%
-% \begin{function}{/._body_toks}
-%   \begin{syntax}
-%   \end{syntax}
-%   Stores the body of a |.code:nn| or |.code:nx| property for use with
-%   |.code put left:n| and |.code put right:n|.
-% \end{function}
 %
 % \begin{function}{/._boolean}
 %   \begin{syntax}
@@ -883,30 +588,6 @@
 %   Indicates that a value is forbidden or required for <key>.
 % \end{function}
 %
-%\subsection{To think about}
-%
-% All keys created by \textsf{keys3} are case-sensitive. This is
-% particularly noticeable for choice keys, where \textsf{xkeyval}
-% provides both case-sensitive and case-insensitive variants.  Is there
-% a need for both types of choice, or is the convention that everything
-% is sensitive to case sufficient?
-%
-% Currently, |.add code:n| does not work cleanly with |.code:nx|. This
-% is because the current method used to add to commands uses the stored
-% body of the macro when complex arguments are present.  The handling
-% here is better than \textsf{pgfkeys}, as no error is raised. However,
-% a better method would be nice.  Ideas are welcome!
-%
-% The package makes it easy to create choices, but does not have an
-% equivalent to \textsf{xkeyval}'s \cs{define@cmdkeys} or
-% \cs{define@boolkeys} macros.  Is the extra ease of producing many
-% keys at once worth the additional complexity?  If so, what would be
-% suitable property names (suggestions |.multi set:n| and
-% |.multi bool:n| come to mind).
-%
-% Does the package need to provide something like
-% \cs{DisableKeyvalOption}? If so, does a method for globally disabling
-% keys need to be provided?
 %
 %\subsection{Implementation}
 %
@@ -1507,46 +1188,6 @@
 }
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\keys_put_code:nc}
-% A function to add code to an existing key function.  This is a rather
-% complex operation. If the key does not already exist, life is easy.
-% On the other hand, if the key has already been defined, the existing
-% definition is ``recovered'' to be patched. For keys with more than a
-% single argument, |._args_toks| contains the appropriate pattern with
-% the body in |._body_toks|.
-%    \begin{macrocode}
-\cs_new:Npn \keys_put_code:nc #1#2 {
-  \keys_if_really_exist:nTF {\l_keys_current_path_tlp /._cmd:w}{
-    \keys_if_really_exist:nTF
-      {\l_keys_current_path_tlp /._args_toks}{
-      \toks_set_eq:Nc \l_keys_args_toks
-        {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._args_toks}
-      \toks_set_eq:Nc \l_keys_body_toks
-        {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._body_toks}
-    }{
-%    \end{macrocode}
-% With only one argument, the definition can be recovered out of the
-% function itself.
-%    \begin{macrocode}
-      \toks_set:Nn \l_keys_args_toks {##1}
-      \toks_set:Nn \l_keys_body_toks \exp_after:NN \exp_after:NN
-        \exp_after:NN {\cs:w \c_keys_cs_prefix_tlp
-        \l_keys_current_path_tlp /._cmd:w \cs_end: ##1 \q_keys_stop}
-    }
-%    \end{macrocode}
-% The new function can now be built; this is the only point where the
-% position of addition is important.
-%    \begin{macrocode}
-    \use:c {toks_put_#2:Nn} \l_keys_body_toks {#1}
-    \tlp_set:Nx \l_keys_tmpa_tlp {\toks_use:N \l_keys_args_toks}
-    \exp_args:NNoo \keys_def_cmd:cnx {\l_keys_current_path_tlp}
-      {\l_keys_tmpa_tlp} {\toks_use:N \l_keys_body_toks}
-  }{
-    \keys_def_cmd:cn {\l_keys_current_path_tlp} {#1}
-  }
-}
-%    \end{macrocode}
-%\end{macro}
 %\begin{macro}{\keys_store:NN}
 %\begin{macro}{\keys_store:Nc}
 % Generic storage functions.
@@ -1732,16 +1373,6 @@
     \keys_def_cmd:cnx {\l_keys_current_path_tlp} {#1} {#2}
   },
 %    \end{macrocode}
-% The package itself will need to be able to add code to an existing
-% key, so the appropriate mechanism is created.
-%    \begin{macrocode}
-  \c_keys_properties_path_tlp /.put~code~right:n/.code:n = {
-    \keys_put_code:nc {#1} {right}
-  },
-  \c_keys_properties_path_tlp /.put~code~left:n/.code:n = {
-    \keys_put_code:nc {#1} {left}
-  },
-%    \end{macrocode}
 % Initial and default values can now be created.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.initial:n/.code:n = {
@@ -1807,21 +1438,6 @@
     }
   },
 %    \end{macrocode}
-% Code can also be added to the above.
-%    \begin{macrocode}
-  \c_keys_properties_path_tlp /.put~keys~left:n/.code:n = {
-    \keys_manage_internal:n {
-      \l_keys_current_path_tlp /.put~code~left:n =
-        {\keys_parse_list:n {#1}}
-    }
-  },
-  \c_keys_properties_path_tlp /.put~keys~right:n/.code:n = {
-    \keys_manage_internal:n {
-      \l_keys_current_path_tlp /.put~code~right:n =
-        {\keys_parse_list:n {#1}}
-    }
-  },
-%    \end{macrocode}
 % Transfer of data in and out.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.key~to~tlp:N/.code:n = {
@@ -1835,15 +1451,6 @@
   },
   \c_keys_properties_path_tlp /.tlp~to~key:c/.code:n = {
     \tlp_set_eq:cc {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} {#1}
-  },
-%    \end{macrocode}
-% Adding to literal values is easier than adding to code.
-%    \begin{macrocode}
-  \c_keys_properties_path_tlp /.put~right:n/.code:n = {
-    \keys_put:nnn {right} {\l_keys_current_path_tlp} {#1}
-  },
-  \c_keys_properties_path_tlp /.put~left:n/.code:n = {
-    \keys_put:nnn {left} {\l_keys_current_path_tlp} {#1}
   },
 %    \end{macrocode}
 % That is all of the lower-level things done.  Now use them to build

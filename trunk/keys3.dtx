@@ -559,9 +559,9 @@
 %
 %\subsubsection{Internal functions}
 %
-% \begin{function}{\keys_bool_new:c}
+% \begin{function}{\keys_bool_new:n}
 %   \begin{syntax}
-%     "\keys_bool_new:c" \Arg{key}
+%     "\keys_bool_new:n" \Arg{key}
 %   \end{syntax}
 %   Create a new Boolean <key> and sets to |true|.
 % \end{function}
@@ -611,12 +611,9 @@
 %   Removes all existing internal properties from <key>.
 % \end{function}
 %
-% \begin{function}{%
-%   \keys_if_cmd_really_exist:cTF|
-%   \keys_if_cmd_really_exist:cT|
-%   \keys_if_cmd_really_exist:cF}
+% \begin{function}{\keys_if_cmd_really_exist:n / (TF) }
 %   \begin{syntax}
-%     "\keys_if_cmd_really_exist:cTF"
+%     "\keys_if_cmd_really_exist:nTF"
 %     ~~~~\Arg{key} \Arg{true code} \Arg{false code}
 %   \end{syntax}
 %   Tests if <key> |._cmd:w| property exists.
@@ -629,9 +626,9 @@
 %   Helper macro for expansion control.
 % \end{function}
 %
-% \begin{function}{\keys_let:cc}
+% \begin{function}{\keys_set_eq:nn}
 %   \begin{syntax}
-%     "\keys_let:cc" \Arg{key1} \Arg{key2}
+%     "\keys_set_eq:nn" \Arg{key1} \Arg{key2}
 %   \end{syntax}
 %   Let <key1> to <key2>.
 % \end{function}
@@ -674,9 +671,9 @@
 %   testing of the key--value combination has occurred.
 % \end{function}
 %
-% \begin{function}{\keys_put:ncn}
+% \begin{function}{\keys_put:nnn}
 %   \begin{syntax}
-%     "\keys_put:ncn" \Arg{position} \Arg{key} \Arg{data}
+%     "\keys_put:nnn" \Arg{position} \Arg{key} \Arg{data}
 %   \end{syntax}
 %   Add <data> to the <position> of the value stored in <key>.
 % \end{function}
@@ -707,9 +704,9 @@
 %   Used to store argument of <key> using <func> into <store>.
 % \end{function}
 %
-% \begin{function}{\keys_toks_new:cn}
+% \begin{function}{\keys_toks_new:nn}
 %   \begin{syntax}
-%     "\keys_toks_new:cn" \Arg{key} \Arg{tokens}
+%     "\keys_toks_new:nn" \Arg{key} \Arg{tokens}
 %   \end{syntax}
 %   Create a new toks <key> and store <tokens>.
 % \end{function}
@@ -1096,11 +1093,64 @@
 %\end{macro}
 %\end{macro}
 %
+%\begin{macro}{\keys_bool_new:n}
+% To create a new switch, which will be true (as the existence of the 
+% switch is the flag here).
+%    \begin{macrocode}
+\cs_new:NNn \keys_bool_new:n 1 {
+  \bool_new:c { \c_keys_cs_prefix_tlp #1 }
+  \bool_set_true:c { \c_keys_cs_prefix_tlp #1 }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_clear_properties:n}
+% To avoid problem on redefinition, all properties are removed.
+%    \begin{macrocode}
+\cs_new:NNn \keys_clear_properties:n 1 {
+  \keys_undefine:n { #1/._args_toks }
+  \keys_undefine:n { #1/._body_toks }
+  \keys_undefine:n { #1/._boolean }     
+  \keys_undefine:n { #1/._cmd:w }      
+  \keys_undefine:n { #1/._default_tlp }  
+  \keys_undefine:n { #1/._forbidden_bool } 
+  \keys_undefine:n { #1/._required_bool }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_expand:n}
+% A helper for expansion.
+%    \begin{macrocode}
+\cs_new:NNn \keys_expand:n 1 {
+  \keys_process:n { \l_keys_current_path_tlp = #1 }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}[TF]{\keys_if_cmd_really_exist:n}
+% A dedicated check for the |._cmd:w| property key.
+%    \begin{macrocode}
+\def_long_test_function_new:npn { keys_if_cmd_really_exist:n } #1 {
+  \if_cs_exist:w \c_keys_cs_prefix_tlp #1 /._cmd:w \cs_end:
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}[TF]{\keys_if_really_exist:n}
 % Check if a key exists without adding to the hash table.
 %    \begin{macrocode}
 \def_long_test_function_new:npn { keys_if_really_exist:n } #1 {
   \if_cs_exist:w \c_keys_cs_prefix_tlp #1 \cs_end:
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_put:nnn}
+% To add code to one end of a stored key.
+%    \begin{macrocode}
+\cs_new:NNn \keys_put:nnn 3 {
+  \use:c { tlp_put_#1:cn } { \c_keys_cs_prefix_tlp #2 } {#3}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1119,13 +1169,45 @@
 %\end{macro}
 %\end{macro}
 %
+%\begin{macro}{\keys_set_eq:nn}
+% To alias one key to another.
+%    \begin{macrocode}
+\cs_new:NNn \keys_set_eq:nn 2 {
+  \cs_set_eq:cc { \c_keys_cs_prefix_tlp #1 } 
+    { \c_keys_cs_prefix_tlp #2 }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_toks_new:nn}
+% Creates a new token register and stores the given data in it.
+%    \begin{macrocode}
+\cs_new:NNn \keys_toks_new:nn 2 {
+  \toks_new:c { \c_keys_cs_prefix_tlp #1 }
+  \toks_set:cn { \c_keys_cs_prefix_tlp #1 } {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_undefine:n}
+% To remove a key.
+%    \begin{macrocode}
+\cs_new:NNn \keys_undefine:n 1 {
+  \cs_set_eq:cN { \c_keys_cs_prefix_tlp #1 } \c_undefined
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\keys_use:n}
+% Use whatever is stored in a key.
 %    \begin{macrocode}
 \cs_new:NNn \keys_use:n 1 {
   \use:c { \c_keys_cs_prefix_tlp #1 }
 }
 %    \end{macrocode}
 %\end{macro}
+%
+%------
 %
 %\begin{macro}{\keys_parse:n}
 % The macro used to actually process the key--value input is taken from
@@ -1196,7 +1278,7 @@
 % To keep things readable, this is a separate function.
 %    \begin{macrocode}
 \cs_new:Npn \keys_process_elt: {
-  \keys_if_cmd_really_exist:cTF {\l_keys_current_key_full_tlp} {
+  \keys_if_cmd_really_exist:nTF {\l_keys_current_key_full_tlp} {
     \keys_use_cmd:c {\l_keys_current_key_full_tlp}
   }{
 %    \end{macrocode}
@@ -1222,7 +1304,7 @@
 % Generic property lists are then checked.
 %    \begin{macrocode}
       \keys_separate:
-      \keys_if_cmd_really_exist:cTF {
+      \keys_if_cmd_really_exist:nTF {
         \c_keys_properties_path_tlp / \l_keys_current_key_name_tlp
         }{
           \keys_use_cmd:c
@@ -1231,7 +1313,7 @@
 %    \end{macrocode}
 % Still no luck, and so the |unknown| paths are tried.
 %    \begin{macrocode}
-          \keys_if_cmd_really_exist:cTF {
+          \keys_if_cmd_really_exist:nTF {
             \l_keys_current_path_tlp /unknown
           }{
             \keys_use_cmd:c
@@ -1268,15 +1350,6 @@
 }
 %    \end{macrocode}
 %\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_bool_new:c}
-% Boolean value are always true here!
-%    \begin{macrocode}
-\cs_new:Npn \keys_bool_new:c #1 {
-  \bool_new:c {\c_keys_cs_prefix_tlp #1}
-  \bool_set_true:c {\c_keys_cs_prefix_tlp #1}
-}
-%    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\keys_boolean:nN}
 %\begin{macro}{\keys_boolean:nc}
@@ -1341,25 +1414,7 @@
 }
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\keys_clear_properties:n}
-%\begin{macro}{\keys_undefine:n}
-% To avoid problem on redefinition, all properties are removed.
-%    \begin{macrocode}
-\cs_new:NNn \keys_clear_properties:n 1 {
-  \keys_undefine:n { #1/._args_toks }
-  \keys_undefine:n { #1/._body_toks }
-  \keys_undefine:n { #1/._boolean }     
-  \keys_undefine:n { #1/._cmd:w }      
-  \keys_undefine:n { #1/._default_tlp }  
-  \keys_undefine:n { #1/._forbidden_bool } 
-  \keys_undefine:n { #1/._required_bool }
-}
-\cs_new:NNn \keys_undefine:n 1 {
-  \cs_set_eq:cN { \c_keys_cs_prefix_tlp #1 } \c_undefined
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
+
 %\begin{macro}{\keys_def_cmd:cn}
 %\begin{macro}{\keys_def_cmd:cx}
 %\begin{macro}{\keys_def_cmd:cnn}
@@ -1377,14 +1432,14 @@
 \cs_new:Npn \keys_def_cmd:cnn #1#2#3 {
   \keys_clear_properties:n {#1}
   \cs_set:cpn {\c_keys_cs_prefix_tlp #1/._cmd:w} #2 \q_keys_stop {#3}
-  \keys_toks_new:cn {#1/._args_toks} {#2}
-  \keys_toks_new:cn {#1/._body_toks} {#3}
+  \keys_toks_new:nn {#1/._args_toks} {#2}
+  \keys_toks_new:nn {#1/._body_toks} {#3}
 }
 \cs_new:Npn \keys_def_cmd:cnx #1#2#3 {
   \keys_clear_properties:n {#1}
   \cs_set:cpx {\c_keys_cs_prefix_tlp #1/._cmd:w} #2 \q_keys_stop {#3}
-  \keys_toks_new:cn {#1/._args_toks} {#2}
-  \keys_toks_new:cn {#1/._body_toks} {
+  \keys_toks_new:nn {#1/._args_toks} {#2}
+  \keys_toks_new:nn {#1/._body_toks} {
     \exp_not:n{\keys_err_use:cw {def_x_args} \l_keys_current_key_full_tlp}
     #3
   }
@@ -1393,33 +1448,6 @@
 %\end{macro}
 %\end{macro}
 %\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_if_cmd_really_exist:cTF}
-%\begin{macro}{\keys_if_cmd_really_exist:cT}
-%\begin{macro}{\keys_if_cmd_really_exist:cF}
-% A more specific version of an earlier test.
-%    \begin{macrocode}
-\def_long_test_function_new:npn {keys_if_cmd_really_exist:c} #1 {
-  \if_cs_exist:w \c_keys_cs_prefix_tlp #1 /._cmd:w \cs_end:
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_expand:n}
-% A helper for expansion.
-%    \begin{macrocode}
-\cs_new:Npn \keys_expand:n #1 {
-  \keys_process:n {\l_keys_current_path_tlp = #1}
-}
-%    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\keys_let:cc}
-%    \begin{macrocode}
-\cs_new:Npn \keys_let:cc #1#2 {
-  \let:cc {\c_keys_cs_prefix_tlp #1} {\c_keys_cs_prefix_tlp #2}
-}
-%    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\keys_module_name:}
 % The module name is needed in a few places.
@@ -1430,13 +1458,6 @@
   }{
     \tlp_set:Nx \l_keys_tmpa_tlp {\l_keys_current_module_tlp _}
   }
-}
-%    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\keys_put:ncn}
-%    \begin{macrocode}
-\cs_new:Npn \keys_put:ncn #1#2#3 {
-  \use:c {tlp_put_#1:cn} {\c_keys_cs_prefix_tlp #2} {#3}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1520,14 +1541,6 @@
 }
 %    \end{macrocode}
 %\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_toks_new:cn}
-%    \begin{macrocode}
-\cs_new:Npn \keys_toks_new:cn #1#2 {
-  \toks_new:c {\c_keys_cs_prefix_tlp #1}
-  \toks_set:cn {\c_keys_cs_prefix_tlp #1} {#2}
-}
-%    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\keys_toks_set:Nc}
 % Sets a toks to a key: not really intended for others to use. The
@@ -1720,13 +1733,13 @@
 % messages. 
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.value~required:/.code:n = {
-    \keys_bool_new:c {\l_keys_current_path_tlp /._required_bool}
+    \keys_bool_new:n {\l_keys_current_path_tlp /._required_bool}
   },
   \c_keys_errors_path_tlp /value~required/.code:n = {
     \keys_err_use:cw {value_required} \l_keys_current_key_full_tlp
   },
   \c_keys_properties_path_tlp /.value~forbidden:/.code:n = {
-    \keys_bool_new:c {\l_keys_current_path_tlp /._forbidden_bool}
+    \keys_bool_new:n {\l_keys_current_path_tlp /._forbidden_bool}
   },
   \c_keys_errors_path_tlp /value~forbidden/.code:n = {
     \keys_err_use:cw {value_forbidden} \l_keys_current_key_full_tlp
@@ -1805,10 +1818,10 @@
 % Adding to literal values is easier than adding to code.
 %    \begin{macrocode}
   \c_keys_properties_path_tlp /.put~right:n/.code:n = {
-    \keys_put:ncn {right} {\l_keys_current_path_tlp} {#1}
+    \keys_put:nnn {right} {\l_keys_current_path_tlp} {#1}
   },
   \c_keys_properties_path_tlp /.put~left:n/.code:n = {
-    \keys_put:ncn {left} {\l_keys_current_path_tlp} {#1}
+    \keys_put:nnn {left} {\l_keys_current_path_tlp} {#1}
   },
 %    \end{macrocode}
 % That is all of the lower-level things done.  Now use them to build
@@ -1982,7 +1995,7 @@
     \keys_if_really_exist:nT {\l_keys_current_path_tlp /._cmd:w} {
       \tlp_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp
       \keys_separate:
-      \keys_let:cc {\l_keys_current_path_tlp /#1/._cmd:w}
+      \keys_set_eq:nn {\l_keys_current_path_tlp /#1/._cmd:w}
         {\l_keys_current_key_full_tlp /._cmd:w}
     }
   },

@@ -642,12 +642,13 @@
 % \end{function}
 %
 % \begin{function}{%
-%   \keys_path_add:w|
-%   \keys_path_add_aux:w}
+%   \keys_path_add:N|
+%   \keys_path_add:w}
 %   \begin{syntax}
+%     "\keys_path_add:N" <tlp>
 %     "\keys_path_add:w" <key> "\q_stop"
 %   \end{syntax}
-%   Adds a path to <key> if necessary.
+%   Adds a path to <key> (stored in <tlp>) if necessary.
 % \end{function}
 %
 % \begin{function}{\keys_parse:n}
@@ -686,11 +687,11 @@
 % \end{function}
 %
 % \begin{function}{%
-%   \keys_separate:|
-%   \keys_separate:w}
+%   \keys_separate_path:|
+%   \keys_separate_path:w}
 %   \begin{syntax}
-%     "\keys_separate:"
-%     "\keys_separate:w" <key> / "\q_stop"
+%     "\keys_separate_path:"
+%     "\keys_separate_path:w" <key> / "\q_stop"
 %   \end{syntax}
 %   Separates <key> into a <path> and a <name>.
 % \end{function}
@@ -1146,6 +1147,38 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\keys_parse:n}
+% The macro used to actually process the key--value input is taken from
+% \textsf{l3keyval}.  There are two possible options, and so at this
+% stage the macro is simply reserved.
+%    \begin{macrocode}
+\cs_new:NNn \keys_parse:n 1 {\ERROR}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_path_add:N}
+%\begin{macro}{\keys_path_add:w}
+%\begin{macro}[aux]{\keys_path_add_aux:w}
+% The code to check for a path looks for a |/| at the start of the key.
+%    \begin{macrocode}
+\cs_new:NNn \keys_path_add:N 1 {
+  \exp_after:NN \keys_path_add:w #1 \q_stop
+}
+\cs_new:Npn \keys_path_add:w {
+  \exp_after:NN \peek_meaning:NTF \c_keys_root_tlp {
+    \use_none_delimit_by_q_stop:w
+  }{
+    \keys_path_add_aux:w
+  }
+}
+\cs_new:Npn \keys_path_add_aux:w #1 \q_stop {
+  \tlp_set:Nx \l_keys_current_key_full_tlp {\l_keys_default_path_tlp #1}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}{\keys_put:nnn}
 % To add code to one end of a stored key.
 %    \begin{macrocode}
@@ -1153,6 +1186,27 @@
   \use:c { tlp_put_#1:cn } { \c_keys_cs_prefix_tlp #2 } {#3}
 }
 %    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_separate_path:}
+%\begin{macro}{\keys_separate_path:w}
+% A simple piece of recursion to find the key name and path.
+%    \begin{macrocode}
+\cs_new:NNn \keys_separate_path: 0 {
+  \tlp_clear:N \l_keys_current_path_tlp
+  \exp_after:NN \keys_separate_path:w \l_keys_current_key_full_tlp 
+    / \q_stop
+}
+\cs_new:Npn \keys_separate_path:w /#1/#2 \q_stop {
+  \tlist_if_empty:nTF {#2} {
+    \tlp_set:Nn \l_keys_current_key_name_tlp {#1}
+  }{
+     \tlp_put_right:Nn \l_keys_current_path_tlp { / #1 }
+     \keys_separate_path:w /#2 \q_stop
+  }
+}
+%    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\keys_set:nn}
@@ -1209,14 +1263,6 @@
 %
 %------
 %
-%\begin{macro}{\keys_parse:n}
-% The macro used to actually process the key--value input is taken from
-% \textsf{l3keyval}.  There are two possible options, and so at this
-% stage the macro is simply reserved.
-%    \begin{macrocode}
-\cs_new:Npn \keys_parse:n #1 {\ERROR}
-%    \end{macrocode}
-%\end{macro}
 %\begin{macro}{\keys_process:n}
 % All of the management macros call this common parser. First, the key
 % processing macros are defined, then the appropriate parser is called.
@@ -1252,7 +1298,7 @@
 %    \begin{macrocode}
 \cs_new:Npn \keys_process_elt_tmp:nn #1#2 {
   \tlp_set:Nx \l_keys_current_key_full_tlp {#1}
-  \exp_after:NN \keys_path_add:w \l_keys_current_key_full_tlp \q_stop
+  \keys_path_add:N \l_keys_current_key_full_tlp
   \toks_set:Nn \l_keys_current_value_toks {#2}
   \bool_if:NT \l_keys_no_value_bool {
     \keys_if_really_exist:nT {\l_keys_current_key_full_tlp /._default_tlp} {
@@ -1303,7 +1349,7 @@
 % examined.  First, the path and name of the key must be separated.
 % Generic property lists are then checked.
 %    \begin{macrocode}
-      \keys_separate:
+      \keys_separate_path:
       \keys_if_cmd_really_exist:nTF {
         \c_keys_properties_path_tlp / \l_keys_current_key_name_tlp
         }{
@@ -1334,23 +1380,6 @@
 %
 %\subsubsection{Internal functions}
 %
-%\begin{macro}{\keys_path_add:w}
-%\begin{macro}{\keys_path_add_aux:w}
-% The code to check for a path looks for a |/| at the start of the key.
-%    \begin{macrocode}
-\cs_new:Npn \keys_path_add:w {
-  \exp_after:NN \peek_meaning:NTF \c_keys_root_tlp {
-    \use_none_delimit_by_q_stop:w
-  }{
-    \keys_path_add_aux:w
-  }
-}
-\cs_new:Npn \keys_path_add_aux:w #1 \q_stop {
-  \tlp_set:Nx \l_keys_current_key_full_tlp {\l_keys_default_path_tlp #1}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %\begin{macro}{\keys_boolean:nN}
 %\begin{macro}{\keys_boolean:nc}
 % To allow code-sharing for switch control.
@@ -1500,25 +1529,6 @@
   }
 }
 %    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\keys_separate:}
-%\begin{macro}{\keys_separate:w}
-% A simple piece of recursion.
-%    \begin{macrocode}
-\cs_new:Npn \keys_separate: {
-  \tlp_clear:N \l_keys_current_path_tlp
-  \exp_after:NN \keys_separate:w \l_keys_current_key_full_tlp / \q_stop
-}
-\cs_new:Npn \keys_separate:w /#1/#2 \q_stop {
-  \tlist_if_empty:nTF {#2}{
-    \tlp_set:Nn \l_keys_current_key_name_tlp {#1}
-  }{
-     \tlp_put_right:Nn \l_keys_current_path_tlp {/#1}
-     \keys_separate:w /#2 \q_stop
-  }
-}
-%    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %\begin{macro}{\keys_store:NN}
 %\begin{macro}{\keys_store:Nc}
@@ -1934,7 +1944,7 @@
     \keys_if_really_exist:nTF {\l_keys_current_path_tlp /._boolean} {
       \tlp_set_eq:NN \l_keys_tmpa_tlp \l_keys_current_path_tlp
       \tlp_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp
-      \keys_separate:
+      \keys_separate_path:
       \keys_process:n {
         \l_keys_current_path_tlp /#1/.code:x = {
           \exp_not:N \tlist_if_eq:nnTF {true} {##1} {
@@ -1994,7 +2004,7 @@
   \c_keys_properties_path_tlp /.equivalent~key:n/.code:n = {
     \keys_if_really_exist:nT {\l_keys_current_path_tlp /._cmd:w} {
       \tlp_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp
-      \keys_separate:
+      \keys_separate_path:
       \keys_set_eq:nn {\l_keys_current_path_tlp /#1/._cmd:w}
         {\l_keys_current_key_full_tlp /._cmd:w}
     }

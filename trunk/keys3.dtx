@@ -138,8 +138,41 @@
 % single argument is required, the braces around the argument may be
 % omitted without any error arising.
 % 
+%\subsection{Properties}
+%
+% \begin{function}{.code:n}
+%  \begin{syntax}
+%    <key>/.code:n = <code>
+%  \end{syntax}
+%  Stores the <code> for execution when <key> is called. The <code> can
+%  include one parameter (|#1|).
+% \end{function}
+% 
+% \begin{function}{.code:Nn}
+%  \begin{syntax}
+%    <key>/.code:Nn = <number> <code>
+%  \end{syntax}
+%  Stores the <code> for execution when <key> is called. The <code> can
+%  include <number> parameters, which can be in the range 0--9.
+% \end{function}
+% 
 %\subsection{Variables and constants}
 %
+% \begin{variable}{
+%   \c_keys_0_empty_tlp|
+%   \c_keys_1_empty_tlp|
+%   \c_keys_2_empty_tlp|
+%   \c_keys_3_empty_tlp|
+%   \c_keys_4_empty_tlp|
+%   \c_keys_5_empty_tlp|
+%   \c_keys_6_empty_tlp|
+%   \c_keys_7_empty_tlp|
+%   \c_keys_8_empty_tlp|
+%   \c_keys_9_empty_tlp|
+% }
+%   A set of tlps containing empty groups.
+% \end{variable}
+% 
 % \begin{variable}{\c_keys_cs_prefix_tlp}
 %   The prefix added to the fully-qualified key when saving them.
 % \end{variable}
@@ -234,7 +267,6 @@
 %   A helper function used to expand <code>.
 % \end{function}
 % 
-
 % \begin{function}{
 %   \keys_find_code_full:|
 %   \keys_find_code_name:
@@ -344,6 +376,18 @@
 %   Sets <key1> equal to <key2>.
 % \end{function}
 % 
+% \begin{function}{
+%   \keys_set_cmd:nn|
+%   \keys_set_cmd:nNn
+%  }
+%   \begin{syntax}
+%     "\keys_set_cmd:nn" <key> <code>
+%     "\keys_set_cmd:nNn" <key> <number> <code>
+%   \end{syntax}
+%   Creates a |._cmd:w| function for <key>, with definition <code>. The
+%   \texttt{N} variant can include <number> parameters.
+% \end{function}
+% 
 % \begin{function}{\keys_toks_set:Nn}
 %   \begin{syntax}
 %     "\keys_toks_set:Nn" <toks> <key>
@@ -365,6 +409,17 @@
 %   Use definition of <key>.
 % \end{function}
 % 
+% \begin{function}{
+%   \keys_use_cmd:n|
+%   \keys_use_cmd:nn
+% }
+%   \begin{syntax}
+%     "\keys_use_cmd:n" <key>
+%     "\keys_use_cmd:nn" <key> <arg>
+%   \end{syntax}
+%   Uses the |._cmd:w| function for <key>, passing <arg> if needed.
+% \end{function}
+% 
 %\subsection{Implementation}
 %
 % The usual preliminaries.  The key--value parsing itself is handled by
@@ -378,6 +433,40 @@
 %    \end{macrocode}
 %
 %\subsubsection{Variables and contrasts}
+%
+%\begin{macro}{\c_keys_0_empty_tlp}
+%\begin{macro}{\c_keys_1_empty_tlp}
+%\begin{macro}{\c_keys_2_empty_tlp}
+%\begin{macro}{\c_keys_3_empty_tlp}
+%\begin{macro}{\c_keys_4_empty_tlp}
+%\begin{macro}{\c_keys_5_empty_tlp}
+%\begin{macro}{\c_keys_6_empty_tlp}
+%\begin{macro}{\c_keys_7_empty_tlp}
+%\begin{macro}{\c_keys_8_empty_tlp}
+%\begin{macro}{\c_keys_9_empty_tlp}
+% A set of empty arguments.
+%    \begin{macrocode}
+\tlp_new:cn { c_keys_0_empty_tlp } {}
+\tlp_new:cn { c_keys_1_empty_tlp } { {} }
+\tlp_new:cn { c_keys_2_empty_tlp } { {} {} }
+\tlp_new:cn { c_keys_3_empty_tlp } { {} {} {} }
+\tlp_new:cn { c_keys_4_empty_tlp } { {} {} {} {} }
+\tlp_new:cn { c_keys_5_empty_tlp } { {} {} {} {} {} }
+\tlp_new:cn { c_keys_6_empty_tlp } { {} {} {} {} {} {} }
+\tlp_new:cn { c_keys_7_empty_tlp } { {} {} {} {} {} {} {} }
+\tlp_new:cn { c_keys_8_empty_tlp } { {} {} {} {} {} {} {} {} }
+\tlp_new:cn { c_keys_9_empty_tlp } { {} {} {} {} {} {} {} {} {} }
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
 %
 %\begin{macro}{\c_keys_cs_prefix_tlp}
 % First, the small number of constants needed are created. A prefix is
@@ -469,7 +558,7 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%\subsection{Programmer functions}
+%\subsubsection{Programmer functions}
 %
 %\begin{macro}{\keys_manage:n}
 %\begin{macro}{\keys_manage_quick:n}
@@ -536,7 +625,7 @@
 %\end{macro}
 %\end{macro}
 %
-%\subsection{Internal functions}
+%\subsubsection{Internal functions}
 %
 %\begin{macro}{\keys_bool_new:n}
 % To create a new switch, which will be true (as the existence of the 
@@ -595,7 +684,7 @@
 %    \begin{macrocode}
 \cs_new:NNn \keys_find_code_full: 0 {
   \keys_if_cmd_really_exist:nTF { \l_keys_current_key_full_tlp } {
-    \keys_use_cmd:c { \l_keys_current_key_full_tlp }
+    \keys_use_cmd:n { \l_keys_current_key_full_tlp }
   }{
     \keys_if_really_exist:nTF { \l_keys_current_key_full_tlp } {
       \bool_if:NTF \l_keys_no_value_bool {
@@ -613,12 +702,12 @@
   \keys_separate_path:
   \keys_if_cmd_really_exist:nTF
     { \c_keys_properties_path_tlp / \l_keys_current_key_name_tlp } {
-    \keys_use_cmd:c  
+    \keys_use_cmd:n  
       {\c_keys_properties_path_tlp / \l_keys_current_key_name_tlp}
   }{
     \keys_if_cmd_really_exist:nTF 
       { \l_keys_current_path_tlp / unknown } {
-      \keys_use_cmd:c { \l_keys_current_path_tlp / unknown }
+      \keys_use_cmd:n { \l_keys_current_path_tlp / unknown }
     }{
       \keys_err_use:n { unknown_key }
     }
@@ -791,6 +880,25 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\keys_set_cmd:nn}
+%\begin{macro}{\keys_set_cmd:nNn}
+% Creation of the key |._cmd:w| macros happens here. For the 
+% multiple-argument versions, the number of arguments is stored for
+% use later on.
+%    \begin{macrocode}
+\cs_new:NNn \keys_set_cmd:nn 2 {
+  \keys_clear_properties:n {#1}
+  \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } 1 {#2}
+}
+\cs_new:NNn \keys_set_cmd:nNn 3 {
+  \keys_clear_properties:n {#1}
+  \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
+  \keys_set:nn { #1 /._num_args_tlp} {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}{\keys_toks_set:Nn}
 % Sets a toks to the content of a key.
 %    \begin{macrocode}
@@ -818,14 +926,65 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%------
-%
-%\begin{macro}{\q_keys_stop}
-% A private quark is needed.
+%\begin{macro}{\keys_use_cmd:n}
+%\begin{macro}{\keys_use_cmd:nn}
+%\begin{macro}[aux]{\keys_use_cmd_aux:nn}
+%\begin{macro}[aux]{\keys_use_cmd_aux:w}
+% Some care is needed when using command keys. For commands with 
+% multiple arguments a check is made in case none were given, and if
+% so a series of empty values is given instead.
 %    \begin{macrocode}
-\quark_new:N \q_keys_stop
+\cs_new:NNn \keys_use_cmd:n 1 {
+  \exp_args:Nno \keys_use_cmd:nn {#1} 
+    { \toks_use:N \l_keys_current_value_toks }
+}
+\cs_new:NNn \keys_use_cmd:nn 2 {
+  \keys_if_really_exist:nTF { #1 /._num_args_tlp } {
+     \keys_use_cmd_aux:nn {#1} {#2}
+  }{
+    \keys_use:n {#1/._cmd:w} {#2}
+  }
+}
+\cs_new:NNn \keys_use_cmd_aux:nn 2 {
+  \tlist_if_empty:nTF {#2} {
+    \cs_set:NNn \keys_use_cmd_aux:w 0 {
+      \keys_use:n { #1 /._cmd:w }
+    }
+    \exp_after:NN \exp_after:NN \exp_after:NN \keys_use_cmd_aux:w 
+      \cs:w
+        c_keys_ \keys_use:n { #1 /._num_args_tlp } _empty_tlp
+      \cs_end:
+  }{
+    \keys_use:n { #1 /._cmd:w } #2
+  }
+}
+\cs_new:NNn \keys_use_cmd_aux_ii:nn 2 {
+}
 %    \end{macrocode}
 %\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%\subsubsection{Property definitions}
+%
+%\begin{macro}{.code:n}
+%\begin{macro}{.code:Nn}
+% The \texttt{.code:n} and \texttt{.code:Nn} properties have to be 
+% defined directly.
+%    \begin{macrocode}
+\keys_set_cmd:nn { \c_keys_properties_path_tlp /.code:n } {
+  \keys_set_cmd:nn { \l_keys_current_path_tlp } {#1}
+}
+\keys_set_cmd:nNn { \c_keys_properties_path_tlp /.code:Nn } 2 {
+  \keys_set_cmd:nNn { \l_keys_current_path_tlp } #1 {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%------
+%
 %\begin{macro}{\keys_boolean:nN}
 %\begin{macro}{\keys_boolean:nc}
 % To allow code-sharing for switch control.
@@ -891,31 +1050,19 @@
 %    \end{macrocode}
 %\end{macro}
 
-%\begin{macro}{\keys_def_cmd:nn}
 %\begin{macro}{\keys_def_cmd:cx}
-%\begin{macro}{\keys_def_cmd:nnn}
 %\begin{macro}{\keys_def_cmd:nnx}
 % Creating the |._cmd:w| keys happens here.
 %    \begin{macrocode}
-\cs_new:NNn \keys_def_cmd:nn 2 {
-  \keys_clear_properties:n {#1}
-  \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } 1 {#2}
-}
 \cs_new:Npn \keys_def_cmd:cx #1#2 {
   \keys_clear_properties:n {#1}
   \cs_set:cpx {\c_keys_cs_prefix_tlp #1/._cmd:w} ##1 \q_keys_stop {#2}
-}
-\cs_new:NNn \keys_def_cmd:nNn 3 {
-  \keys_clear_properties:n {#1}
-  \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
 }
 \cs_new:Npn \keys_def_cmd:nnx #1#2#3 {
   \keys_clear_properties:n {#1}
   \cs_set:cpx {\c_keys_cs_prefix_tlp #1/._cmd:w} #2 \q_keys_stop {#3}
 }
 %    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %\end{macro}
 %\end{macro}
 %\begin{macro}{\keys_module_name:}
@@ -952,28 +1099,6 @@
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
-%\begin{macro}{\keys_use_cmd:cn}
-%\begin{macro}{\keys_use_cmd:c}
-% Command keys are stored in a slightly odd fashion, and so this macro
-% uses them in a ``safe'' way.
-%    \begin{macrocode}
-\cs_new:Npn \keys_use_cmd:c #1 {
-  \showthe\l_keys_current_value_toks
-  \exp_args:Nno \keys_use_cmd:cn {#1}
-    {\toks_use:N \l_keys_current_value_toks}
-}
-\cs_new:Npn \keys_use_cmd:cn #1#2 {
-  \bool_if:NTF \l_keys_no_value_bool {
-    \keys_use:n {#1/._cmd:w} { }
-  }{
-    %\tempa{#2}\show\tempa
-    %\expandafter\show\csname keys-root/#1/.cmd:w
-    \keys_use:n {#1/._cmd:w} {#2}
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %\begin{macro}{\keys_try:}
 % Trying something without errors.
 %    \begin{macrocode}
@@ -987,7 +1112,7 @@
       }
     }
     \let:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp 
-    \keys_use_cmd:c {\l_keys_current_path_tlp}
+    \keys_use_cmd:n {\l_keys_current_path_tlp}
     \bool_set_true:N \l_keys_success_bool
   }{
     \keys_if_really_exist:nTF {\l_keys_current_path_tlp} {
@@ -1083,18 +1208,6 @@
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
-%
-%\subsubsection{Property definitions}
-%
-% The |.code:n| and |.code:nn| properties have to be defined directly.
-%    \begin{macrocode}
-\keys_def_cmd:nn { \c_keys_properties_path_tlp /.code:n } {
-  \keys_def_cmd:nn { \l_keys_current_path_tlp } {#1}
-}
-\keys_def_cmd:nNn { \c_keys_properties_path_tlp /.code:nn } 2 {
-  \keys_def_cmd:nNn { \l_keys_current_path_tlp } #1 {#2}
-}
-%    \end{macrocode}
 %
 % The remaining definitions can all be carried out using the package
 % itself. Here, the |_quick| method is used as there is no need to

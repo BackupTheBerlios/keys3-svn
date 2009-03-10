@@ -25,7 +25,7 @@
 %\iffalse
 \documentclass[full]{l3doc}
 \begin{document}
-\DocInput{\filename.\filenameext}
+  \DocInput{\filename.\filenameext}
 \end{document}
 %</driver>
 % \fi
@@ -110,7 +110,7 @@
 %   \keys_manage_quick:n|
 % }
 %   \begin{syntax}
-%     "\keys_manage:n" \Arg{keyval list}
+%     "\keys_manage:n" <keyval list>
 %   \end{syntax}
 %   The main key management function, which parses over the <keyval
 %   list> and processes each key. The standard version removes leading
@@ -124,7 +124,7 @@
 %   \keys_manage_quick:nn|
 % }
 %   \begin{syntax}
-%     "\keys_manage:nn" \Arg{path} \Arg{keyval list}
+%     "\keys_manage:nn" <path> <keyval list>
 %   \end{syntax}
 %   Versions of the above which include a <path> as an argument. These
 %   are faster versions of the |:n| macros when setting lots of keys
@@ -181,7 +181,7 @@
 % 
 % \begin{variable}{
 %   \l_keys_current_choice_tlp|
-%   \l_keys_current_choice_tlp|
+%   \l_keys_current_choice_int|
 % }
 %   Information on multiple choices.
 % \end{variable}
@@ -197,7 +197,174 @@
 % \begin{variable}{\l_keys_tmpa_tlp}
 %   A scratch variable.
 % \end{variable}
+% 
+%\subsection{Internal functions}
 %
+% Notice that everything should be done using the keys system. Only
+% \cs{keys_manage:n} and so on are intended for external use. In all
+% cases, \m{key} is a fully-qualified key name. Functions created will
+% be prefixed with \cs{c_keys_cs_prefix_tlp}.
+% 
+% \begin{function}{\keys_bool_new:n}
+%   \begin{syntax}
+%     "\keys_bool_new:n" <key>
+%   \end{syntax}
+%   Creates a switch <key>, which will be set to \texttt{true}.
+% \end{function}
+% 
+% \begin{function}{\keys_clear_properties:n}
+%   \begin{syntax}
+%     "\keys_clear_properties:n" <key>
+%   \end{syntax}
+%   Clears the internal properties of <key>.
+% \end{function}
+% 
+% \begin{function}{\keys_default_add:}
+%   \begin{syntax}
+%     "\keys_default_add:"
+%   \end{syntax}
+%   If no value was given for the current key, and a default value is
+%   available, copies the default into \cs{l_keys_current_value_toks}.
+% \end{function}
+% 
+% \begin{function}{\keys_expand:n}
+%   \begin{syntax}
+%     "\keys_expand:n" \Arg{code}
+%   \end{syntax}
+%   A helper function used to expand <code>.
+% \end{function}
+% 
+
+% \begin{function}{
+%   \keys_find_code_full:|
+%   \keys_find_code_name:
+% }
+%   \begin{syntax}
+%     "\keys_find_code_full:"
+%     "\keys_find_code_name:"
+%   \end{syntax}
+%   Find code to execute for the current fully qualified key 
+%   (\texttt{full}) or key name only (\texttt{name}).
+% \end{function}
+% 
+% \begin{function}{\keys_if_cmd_really_exist:n / (TF)}
+%   \begin{syntax}
+%     "\keys_if_cmd_really_exist:nTF" <key> <true code> 
+%     ~~~~<false code>
+%   \end{syntax}
+%   Checks for the existence of a |._cmd:w| function for <key>.
+% \end{function}
+% 
+% \begin{function}{\keys_if_really_exist:n / (TF)}
+%   \begin{syntax}
+%     "\keys_if_really_exist:nTF" <key> <true code> 
+%     ~~~~<false code>
+%   \end{syntax}
+%   Checks for the existence of a <key>.
+% \end{function}
+% 
+% \begin{function}{\keys_if_value:n / (TF)}
+%   \begin{syntax}
+%     "\keys_if_value:nTF" <property> <true code> <false code>
+%   \end{syntax}
+%   Checks for the <property> switch of a <key> (typically 
+%   \texttt{required} or \texttt{forbidden}).
+% \end{function}
+% 
+% \begin{function}{
+%   \keys_no_value_elt:n|
+%   \keys_value_elt:nn
+% }
+%   \begin{syntax}
+%     "\keys_no_value_elt:n" <elt>
+%     "\keys_value_elt:nn" <elt> <value>
+%   \end{syntax}
+%   Functions used by \textsf{l3keyval} for each <elt> of the <keyval 
+%   list> being processed.
+% \end{function}
+% 
+% \begin{function}{\keys_parse:n}
+%   \begin{syntax}
+%     "\keys_parse:n" <keyval list>
+%   \end{syntax}
+%   Functions which actually parses <keyval list>.
+% \end{function}
+% 
+% \begin{function}{\keys_parse_list:n}
+%   \begin{syntax}
+%     "\keys_parse_list:n" <keyval list>
+%   \end{syntax}
+%   Set up macro for \cs{keys_parse:n}.
+% \end{function}
+% 
+% \begin{function}{
+%   \keys_path_add:N|
+%   \keys_path_add:w
+%  }
+%   \begin{syntax}
+%     "\keys_path_add:N" <tlp>
+%     "\keys_path_add:w" <tlist> "\q_stop"
+%   \end{syntax}
+%   Adds a full path to key name stored in <tlp> or given as <tlist>.
+% \end{function}
+% 
+% \begin{function}{\keys_process_elt:nn}
+%   \begin{syntax}
+%     "\keys_process_elt:nn" <elt> <value>
+%   \end{syntax}
+%   Lead-off processor for converting <elt> into a fully-qualified 
+%   <key> and checking validity of <value>.
+% \end{function}
+% 
+% \begin{function}{
+%   \keys_separate_path:
+%   \keys_separate_path:w
+%  }
+%   \begin{syntax}
+%     "\keys_separate_path:" 
+%     "\keys_separate_path:w" / <path 1> / <path 2> "\q_stop"
+%   \end{syntax}
+%   Separates key into <path> and <key name>.
+% \end{function}
+% 
+% \begin{function}{
+%   \keys_set:nn
+%   \keys_set:nx
+%  }
+%   \begin{syntax}
+%     "\keys_set:nn" <key> <data>
+%   \end{syntax}
+%   Stores <data> in <key> function.
+% \end{function}
+% 
+% \begin{function}{\keys_set_eq:nn}
+%   \begin{syntax}
+%     "\keys_set_eq:nn" <key1> <key2>
+%   \end{syntax}
+%   Sets <key1> equal to <key2>.
+% \end{function}
+% 
+% \begin{function}{\keys_toks_set:Nn}
+%   \begin{syntax}
+%     "\keys_toks_set:Nn" <toks> <key>
+%   \end{syntax}
+%   Sets <toks> equal to the content of <key>
+% \end{function}
+% 
+% \begin{function}{\keys_undefine:n}
+%   \begin{syntax}
+%     "\keys_undefine:n" <key>
+%   \end{syntax}
+%   Delete definition of <key>.
+% \end{function}
+% 
+% \begin{function}{\keys_use:n}
+%   \begin{syntax}
+%     "\keys_use:n" <key>
+%   \end{syntax}
+%   Use definition of <key>.
+% \end{function}
+% 
 %\subsection{Implementation}
 %
 % The usual preliminaries.  The key--value parsing itself is handled by
@@ -302,7 +469,7 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%\subsection{Functions}
+%\subsection{Programmer functions}
 %
 %\begin{macro}{\keys_manage:n}
 %\begin{macro}{\keys_manage_quick:n}
@@ -368,6 +535,8 @@
 %\end{macro}
 %\end{macro}
 %\end{macro}
+%
+%\subsection{Internal functions}
 %
 %\begin{macro}{\keys_bool_new:n}
 % To create a new switch, which will be true (as the existence of the 
@@ -577,15 +746,6 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\keys_put:nnn}
-% To add code to one end of a stored key.
-%    \begin{macrocode}
-\cs_new:NNn \keys_put:nnn 3 {
-  \use:c { tlp_put_#1:cn } { \c_keys_cs_prefix_tlp #2 } {#3}
-}
-%    \end{macrocode}
-%\end{macro}
-%
 %\begin{macro}{\keys_separate_path:}
 %\begin{macro}{\keys_separate_path:w}
 % A simple piece of recursion to find the key name and path.
@@ -627,16 +787,6 @@
 \cs_new:NNn \keys_set_eq:nn 2 {
   \cs_set_eq:cc { \c_keys_cs_prefix_tlp #1 } 
     { \c_keys_cs_prefix_tlp #2 }
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_toks_new:nn}
-% Creates a new token register and stores the given data in it.
-%    \begin{macrocode}
-\cs_new:NNn \keys_toks_new:nn 2 {
-  \toks_new:c { \c_keys_cs_prefix_tlp #1 }
-  \toks_set:cn { \c_keys_cs_prefix_tlp #1 } {#2}
 }
 %    \end{macrocode}
 %\end{macro}

@@ -172,6 +172,25 @@
 %  include <number> parameters, which can be in the range 0--9.
 % \end{function}
 % 
+% \begin{function}{.default:n}
+%  \begin{syntax}
+%    <key>/.default:n = <content>
+%  \end{syntax}
+%  Creates a default value for <key>, which is used if no value is 
+%  given. The <content> is stored as a tlp, and so must be compatible
+%  with this variable type.
+% \end{function}
+% 
+% \begin{function}{
+%   .value~forbidden:|
+%   .value~required:|
+% }
+%  \begin{syntax}
+%    <key>/.value forbidden:
+%  \end{syntax}
+%  Flags for forbidding and requiring a <value> for <key>.
+% \end{function}
+% 
 %\subsection{Variables and constants}
 %
 % \begin{variable}{
@@ -299,14 +318,14 @@
 % \begin{function}{
 %   \keys_err_use:nw|
 %   \keys_err_use:n|
-%   \keys_err_use:nV|
+%   \keys_err_use:nn|
 % }
 %   \begin{syntax}
 %     "\keys_err_use:n" <name>
-%     "\keys_err_use:nV" <name> <var>
+%     "\keys_err_use:nn" <name> <content>
 %   \end{syntax}
-%   Issues error <name>, with or without content of <var>. The 
-%   \texttt{w} variant may take one or two arguments.
+%   Issues error <name>, with or without <content>. The \texttt{w} 
+%   variant may take one or two arguments.
 % \end{function}
 % 
 % \begin{function}{\keys_expand:n}
@@ -469,6 +488,42 @@
 %     "\keys_use_cmd:nn" <key> <arg>
 %   \end{syntax}
 %   Uses the |._cmd:w| function for <key>, passing <arg> if needed.
+% \end{function}
+% 
+%\subsubsection{Internal properties}
+%
+% The internal key properties should not be accessed directly.
+%
+% \begin{function}{._cmd:w}
+%  \begin{syntax}
+%  \end{syntax}
+%  The function which is executed for a key with \texttt{.code}.
+% \end{function}
+%
+% \begin{function}{._default_tlp}
+%  \begin{syntax}
+%  \end{syntax}
+%  Holds the default value for a key.
+% \end{function}
+% 
+% \begin{function}{._forbidden_bool}
+%  \begin{syntax}
+%  \end{syntax}
+%  Indicates that a value cannot be given for <key>.
+% \end{function}
+% 
+% \begin{function}{._num_args_tlp}
+%  \begin{syntax}
+%  \end{syntax}
+%  For functions defined with \texttt{.code:Nn} and \texttt{.code:Nx},
+%  contains the number of arguments the associated |._cmd:w| function
+%  takes.
+% \end{function}
+% 
+% \begin{function}{._required_bool}
+%  \begin{syntax}
+%  \end{syntax}
+%  Indicates that <key> must have a value provided.
 % \end{function}
 % 
 %\subsection{Implementation}
@@ -868,6 +923,7 @@
 %\end{macro}
 %
 %\begin{macro}{\keys_process_elt:nn}
+%\begin{macro}[aux]{\keys_process_elt_aux:}
 % The key processor starts by storing the given key name and value, and
 % adding a path to the former if necessary. There is then potentially a
 % need to fill in a default value before checking for required or 
@@ -879,20 +935,29 @@
   \keys_path_add:N \l_keys_current_key_full_tlp
   \keys_default_add:
   \keys_if_value:nTF { required } {
-    \bool_if:NT \l_keys_no_value_bool {
+    \bool_if:NTF \l_keys_no_value_bool {
       \keys_err_use:n { value_required }
+    }{
+      \keys_process_elt_aux:
     }
   }{
-    \keys_if_value:nTF { forbidden } {
-      \bool_if:NF \l_keys_no_value_bool {
-        \keys_err_use:n { value_forbidden }
-      }
-    }{
+    \keys_process_elt_aux:
+  }
+}
+\cs_new:NNn \keys_process_elt_aux: 0 {
+  \keys_if_value:nTF { forbidden } {
+    \bool_if:NTF \l_keys_no_value_bool {
       \keys_find_code_full:
+    }{
+      \keys_err_use:nn { value_forbidden } 
+        { \toks_use:N \l_keys_current_value_toks }
     }
+  }{
+    \keys_find_code_full:
   }
 }
 %    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\keys_separate_path:}
@@ -944,6 +1009,8 @@
 %\begin{macro}{\keys_set_cmd:nx}
 %\begin{macro}{\keys_set_cmd:nNn}
 %\begin{macro}{\keys_set_cmd:nNx}
+%\begin{macro}{._cmd:w}
+%\begin{macro}{._num_args_tlp}
 % Creation of the key |._cmd:w| macros happens here. For the 
 % multiple-argument versions, the number of arguments is stored for
 % use later on.
@@ -967,6 +1034,8 @@
   \keys_set:nn { #1 /._num_args_tlp} {#2}
 }
 %    \end{macrocode}
+%\end{macro}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %\end{macro}
@@ -1072,9 +1141,9 @@
 \keys_err_new:nNnnn { value_required } 1
   { The~key~`#1'~requires~a~value~and~is~being~ignored }
   { \err_help_return_or_X: } { }
-\keys_err_new:nNnnn { value_forbidden } 1
-  { The~key~`#1'~cannot~taken~a~value:~\iow_newline:~\text_put_sp:~
-   \text_put_sp:~the~one~given~is~being~ignored }
+\keys_err_new:nNnnn { value_forbidden } 2
+  { The~key~`#1'~cannot~taken~a~value:~the~given~input~\iow_newline:
+    ~\text_put_sp:~\text_put_sp:`#2'~is~being~ignored }
   { \err_help_return_or_X: } { }
 \keys_err_new:nNnnn { boolean_expected } 2
   { Key~`#1'~takes~the~Boolean~values~`true'~and~`false'~\iow_newline:~
@@ -1108,9 +1177,8 @@
 \cs_new:NNn \keys_err_use:n 1 {
   \keys_err_use:nw {#1} \l_keys_current_key_full_tlp
 }
-\cs_new:NNn \keys_err_use:nV 2 {
-  \cs_set:Nn \l_keys_tmpa_tlp {#1}
-  \exp_args:NVV \keys_err_use:nw \l_keys_tmpa_tlp #2
+\cs_new:NNn \keys_err_use:nn 2 {
+  \keys_err_use:nw {#1} \l_keys_current_key_full_tlp {#2}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1170,6 +1238,40 @@
   },
   \c_keys_properties_path_tlp /.code:Nx/.code:Nn = 2 {
     \keys_set_cmd:nNx { \l_keys_current_path_tlp } {#1} {#2}
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{.value~forbidden:}
+%\begin{macro}{._required_bool}
+%\begin{macro}{.value~required:}
+%\begin{macro}{._forbidden_bool}
+% Values are required or forbidden by creating the appropriate flags.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.value~required:/.code:n = {
+    \keys_bool_new:n { \l_keys_current_path_tlp /._required_bool }
+  },
+  \c_keys_properties_path_tlp /.value~forbidden:/.code:n = {
+    \keys_bool_new:n { \l_keys_current_path_tlp /._forbidden_bool}
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{.default:n}
+%\begin{macro}{._default_tlp}
+% The default value for a key is stored in the |._default_tlp|
+% private property.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.default:n/.code:n = {
+    \keys_set:nn { \l_keys_current_path_tlp /._default_tlp } {#1}
   }
 }
 %    \end{macrocode}
@@ -1312,34 +1414,6 @@
 % worry about spaces or catcodes.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-%    \end{macrocode}
-% Initial and default values can now be created.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.initial:n/.code:n = {
-%    \keys_set:nn {\l_keys_current_path_tlp} {#1}
-%  },
-%  \c_keys_properties_path_tlp /.default:n/.code:n = {
-%    \keys_set:nn {\l_keys_current_path_tlp /._default_tlp} {#1}
-%  },
-%    \end{macrocode}
-% Values are either required or forbidden, with the appropriate error
-% messages. 
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.value~required:/.code:n = {
-%    \keys_bool_new:n {\l_keys_current_path_tlp /._required_bool}
-%  },
-%  \c_keys_errors_path_tlp /value~required/.code:n = {
-%    \keys_err_use:nw {value_required} \l_keys_current_key_full_tlp
-%  },
-%  \c_keys_properties_path_tlp /.value~forbidden:/.code:n = {
-%    \keys_bool_new:n {\l_keys_current_path_tlp /._forbidden_bool}
-%  },
-%  \c_keys_errors_path_tlp /value~forbidden/.code:n = {
-%    \keys_err_use:nw {value_forbidden} \l_keys_current_key_full_tlp
-%  },
-%    \end{macrocode}
-% Being able to change path is pretty useful.
-%    \begin{macrocode}
 %  \c_keys_properties_path_tlp /.module:/.code:n = {
 %    \keys_manage_internal:n {
 %      \l_keys_current_path_tlp /.code:x = {
@@ -1373,21 +1447,6 @@
 %      \l_keys_current_path_tlp /.code:x =
 %        {#1} {\exp_not:N \keys_parse_list:n {#2}}
 %    }
-%  },
-%    \end{macrocode}
-% Transfer of data in and out.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.key~to~tlp:N/.code:n = {
-%    \tlp_set_eq:Nc #1 {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
-%  },
-%  \c_keys_properties_path_tlp /.key~to~tlp:c/.code:n = {
-%    \tlp_set_eq:cc {#1} {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
-%  },
-%  \c_keys_properties_path_tlp /.tlp~to~key:N/.code:n = {
-%    \tlp_set_eq:cN {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} #1
-%  },
-%  \c_keys_properties_path_tlp /.tlp~to~key:c/.code:n = {
-%    \tlp_set_eq:cc {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp} {#1}
 %  },
 %    \end{macrocode}
 % That is all of the lower-level things done.  Now use them to build

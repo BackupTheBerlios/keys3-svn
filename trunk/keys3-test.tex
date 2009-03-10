@@ -6,8 +6,8 @@
 \usepackage[parfill]{parskip}
 
 % The document commands for creating keys is very simple. A generic
-% one is created to set any modules keys, and one specific to
-% the module used here.
+% one is created to set any modules keys, and one specific to the module 
+% used here.
 \ExplSyntaxOn
 \DeclareDocumentCommand{\SetModuleKeys}{m}{
   \keys_manage:n{
@@ -23,6 +23,10 @@
 
 \begin{document}
 
+% Each test starts with a short piece of text explaining the property
+% being used. Under this, the expected output is given, followed
+% if relevant by the text of any error messages expected.
+
 % Test one: Simply creating a key with one argument and then using it.
 % Notice that the text length determines the limits of the argument: 
 % spaces at either end are ignored. Literal spaces between text are 
@@ -36,7 +40,7 @@
   key/.code:n = {You said: `#1'\\},
   key = Hello World ,
   key = { Hello World },
-  key = 
+  key 
 }
 
 % Test two: Creating a multiple-argument key. Here, the arguments
@@ -105,6 +109,28 @@
 \SetModuleKeys{
   key one = {A} {B},
   key two = {1} {2}
+}
+
+% Test five: Values can be required and forbidden with the 
+% .value required: and .value forbidden: properties.
+% ----------------------------------------------------------------------
+%   All okay
+%   All okay
+% ----------------------------------------------------------------------
+% ! The key `/module name/key' cannot taken a value: the given input 
+%   `Not allowed' is being ignored.
+%  
+% ! The key `/module name/key' requires a value and is being ignored.
+% ----------------------------------------------------------------------
+\SetModuleKeys{
+  key/.code:n = {All okay\\},
+  key/.value forbidden:,
+  key,
+  key = Not allowed,
+  key/.code:n = #1,
+  key/.value required:,
+  key = {All okay\\},
+  key
 }
 
 \end{document}

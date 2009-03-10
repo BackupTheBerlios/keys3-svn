@@ -761,6 +761,7 @@
   \keys_undefine:n { #1/._cmd:w }      
   \keys_undefine:n { #1/._default_tlp }  
   \keys_undefine:n { #1/._forbidden_bool } 
+  \keys_undefine:n { #1/._num_args_tlp }
   \keys_undefine:n { #1/._required_bool }
 }
 %    \end{macrocode}
@@ -775,6 +776,7 @@
       { \l_keys_current_key_full_tlp /._default_tlp } {
       \keys_toks_set:Nn \l_keys_current_value_toks
         { \l_keys_current_key_full_tlp /._default_tlp }
+      \bool_set_false:N \l_keys_no_value_bool
     }
   }
 }
@@ -1253,9 +1255,11 @@
 \keys_manage_quick:n {
   \c_keys_properties_path_tlp /.value~required:/.code:n = {
     \keys_bool_new:n { \l_keys_current_path_tlp /._required_bool }
+    \keys_undefine:n { \l_keys_current_path_tlp /._forbidden_bool }
   },
   \c_keys_properties_path_tlp /.value~forbidden:/.code:n = {
-    \keys_bool_new:n { \l_keys_current_path_tlp /._forbidden_bool}
+    \keys_bool_new:n { \l_keys_current_path_tlp /._forbidden_bool }
+    \keys_undefine:n { \l_keys_current_path_tlp /._required_bool }
   }
 }
 %    \end{macrocode}
@@ -1272,6 +1276,7 @@
 \keys_manage_quick:n {
   \c_keys_properties_path_tlp /.default:n/.code:n = {
     \keys_set:nn { \l_keys_current_path_tlp /._default_tlp } {#1}
+    \keys_undefine:n { \l_keys_current_path_tlp /._required_bool }
   }
 }
 %    \end{macrocode}

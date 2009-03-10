@@ -129,7 +129,22 @@
   key = Not allowed,
   key/.code:n = #1,
   key/.value required:,
-  key = {All okay\\},
+  key = {All okay},
+  key
+}
+
+% Test six: Keys can be given a default value, to be used if nothing is
+% specified by the user.
+% ----------------------------------------------------------------------
+%   Default
+%   Real
+%   Default
+% ----------------------------------------------------------------------
+\SetModuleKeys{
+  key/.code:n = {#1\\},
+  key/.default:n = Default,
+  key,
+  key = Real,
   key
 }
 

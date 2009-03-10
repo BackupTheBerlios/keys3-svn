@@ -108,6 +108,7 @@
 % \begin{function}{
 %   \keys_manage:n|
 %   \keys_manage_quick:n|
+%   \keys_manage_internal:n|
 % }
 %   \begin{syntax}
 %     "\keys_manage:n" <keyval list>
@@ -116,7 +117,9 @@
 %   list> and processes each key. The standard version removes leading
 %   and trailing spaces and checks catcodes for ungrouped ``|,|'' and
 %   ``|=|''. The |_quick| version omits these tests for speed, and is
-%   therefore more suited to creating keys inside code blocks.
+%   therefore more suited to creating keys inside code blocks. The
+%   \texttt{internal} variant is used when recycling keys inside
+%   \textsf{keys3}.
 % \end{function}
 %
 % \begin{function}{
@@ -177,16 +180,34 @@
 %   The prefix added to the fully-qualified key when saving them.
 % \end{variable}
 % 
-% \begin{variable}{\c_keys_root_tlp}
-%   The root path for keys.
-% \end{variable}
-% 
 % \begin{variable}{
 %   \c_keys_errors_path_tlp|
 %   \c_keys_properties_path_tlp|
 %   \c_keys_utilities_path_tlp|
 % }
 %   Paths for properties used by \textsf{l3keys} itself.
+% \end{variable}
+% 
+% \begin{variable}{\c_keys_root_tlp}
+%   The root path for keys.
+% \end{variable}
+% 
+% \begin{variable}{
+%   \l_keys_current_choice_tlp|
+%   \l_keys_current_choice_int|
+% }
+%   Information on multiple choices.
+% \end{variable}
+% 
+% \begin{variable}{
+%   \l_keys_current_key_full_tlp|
+%   \l_keys_current_key_name_tlp|
+% }
+%   The current key name is stored both with and without a path.
+% \end{variable}
+% 
+% \begin{variable}{\l_keys_current_module_tlp}
+%   Current module name used when creating csnames.
 % \end{variable}
 % 
 % \begin{variable}{
@@ -197,26 +218,8 @@
 %   Various key paths need to be stored.
 % \end{variable}
 % 
-% \begin{variable}{
-%   \l_keys_current_key_full_tlp|
-%   \l_keys_current_key_name_tlp|
-% }
-%   The current key name is stored both with and without a path.
-% \end{variable}
-% 
 % \begin{variable}{\l_keys_current_value_toks}
 %   The value given for the current key, stored as a token register.
-% \end{variable}
-% 
-% \begin{variable}{\l_keys_current_module_tlp}
-%   Current module name used when creating csnames.
-% \end{variable}
-% 
-% \begin{variable}{
-%   \l_keys_current_choice_tlp|
-%   \l_keys_current_choice_int|
-% }
-%   Information on multiple choices.
 % \end{variable}
 % 
 % \begin{variable}{\l_keys_no_value_bool}
@@ -229,6 +232,18 @@
 % 
 % \begin{variable}{\l_keys_tmpa_tlp}
 %   A scratch variable.
+% \end{variable}
+% 
+% \begin{variable}{ 
+%  \l_keys_err_unknown_key_tlp|
+%  \l_keys_err_value_ignored_tlp|
+%  \l_keys_err_value_required_tlp|
+%  \l_keys_err_def_x_args_tlp|
+%  \l_keys_err_boolean_expected_tlp|
+%  \l_keys_err_not_boolean_tlp|
+%  \l_keys_err_unknown_choice_tlp|
+% }
+%   Identification tlps for error messages.
 % \end{variable}
 % 
 %\subsection{Internal functions}
@@ -260,9 +275,30 @@
 %   available, copies the default into \cs{l_keys_current_value_toks}.
 % \end{function}
 % 
+% \begin{function}{\keys_err_new:nNn}
+%   \begin{syntax}
+%     "\keys_err_new:nNn" <name> <args> <text>
+%   \end{syntax}
+%   Creates error with <name> and taking <args> arguments, with
+%   <text> description.
+% \end{function}
+% 
+% \begin{function}{
+%   \keys_err_use:nw|
+%   \keys_err_use:n|
+%   \keys_err_use:nV|
+% }
+%   \begin{syntax}
+%     "\keys_err_use:n" <name>
+%     "\keys_err_use:nV" <name> <var>
+%   \end{syntax}
+%   Issues error <name>, with or without content of <var>. The 
+%   \texttt{w} variant may take one or two arguments.
+% \end{function}
+% 
 % \begin{function}{\keys_expand:n}
 %   \begin{syntax}
-%     "\keys_expand:n" \Arg{code}
+%     "\keys_expand:n" <code>
 %   \end{syntax}
 %   A helper function used to expand <code>.
 % \end{function}
@@ -349,7 +385,7 @@
 % \end{function}
 % 
 % \begin{function}{
-%   \keys_separate_path:
+%   \keys_separate_path:|
 %   \keys_separate_path:w
 %  }
 %   \begin{syntax}
@@ -360,7 +396,7 @@
 % \end{function}
 % 
 % \begin{function}{
-%   \keys_set:nn
+%   \keys_set:nn|
 %   \keys_set:nx
 %  }
 %   \begin{syntax}
@@ -475,13 +511,7 @@
 \tlp_new:Nn \c_keys_cs_prefix_tlp { keys-root }
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\c_keys_root_tlp}
-% The key root should have a clear name; like all of the key macros,
-% this does not include the prefix.
-%    \begin{macrocode}
-\tlp_new:Nn \c_keys_root_tlp { / }
-%    \end{macrocode}
-%\end{macro}
+%
 %\begin{macro}{\c_keys_errors_path_tlp}
 %\begin{macro}{\c_keys_properties_path_tlp}
 %\begin{macro}{\c_keys_utilities_path_tlp}
@@ -493,6 +523,41 @@
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\c_keys_root_tlp}
+% The key root should have a clear name; like all of the key macros,
+% this does not include the prefix.
+%    \begin{macrocode}
+\tlp_new:Nn \c_keys_root_tlp { / }
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\l_keys_current_choice_tlp}
+%\begin{macro}{\l_keys_current_choice_int}
+% Multiple choices need some storage.
+%    \begin{macrocode}
+\tlp_new:N \l_keys_current_choice_tlp
+\int_new:N \l_keys_current_choice_int
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\l_keys_current_key_full_tlp}
+%\begin{macro}{\l_keys_current_key_name_tlp}
+% The current key name and the fully-qualified key are stored.
+%    \begin{macrocode}
+\tlp_new:N \l_keys_current_key_full_tlp
+\tlp_new:N \l_keys_current_default_tlp
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\l_keys_current_module_tlp}
+% The module name of the current module is stored here.
+%    \begin{macrocode}
+\tlp_new:N \l_keys_current_module_tlp
+%    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\l_keys_current_path_tlp}
@@ -509,48 +574,28 @@
 %\end{macro}
 %\end{macro}
 %\end{macro}
-%\begin{macro}{\l_keys_current_key_full_tlp}
-%\begin{macro}{\l_keys_current_key_name_tlp}
-% The current key name and the fully-qualified key are stored.
-%    \begin{macrocode}
-\tlp_new:N \l_keys_current_key_full_tlp
-\tlp_new:N \l_keys_current_default_tlp
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
+%
 %\begin{macro}{\l_keys_current_value_toks}
 % The current value is stored in a token register.
 %    \begin{macrocode}
 \toks_new:N \l_keys_current_value_toks
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\l_keys_current_module_tlp}
-% The module name of the current module is stored here.
-%    \begin{macrocode}
-\tlp_new:N \l_keys_current_module_tlp
-%    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\l_keys_current_choice_tlp}
-%\begin{macro}{\l_keys_current_choice_int}
-% Multiple choices need some storage.
-%    \begin{macrocode}
-\tlp_new:N \l_keys_current_choice_tlp
-\int_new:N \l_keys_current_choice_int
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
+%
 %\begin{macro}{\l_keys_no_value_bool}
 % To indicate that no value has been given.
 %    \begin{macrocode}
 \bool_new:N \l_keys_no_value_bool
 %    \end{macrocode}
 %\end{macro}
+%
 %\begin{macro}{\l_keys_success_bool}
 % A switch for trying keys.
 %    \begin{macrocode}
 \bool_new:N \l_keys_success_bool
 %    \end{macrocode}
 %\end{macro}
+%
 %\begin{macro}{\l_keys_tmpa_tlp}
 % A scratch area.
 %    \begin{macrocode}
@@ -558,7 +603,7 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%\subsubsection{Programmer functions}
+%\subsubsection{Functions}
 %
 %\begin{macro}{\keys_manage:n}
 %\begin{macro}{\keys_manage_quick:n}
@@ -964,6 +1009,81 @@
 %\end{macro}
 %\end{macro}
 %
+%\subsubsection{Error handling code}
+%
+% The \LaTeX3 approach is to have named errors called separately and 
+% defined separately. To make life a little easier here, some custom
+% functions are used to keep repetition down.
+% 
+%\begin{macro}{\keys_err_new:nNn}
+% To create new error messages, a utility function is created.
+%    \begin{macrocode}
+\cs_new:NNn \keys_err_new:nNn 3 {
+  \tlp_new:cn { l_keys_err_#1_tlp } {#1}
+  \exp_args:NNc \err_interrupt_new:NNNnnn \c_keys_err_tlp
+    { l_keys_err_#1_tlp } #2 {#3} { \err_help_return_or_X: } { }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\l_keys_err_unknown_key_tlp}
+%\begin{macro}{\l_keys_err_value_ignored_tlp}
+%\begin{macro}{\l_keys_err_value_required_tlp}
+%\begin{macro}{\l_keys_err_def_x_args_tlp}
+%\begin{macro}{\l_keys_err_boolean_expected_tlp}
+%\begin{macro}{\l_keys_err_not_boolean_tlp}
+%\begin{macro}{\l_keys_err_unknown_choice_tlp}
+% Text for package error messages is stored in \texttt{keys3.err}. The 
+% error names do not need \cs{keys} at the start as they have to be in 
+% the file.
+%    \begin{macrocode}
+\err_file_new:Nn \c_keys_err_tlp { keys3.err }
+\keys_err_new:nNn { unknown_key } 1
+  { The~key~`#1'~is~unknown~and~is~being~ignored }
+\keys_err_new:nNn { value_required } 1
+  { The~key~`#1'~requires~a~value~and~is~being~ignored }
+\keys_err_new:nNn { value_forbidden } 1
+  { The~key~`#1'~cannot~taken~a~value:~\iow_newline:~\text_put_sp:~
+   \text_put_sp:~the~one~given~is~being~ignored }
+\keys_err_new:nNn { boolean_expected } 2
+  { Key~`#1'~takes~the~Boolean~values~`true'~and~`false'~\iow_newline:~
+   \text_put_sp:~\text_put_sp:~only.~The~given~value~`#2'~is~ignored }
+\keys_err_new:nNn { not_boolean } 1
+  { Key~`#1'~is~not~a~Boolean~key:~you~cannot~create~a~complement }
+\keys_err_new:nNn { unknown_choice } 2
+  { Choice~`#2'~unknown~for~key~`#1':~\iow_newline:~\text_put_sp:~
+   \text_put_sp:~the~value~give~is~being~ignored }
+\err_file_close:N \c_keys_err_tlp
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{\keys_err_use:nw}
+%\begin{macro}{\keys_err_use:n}
+%\begin{macro}{\keys_err_use:nV}
+% Utilities for using errors: the first function is \texttt{nw} as it
+% may need one or two arguments in addition to the \texttt{n}.
+%    \begin{macrocode}
+\cs_new:NNn \keys_err_use:nw 1 {
+  \exp_args:NNc \err_interrupt:NNw \c_keys_err_tlp { l_keys_err_#1_tlp }
+}
+\cs_new:NNn \keys_err_use:n 1 {
+  \keys_err_use:nw {#1} \l_keys_current_key_full_tlp
+}
+\cs_new:NNn \keys_err_use:nV 2 {
+  \cs_set:Nn \l_keys_tmpa_tlp {#1}
+  \exp_args:NVV \keys_err_use:nw \l_keys_tmpa_tlp #2
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%
 %\subsubsection{Property definitions}
 %
 %\begin{macro}{.code:n}
@@ -981,6 +1101,20 @@
 %\end{macro}
 %\end{macro}
 %
+% The remaining definitions can all be carried out using the package
+% itself. As category codes and spaces are not an issue here, the
+% |_quick| version of \cs{keys_manage} is used.
+% 
+% First, an error is created for unknown keys: this is done early to
+% catch any internal errors.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_errors_path_tlp /unknown/.code:n = {
+    \keys_err_use:n { unknown_key }
+  }
+}
+%    \end{macrocode}
+%
 %------
 %
 %\begin{macro}{\keys_boolean:nN}
@@ -995,8 +1129,8 @@
       \cs_if_really_exist:cTF {bool_set_##1:c} {
         \use:c {bool_#1_##1:N} #2
       }{
-        \keys_err_use:cw {boolean_expected} \l_keys_current_key_full_tlp
-          {\toks_use:N \l_keys_current_value_toks}
+        \keys_err_use:nn { boolean_expected } 
+          { \toks_use:N \l_keys_current_value_toks }
       }
     },
     \l_keys_current_path_tlp /.default:n = true
@@ -1015,9 +1149,8 @@
           \exp_not:d {\use:c {l_ \l_keys_tmpa_tlp #2 _bool}}
       }{
         \exp_not:n {
-          \keys_err_use:cw {boolean_expected}
-            \l_keys_current_key_full_tlp
-            {\toks_use:N \l_keys_current_value_toks}
+          \keys_err_use:nn {boolean_expected}
+            { \toks_use:N \l_keys_current_value_toks }
         }
       }
     },
@@ -1129,96 +1262,11 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\keys_err_new:cNnnn}
-% To create new error messages, a utility function is handy.
-%    \begin{macrocode}
-\cs_new:Npn \keys_err_new:cNnnn #1 {
-  \tlp_new:cn {l_keys_err_#1_tlp} {#1}
-  \exp_args:NNc \err_interrupt_new:NNNnnn \c_keys_err_tlp
-    {l_keys_err_#1_tlp}
-}
-%    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\l_keys_err_unknown_key_tlp}
-%\begin{macro}{\l_keys_err_value_ignored_tlp}
-%\begin{macro}{\l_keys_err_value_required_tlp}
-%\begin{macro}{\l_keys_err_def_x_args_tlp}
-%\begin{macro}{\l_keys_err_boolean_expected_tlp}
-%\begin{macro}{\l_keys_err_not_boolean_tlp}
-%\begin{macro}{\l_keys_err_unknown_choice_tlp}
-% Text for package error messages is stored in |keys3.err|. The error
-% names do not need \cs{keys} at the start as they have to be in the
-% file.
-%    \begin{macrocode}
-\err_file_new:Nn \c_keys_err_tlp {keys3.err}
-\keys_err_new:cNnnn {unknown_key} 1
-  {The~key~`#1'~is~unknown~and~is~being~ignored}
-  {\err_help_return_or_X:}
-  {}
-\keys_err_new:cNnnn {value_required} 1
-  {The~key~`#1'~requires~a~value~and~is~being~ignored}
-  {\err_help_return_or_X:}
-  {}
-\keys_err_new:cNnnn {value_forbidden} 1
-  {The~key~`#1'~cannot~taken~a~value:~\iow_newline:~\text_put_sp:~
-   \text_put_sp:~the~one~given~is~being~ignored}
-  {\err_help_return_or_X:}
-  {}
-\keys_err_new:cNnnn {def_x_args} 1
-  {Key~`#1'~has~multiple~arguments~and~was~expanded:~\iow_newline:~
-   \text_put_sp:~\text_put_sp:~adding~code~may~give~incorrect~results}
-  {\err_help_return_or_X:}
-  {}
-\keys_err_new:cNnnn {boolean_expected} 2
-  {Key~`#1'~takes~the~Boolean~values~`true'~and~`false'~\iow_newline:~
-   \text_put_sp:~\text_put_sp:~only.~The~given~value~`#2'~is~ignored}
-  {\err_help_return_or_X:}
-  {}
-\keys_err_new:cNnnn {not_boolean} 1
-  {Key~`#1'~is~not~a~Boolean~key:~you~cannot~create~a~complement}
-  {\err_help_return_or_X:}
-  {}
-\keys_err_new:cNnnn {unknown_choice} 2
-  {Choice~`#2'~unknown~for~key~`#1':~\iow_newline:~\text_put_sp:~
-   \text_put_sp:~the~value~give~is~being~ignored}
-  {\err_help_return_or_X:}
-  {}
-\err_file_close:N \c_keys_err_tlp
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_err_use:cw}
-%%\begin{macro}{\keys_err_use:n}
-% A second utility to use errors.
-%    \begin{macrocode}
-\cs_new:Npn \keys_err_use:cw #1 {
-  \exp_args:NNc \err_interrupt:NNw \c_keys_err_tlp {l_keys_err_#1_tlp}
-}
-\cs_new:NNn \keys_err_use:n 1 {
-  \exp_args:NNc \err_interrupt:NNw \c_keys_err_tlp {l_keys_err_#1_tlp}
-     \l_keys_current_key_full_tlp
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%
 % The remaining definitions can all be carried out using the package
 % itself. Here, the |_quick| method is used as there is no need to
 % worry about spaces or catcodes.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-%    \end{macrocode}
-% First, an error is created for unknown keys: this should help to
-% prevent any odd internal errors.
-%    \begin{macrocode}
-  \c_keys_errors_path_tlp /unknown/.code:n = {
-    \keys_err_use:cw {unknown_key} \l_keys_current_key_full_tlp
-  },
 %    \end{macrocode}
 % The two |:x| definition methods need to be created.
 %    \begin{macrocode}
@@ -1245,13 +1293,13 @@
 %    \keys_bool_new:n {\l_keys_current_path_tlp /._required_bool}
 %  },
 %  \c_keys_errors_path_tlp /value~required/.code:n = {
-%    \keys_err_use:cw {value_required} \l_keys_current_key_full_tlp
+%    \keys_err_use:nw {value_required} \l_keys_current_key_full_tlp
 %  },
 %  \c_keys_properties_path_tlp /.value~forbidden:/.code:n = {
 %    \keys_bool_new:n {\l_keys_current_path_tlp /._forbidden_bool}
 %  },
 %  \c_keys_errors_path_tlp /value~forbidden/.code:n = {
-%    \keys_err_use:cw {value_forbidden} \l_keys_current_key_full_tlp
+%    \keys_err_use:nw {value_forbidden} \l_keys_current_key_full_tlp
 %  },
 %    \end{macrocode}
 % Being able to change path is pretty useful.
@@ -1431,7 +1479,7 @@
 %                {\l_keys_tmpa_tlp /._boolean}
 %            }{
 %              \exp_not:n {
-%                \keys_err_use:cw {boolean_expected}
+%                \keys_err_use:nw {boolean_expected}
 %                  \l_keys_current_key_full_tlp
 %                  {\toks_use:N \l_keys_current_value_toks}
 %              }
@@ -1441,7 +1489,7 @@
 %        \l_keys_current_path_tlp /#1/.default:n = true
 %      }
 %    }{
-%      \keys_err_use:cw {not_boolean} \l_keys_current_path_tlp
+%      \keys_err_use:nw {not_boolean} \l_keys_current_path_tlp
 %    }
 %  },
 %    \end{macrocode}
@@ -1456,7 +1504,7 @@
 %        \exp_args:No \keys_parse_list:n {\l_keys_current_key_full_tlp /##1}
 %      },
 %      unknown/.code:n = {
-%        \keys_err_use:cw {unknown_choice} \l_keys_current_path_tlp
+%        \keys_err_use:nw {unknown_choice} \l_keys_current_path_tlp
 %          {\l_keys_current_key_name_tlp}
 %      }
 %    }

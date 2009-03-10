@@ -143,7 +143,17 @@
 % 
 %\subsection{Properties}
 %
-% \begin{function}{.code:n}
+% \begin{function}{.cd:}
+%  \begin{syntax}
+%    <key>/.cd:
+%  \end{syntax}
+%  Changes path to that given by <key>.
+% \end{function}
+%
+% \begin{function}{
+%   .code:n|
+%   .code:x
+%  }
 %  \begin{syntax}
 %    <key>/.code:n = <code>
 %  \end{syntax}
@@ -151,7 +161,10 @@
 %  include one parameter (|#1|).
 % \end{function}
 % 
-% \begin{function}{.code:Nn}
+% \begin{function}{
+%   .code:Nn|
+%   .code:Nx
+% }
 %  \begin{syntax}
 %    <key>/.code:Nn = <number> <code>
 %  \end{syntax}
@@ -275,12 +288,12 @@
 %   available, copies the default into \cs{l_keys_current_value_toks}.
 % \end{function}
 % 
-% \begin{function}{\keys_err_new:nNn}
+% \begin{function}{\keys_err_new:nNnnn}
 %   \begin{syntax}
-%     "\keys_err_new:nNn" <name> <args> <text>
+%     "\keys_err_new:nNnnn" <name> <args> <short> <long> <code>
 %   \end{syntax}
 %   Creates error with <name> and taking <args> arguments, with
-%   <text> description.
+%   <short> description followed by <long>, and recovery <code>.
 % \end{function}
 % 
 % \begin{function}{
@@ -414,7 +427,9 @@
 % 
 % \begin{function}{
 %   \keys_set_cmd:nn|
-%   \keys_set_cmd:nNn
+%   \keys_set_cmd:nx|
+%   \keys_set_cmd:nNn|
+%   \keys_set_cmd:nNx|
 %  }
 %   \begin{syntax}
 %     "\keys_set_cmd:nn" <key> <code>
@@ -926,7 +941,9 @@
 %\end{macro}
 %
 %\begin{macro}{\keys_set_cmd:nn}
+%\begin{macro}{\keys_set_cmd:nx}
 %\begin{macro}{\keys_set_cmd:nNn}
+%\begin{macro}{\keys_set_cmd:nNx}
 % Creation of the key |._cmd:w| macros happens here. For the 
 % multiple-argument versions, the number of arguments is stored for
 % use later on.
@@ -935,12 +952,23 @@
   \keys_clear_properties:n {#1}
   \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } 1 {#2}
 }
+\cs_new:NNn \keys_set_cmd:nx 2 {
+  \keys_clear_properties:n {#1}
+  \cs_set:cNx { \c_keys_cs_prefix_tlp #1 /._cmd:w } 1 {#2}
+}
 \cs_new:NNn \keys_set_cmd:nNn 3 {
   \keys_clear_properties:n {#1}
   \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
   \keys_set:nn { #1 /._num_args_tlp} {#2}
 }
+\cs_new:NNn \keys_set_cmd:nNx 3 {
+  \keys_clear_properties:n {#1}
+  \cs_set:cNx { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
+  \keys_set:nn { #1 /._num_args_tlp} {#2}
+}
 %    \end{macrocode}
+%\end{macro}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %
@@ -1015,13 +1043,13 @@
 % defined separately. To make life a little easier here, some custom
 % functions are used to keep repetition down.
 % 
-%\begin{macro}{\keys_err_new:nNn}
+%\begin{macro}{\keys_err_new:nNnnn}
 % To create new error messages, a utility function is created.
 %    \begin{macrocode}
-\cs_new:NNn \keys_err_new:nNn 3 {
+\cs_new:NNn \keys_err_new:nNnnn 1 {
   \tlp_new:cn { l_keys_err_#1_tlp } {#1}
   \exp_args:NNc \err_interrupt_new:NNNnnn \c_keys_err_tlp
-    { l_keys_err_#1_tlp } #2 {#3} { \err_help_return_or_X: } { }
+    { l_keys_err_#1_tlp } 
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1038,21 +1066,27 @@
 % the file.
 %    \begin{macrocode}
 \err_file_new:Nn \c_keys_err_tlp { keys3.err }
-\keys_err_new:nNn { unknown_key } 1
+\keys_err_new:nNnnn { unknown_key } 1
   { The~key~`#1'~is~unknown~and~is~being~ignored }
-\keys_err_new:nNn { value_required } 1
+  { \err_help_return_or_X: } { }
+\keys_err_new:nNnnn { value_required } 1
   { The~key~`#1'~requires~a~value~and~is~being~ignored }
-\keys_err_new:nNn { value_forbidden } 1
+  { \err_help_return_or_X: } { }
+\keys_err_new:nNnnn { value_forbidden } 1
   { The~key~`#1'~cannot~taken~a~value:~\iow_newline:~\text_put_sp:~
    \text_put_sp:~the~one~given~is~being~ignored }
-\keys_err_new:nNn { boolean_expected } 2
+  { \err_help_return_or_X: } { }
+\keys_err_new:nNnnn { boolean_expected } 2
   { Key~`#1'~takes~the~Boolean~values~`true'~and~`false'~\iow_newline:~
    \text_put_sp:~\text_put_sp:~only.~The~given~value~`#2'~is~ignored }
-\keys_err_new:nNn { not_boolean } 1
+  { \err_help_return_or_X: } { }
+\keys_err_new:nNnnn { not_boolean } 1
   { Key~`#1'~is~not~a~Boolean~key:~you~cannot~create~a~complement }
-\keys_err_new:nNn { unknown_choice } 2
+  { \err_help_return_or_X: } { }
+\keys_err_new:nNnnn { unknown_choice } 2
   { Choice~`#2'~unknown~for~key~`#1':~\iow_newline:~\text_put_sp:~
    \text_put_sp:~the~value~give~is~being~ignored }
+  { \err_help_return_or_X: } { }
 \err_file_close:N \c_keys_err_tlp
 %    \end{macrocode}
 %\end{macro}
@@ -1114,6 +1148,33 @@
   }
 }
 %    \end{macrocode}
+%    
+%\begin{macro}{.cd:}
+% The change-directory property simply alters the value of the default
+% path.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+    \c_keys_properties_path_tlp /.cd:/.code:n = {
+    \tlp_set:Nx \l_keys_default_path_tlp { \l_keys_current_path_tlp / }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\begin{macro}{.code:x}
+%\begin{macro}{.code:Nx}
+% Fully-expanded versions of the basic \texttt{.code} properties.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.code:x/.code:n = {
+    \keys_set_cmd:nx { \l_keys_current_path_tlp } {#1}
+  },
+  \c_keys_properties_path_tlp /.code:Nx/.code:Nn = 2 {
+    \keys_set_cmd:nNx { \l_keys_current_path_tlp } {#1} {#2}
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
 %
 %------
 %
@@ -1179,22 +1240,6 @@
   }
 }
 %    \end{macrocode}
-%\end{macro}
-
-%\begin{macro}{\keys_def_cmd:cx}
-%\begin{macro}{\keys_def_cmd:nnx}
-% Creating the |._cmd:w| keys happens here.
-%    \begin{macrocode}
-\cs_new:Npn \keys_def_cmd:cx #1#2 {
-  \keys_clear_properties:n {#1}
-  \cs_set:cpx {\c_keys_cs_prefix_tlp #1/._cmd:w} ##1 \q_keys_stop {#2}
-}
-\cs_new:Npn \keys_def_cmd:nnx #1#2#3 {
-  \keys_clear_properties:n {#1}
-  \cs_set:cpx {\c_keys_cs_prefix_tlp #1/._cmd:w} #2 \q_keys_stop {#3}
-}
-%    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %\begin{macro}{\keys_module_name:}
 % The module name is needed in a few places.
@@ -1268,15 +1313,6 @@
 %    \begin{macrocode}
 \keys_manage_quick:n {
 %    \end{macrocode}
-% The two |:x| definition methods need to be created.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.code:x/.code:n = {
-%    \keys_def_cmd:cx {\l_keys_current_path_tlp} {#1}
-%  },
-%  \c_keys_properties_path_tlp /.code:nx/.code:nn = {#1#2} {
-%    \keys_def_cmd:nnx {\l_keys_current_path_tlp} {#1} {#2}
-%  },
-%    \end{macrocode}
 % Initial and default values can now be created.
 %    \begin{macrocode}
 %  \c_keys_properties_path_tlp /.initial:n/.code:n = {
@@ -1304,9 +1340,6 @@
 %    \end{macrocode}
 % Being able to change path is pretty useful.
 %    \begin{macrocode}
-  \c_keys_properties_path_tlp /.cd:/.code:n = {
-    \tlp_set:Nx \l_keys_default_path_tlp {\l_keys_current_path_tlp /}
-  },
 %  \c_keys_properties_path_tlp /.module:/.code:n = {
 %    \keys_manage_internal:n {
 %      \l_keys_current_path_tlp /.code:x = {

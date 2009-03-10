@@ -1,3 +1,4 @@
+% !TEX program  = pdflatex
 \immediate\write18{tex keys3.ins}
 
 \documentclass{article}
@@ -17,10 +18,6 @@
 \DeclareDocumentCommand{\SetKeys}{m}{
   \keys_manage:n{#1}
 }
-
-% A tlp for demonstration purposes.
-\tlp_new:N \tlpone
-\tlp_set:Nn \tlpone {TLP~Contents}
 
 \ExplSyntaxOff
 
@@ -55,4 +52,59 @@
   key = {AAA}{BBB} {CCC} { DDD},
   key =,
 }
+
+% Test three: The ability to change the key path is available with the
+% .cd: property. The following moves from the key root to two separate
+% paths, creating keys with the same names.
+% ----------------------------------------------------------------------
+%   A key in path one
+%   A key in path two
+%   A key in path two
+%   A key in path one
+% ----------------------------------------------------------------------
+\SetKeys{
+  /path one/.cd:,
+  key/.code:n = A key in path one\\,
+  /path two/.cd:,
+  key/.code:n = A key in path two\\,
+  /path one/key,
+  /path two/key,
+  key,
+  /path one/.cd:,
+  key
+}
+
+% Test four: Variants of .code:n and .code:Nn exist which carry out a
+% full expansion on code definition. First the :x variant is tested.
+% ----------------------------------------------------------------------
+%   Temp holds: ABC
+%   Temp hold: 123
+% ----------------------------------------------------------------------
+\newcommand*{\temp}{123}
+\SetModuleKeys{
+  key one/.code:n = Temp holds: \temp\\,
+  key two/.code:x = Temp holds: \temp,
+}
+\renewcommand*{\temp}{ABC}
+\SetModuleKeys{
+  key one,
+  key two
+}
+% Now the :Nx version
+% ----------------------------------------------------------------------
+%   Arguments: A, B. Temp holds: ABC
+%   Arguments: 1, 2. Temp hold: 123
+% ----------------------------------------------------------------------
+\renewcommand*{\temp}{123}
+\SetModuleKeys{
+  key one/.code:Nn = 2 {Arguments: #1, #2. Temp holds: \temp\\},
+  key two/.code:Nx = 2 {Arguments: #1, #2. Temp holds: \temp},
+}
+
+\renewcommand*{\temp}{ABC}
+\SetModuleKeys{
+  key one = {A} {B},
+  key two = {1} {2}
+}
+
 \end{document}

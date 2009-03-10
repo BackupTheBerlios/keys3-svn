@@ -105,9 +105,10 @@
 % macro.  This can be used to create, retrieve and set keys, and is
 % therefore the preferred interface for the package.
 %
-% \begin{function}{%
+% \begin{function}{
 %   \keys_manage:n|
-%   \keys_manage_quick:n}
+%   \keys_manage_quick:n|
+% }
 %   \begin{syntax}
 %     "\keys_manage:n" \Arg{keyval list}
 %   \end{syntax}
@@ -118,9 +119,10 @@
 %   therefore more suited to creating keys inside code blocks.
 % \end{function}
 %
-% \begin{function}{%
+% \begin{function}{
 %   \keys_manage:nn|
-%   \keys_manage_quick:nn}
+%   \keys_manage_quick:nn|
+% }
 %   \begin{syntax}
 %     "\keys_manage:nn" \Arg{path} \Arg{keyval list}
 %   \end{syntax}
@@ -135,6 +137,66 @@
 % key to which the default path will be added. Notice that when a
 % single argument is required, the braces around the argument may be
 % omitted without any error arising.
+% 
+%\subsection{Variables and constants}
+%
+% \begin{variable}{\c_keys_cs_prefix_tlp}
+%   The prefix added to the fully-qualified key when saving them.
+% \end{variable}
+% 
+% \begin{variable}{\c_keys_root_tlp}
+%   The root path for keys.
+% \end{variable}
+% 
+% \begin{variable}{
+%   \c_keys_errors_path_tlp|
+%   \c_keys_properties_path_tlp|
+%   \c_keys_utilities_path_tlp|
+% }
+%   Paths for properties used by \textsf{l3keys} itself.
+% \end{variable}
+% 
+% \begin{variable}{
+%   \l_keys_current_path_tlp|
+%   \l_keys_default_path_tlp|
+%   \l_keys_choice_path_tlp|
+% }
+%   Various key paths need to be stored.
+% \end{variable}
+% 
+% \begin{variable}{
+%   \l_keys_current_key_full_tlp|
+%   \l_keys_current_key_name_tlp|
+% }
+%   The current key name is stored both with and without a path.
+% \end{variable}
+% 
+% \begin{variable}{\l_keys_current_value_toks}
+%   The value given for the current key, stored as a token register.
+% \end{variable}
+% 
+% \begin{variable}{\l_keys_current_module_tlp}
+%   Current module name used when creating csnames.
+% \end{variable}
+% 
+% \begin{variable}{
+%   \l_keys_current_choice_tlp|
+%   \l_keys_current_choice_tlp|
+% }
+%   Information on multiple choices.
+% \end{variable}
+% 
+% \begin{variable}{\l_keys_no_value_bool}
+%   A marker for ``no value'' as key input.
+% \end{variable}
+% 
+% \begin{variable}{\l_keys_success_bool}
+%   A marker used when trying keys without raising errors.
+% \end{variable}
+% 
+% \begin{variable}{\l_keys_tmpa_tlp}
+%   A scratch variable.
+% \end{variable}
 %
 %\subsection{Implementation}
 %
@@ -161,7 +223,7 @@
 % The key root should have a clear name; like all of the key macros,
 % this does not include the prefix.
 %    \begin{macrocode}
-\tlp_new:Nn \c_keys_root_tlp {/}
+\tlp_new:Nn \c_keys_root_tlp { / }
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\c_keys_errors_path_tlp}
@@ -225,12 +287,6 @@
 % To indicate that no value has been given.
 %    \begin{macrocode}
 \bool_new:N \l_keys_no_value_bool
-%    \end{macrocode}
-%\end{macro}
-%\begin{macro}{\q_keys_stop}
-% A private quark is needed.
-%    \begin{macrocode}
-\quark_new:N \q_keys_stop
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\l_keys_success_bool}
@@ -614,6 +670,12 @@
 %
 %------
 %
+%\begin{macro}{\q_keys_stop}
+% A private quark is needed.
+%    \begin{macrocode}
+\quark_new:N \q_keys_stop
+%    \end{macrocode}
+%\end{macro}
 %\begin{macro}{\keys_boolean:nN}
 %\begin{macro}{\keys_boolean:nc}
 % To allow code-sharing for switch control.

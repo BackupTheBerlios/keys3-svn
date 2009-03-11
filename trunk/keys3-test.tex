@@ -219,5 +219,25 @@
 \the\tempskip\\
 \the\temptoks
 
+% Test ten: Variables can be identified only by the unique part of their
+% name, provided that /keys/current_module:n has been set with the
+% appropriate information. Both local and global names can be used in
+% this way.
+% ----------------------------------------------------------------------
+%   Local
+%   Global
+% ----------------------------------------------------------------------
+\SetModuleKeys{
+  /keys/current_module:n = module,
+  key one/.tlp_set:n = local,
+  key two/.tlp_gset:n = global,
+  key one = Local,
+  key two = Global
+}
+\ExplSyntaxOn
+\l_module_local_tlp \\
+\g_module_global_tlp
+\ExplSyntaxOff
+
 \end{document}
 

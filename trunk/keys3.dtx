@@ -141,6 +141,46 @@
 % single argument is required, the braces around the argument may be
 % omitted without any error arising.
 % 
+%\subsubsection{Storing values}
+%
+% A common use of key--value input is to store the values given in a 
+% variable for later use.  \textsf{keys3} provides pre-defined 
+% properties for storing in int, skip, tlp and toks variables. The 
+% method is similar in all cases:
+%\begin{verbatim}
+%  \keys_manage:n{
+%    /module/key~one/.int_set:N = \l_mod_data_int,
+%    /module/key~two/.skip_set:N = \l_mod_data_skip,
+%    /module/key~three/.tlp_set:N = \l_mod_data_tlp,
+%    /module/key~four/.toks_set:N = \l_mod_data_toks
+%  }
+%\end{verbatim}
+% Global variants for all of these are.
+%   
+% 
+% When using keys to store a value, it is often convenient to give only
+% the unique part of the variable name. This is particularly true when
+% creating a large number of related storage areas. To achieve this,
+% \textsf{keys3} requires that the module prefix to be used is defined 
+% first. The special key \texttt{/keys/current_module:n} can be set with 
+% the name of the current module.
+%\begin{verbatim}
+%  \keys_manage:n{
+%    /keys/current_module:n = module,
+%    /module/key/.tlp_set:n = my_data,
+%  }
+%\end{verbatim}
+% This will use a variable called \cs{l_module_my_data_tlp} to store the
+% input. Thus the preceding code achieves the same effect as
+%\begin{verbatim}
+%  \keys_manage:n{
+%    /module/key/.tlp_set:N = \l_module_my_data_tlp
+%  }
+%\end{verbatim}
+% The same method applies to int, skip and toks variables. The 
+% appropriate prefix (\cs{l_} or \cs{g_}) and suffix (|_int|, |_skip|, 
+% |_tlp| or |_toks|) is always added.
+% 
 %\subsection{Properties}
 %
 % \begin{function}{.cd:}
@@ -192,6 +232,18 @@
 % \end{function}
 % 
 % \begin{function}{
+%   .int_set:n|
+%   .int_gset:n|
+% }
+%  \begin{syntax}
+%    <key>/.int_set:n = <name>
+%  \end{syntax}
+%  Defines <key> to store <value> in a int with unique name <name>. The
+%  rest of the int name will be constructed using the current <module>
+%  (if any), prefixes by |\l_| and ending with |_int|.
+% \end{function}
+% 
+% \begin{function}{
 %   .skip_set:N|
 %   .skip_gset:N|
 % }
@@ -202,10 +254,22 @@
 % \end{function}
 % 
 % \begin{function}{
+%   .skip_set:n|
+%   .skip_gset:n|
+% }
+%  \begin{syntax}
+%    <key>/.skip_set:n = <name>
+%  \end{syntax}
+%  Defines <key> to store <value> in a skip with unique name <name>. The
+%  rest of the skip name will be constructed using the current <module>
+%  (if any), prefixes by |\l_| and ending with |_skip|.
+% \end{function}
+% 
+% \begin{function}{
 %   .tlp_set:N|
 %   .tlp_set_x:N|
 %   .tlp_gset:N|
-%   .tlp~gset~x:N|
+%   .tlp~gset_x:N|
 % }
 %  \begin{syntax}
 %    <key>/.tlp_set:N = <tlp>
@@ -216,6 +280,20 @@
 % \end{function}
 % 
 % \begin{function}{
+%   .tlp_set:n|
+%   .tlp_set_x:n|
+%   .tlp_gset:n|
+%   .tlp~gset_x:n|
+% }
+%  \begin{syntax}
+%    <key>/.tlp_set:n = <name>
+%  \end{syntax}
+%  Defines <key> to store <value> in a tlp with unique name <name>. The
+%  rest of the tlp name will be constructed using the current <module>
+%  (if any), prefixes by |\l_| and ending with |_tlp|.
+% \end{function}
+% 
+% \begin{function}{
 %   .toks_set:N|
 %   .toks_gset:N|
 % }
@@ -223,6 +301,18 @@
 %    <key>/.toks_set:N = <toks>
 %  \end{syntax}
 %  Defines <key> to store <value> in the <toks> named.
+% \end{function}
+% 
+% \begin{function}{
+%   .toks_set:n|
+%   .toks_gset:n|
+% }
+%  \begin{syntax}
+%    <key>/.toks_set:n = <name>
+%  \end{syntax}
+%  Defines <key> to store <value> in a toks with unique name <name>. The
+%  rest of the toks name will be constructed using the current <module>
+%  (if any), prefixes by |\l_| and ending with |_toks|.
 % \end{function}
 % 
 % \begin{function}{
@@ -473,12 +563,15 @@
 % 
 % \begin{function}{
 %   \keys_set:NN|
-%   \keys_set:Nc|
+%   \keys_set:Nnn|
 %  }
 %   \begin{syntax}
 %     "\keys_set:NN" <function> <variable>
+%     "\keys_set:Nnn" <function> <prefix> <name>
 %   \end{syntax}
-%   Uses <function> to store <value> in <variable>.
+%   Uses <function> to store <value> in <variable>. If a <name> is
+%   given, it is used to construct a csname for the variable including
+%   the current <module>. The <prefix> should be |l_| or |g_|.
 % \end{function}
 % 
 % \begin{function}{\keys_set_eq:nn}
@@ -1038,7 +1131,7 @@
 %\end{macro}
 %
 %\begin{macro}{\keys_set:NN}
-%\begin{macro}{\keys_store:Nc}
+%\begin{macro}{\keys_set:Nnn}
 % Storage of data in outside of keys.
 %    \begin{macrocode}
 \cs_new:NNn \keys_set:NN 2 {
@@ -1048,11 +1141,10 @@
     }
   }
 }
-\cs_new:Npn \keys_store:Nc #1#2 {
-  \keys_module_name:
+\cs_new:NNn \keys_set:Nnn 3 {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:x = {
-      \exp_not:N #1 {l_ \l_keys_tmpa_tlp #2_tlp} {##1}
+      \exp_not:N #1 { #2 \l_keys_current_module_tlp #3 } {##1}
     }
   }
 }
@@ -1365,7 +1457,7 @@
 %\begin{macro}{.tlp_set:N}
 %\begin{macro}{.tlp_set_x:N}
 %\begin{macro}{.tlp_gset:N}
-%\begin{macro}{.tlp~gset~x:N}
+%\begin{macro}{.tlp_gset_x:N}
 % Storage of the value in a tlp, as given or expanded, local or global.
 %    \begin{macrocode}
 \keys_manage_quick:n {
@@ -1378,15 +1470,16 @@
   \c_keys_properties_path_tlp /.tlp_gset:N/.code:n = {
     \keys_set:NN \tlp_gset:Nn #1
   },
-  \c_keys_properties_path_tlp /.tlp~gset~x:N/.code:n = {
+  \c_keys_properties_path_tlp /.tlp_gset_x:N/.code:n = {
     \keys_set:NN \tlp_gset:Nx #1
-  },
+  }
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %\end{macro}
 %\end{macro}
+%
 %\begin{macro}{.int_set:N}
 %\begin{macro}{.int_gset:N}
 %\begin{macro}{.skip_set:N}
@@ -1413,9 +1506,80 @@
   },
   \c_keys_properties_path_tlp /.toks_gset:N/.code:n = {
     \keys_set:NN \toks_gset:Nn #1
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+% The prefix for the current module is needed when storing material
+% by csname. 
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_utilities_path_tlp /current_module:n/.code:n = {
+    \tlist_if_empty:nTF {#1} {
+      \tlp_clear:N \l_keys_current_module_tlp
+    }{
+      \tlp_set:Nn \l_keys_current_module_tlp { #1 _ }
+    }
+  }
+}
+%    \end{macrocode}
+%    
+%\begin{macro}{.tlp_set:n}
+%\begin{macro}{.tlp_set_x:n}
+%\begin{macro}{.tlp_gset:n}
+%\begin{macro}{.tlp_gset_x:n}
+%\begin{macro}{.int_set:n}
+%\begin{macro}{.int_gset:n}
+%\begin{macro}{.skip_set:n}
+%\begin{macro}{.skip_gset:n}
+%\begin{macro}{.toks_set:n}
+%\begin{macro}{.toks_gset:n}
+% With the module available, storage properties that only need the 
+% unique part of the variable name are created.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.tlp_set:n/.code:n = {
+    \keys_set:Nnn \tlp_set:cn { l_ } { #1 _tlp }
+  },
+  \c_keys_properties_path_tlp /.tlp_set_x:n/.code:n = {
+    \keys_set:Nnn \tlp_set:cx { l_ } { #1 _tlp }
+  },
+  \c_keys_properties_path_tlp /.tlp_gset:n/.code:n = {
+    \keys_set:Nnn \tlp_gset:cn { g_ } { #1 _tlp }
+  },
+  \c_keys_properties_path_tlp /.tlp_gset_x:n/.code:n = {
+    \keys_set:Nnn \tlp_gset:cx { g_ } { #1 _tlp }
+  },
+  \c_keys_properties_path_tlp /.int_set:n/.code:n = {
+    \keys_set:Nnn \int_set:cn { l_ } { #1 _int }
+  },
+  \c_keys_properties_path_tlp /.int_gset:n/.code:n = {
+    \keys_set:Nnn \int_gset:cn { g_ } { #1 _int }
+  },
+  \c_keys_properties_path_tlp /.skip_set:n/.code:n = {
+    \keys_set:Nnn \skip_set:cn { l_ } { #1 _skip }
+  },
+  \c_keys_properties_path_tlp /.skip_gset:n/.code:n = {
+    \keys_set:Nnn \skip_gset:cn { g_ } { #1 _skip }
+  },
+  \c_keys_properties_path_tlp /.toks_set:n/.code:n = {
+    \keys_set:Nnn \toks_set:cn { l_ } { #1 _toks }
+  },
+  \c_keys_properties_path_tlp /.toks_gset:n/.code:n = {
+    \keys_set:Nnn \toks_gset:cn { g_ } { #1 _toks }
   },
 }
 %    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %\end{macro}
@@ -1488,18 +1652,6 @@
 }
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\keys_module_name:}
-% The module name is needed in a few places.
-%    \begin{macrocode}
-\cs_new:Npn \keys_module_name: {
-  \tlp_if_empty:NTF \l_keys_current_module_tlp {
-    \tlp_clear:N \l_keys_tmpa_tlp
-  }{
-    \tlp_set:Nx \l_keys_tmpa_tlp {\l_keys_current_module_tlp _}
-  }
-}
-%    \end{macrocode}
-%\end{macro}
 %\begin{macro}{\keys_try:}
 % Trying something without errors.
 %    \begin{macrocode}
@@ -1559,43 +1711,6 @@
 %      \l_keys_current_path_tlp /.code:x =
 %        {#1} {\exp_not:N \keys_parse_list:n {#2}}
 %    }
-%  },
-%    \end{macrocode}
-% That is all of the lower-level things done.  Now use them to build
-% some higher-level functionality.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.store~in~tlp:c/.code:n = {
-%    \keys_store:Nc \tlp_set:cn {#1}
-%  },
-%  \c_keys_properties_path_tlp /.estore~in~tlp:c/.code:n = {
-%    \keys_store:Nc \tlp_set:cx {#1}
-%  },
-%  \c_keys_properties_path_tlp /.store~in~int:c/.code:n = {
-%    \keys_store:Nc \int_set:cn {#1}
-%  },
-%  \c_keys_properties_path_tlp /.store~in~skip:c/.code:n = {
-%    \keys_store:Nc \skip_set:cn {#1}
-%  },
-%  \c_keys_properties_path_tlp /.store~in~toks:c/.code:n = {
-%    \keys_store:Nc \toks_set:cn {#1}
-%  },
-%    \end{macrocode}
-% Global versions of all of the above storage properties.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.gstore~in~tlp:c/.code:n = {
-%    \keys_store:Nc \tlp_gset:cn {#1}
-%  },
-%  \c_keys_properties_path_tlp /.xstore~in~tlp:c/.code:n = {
-%    \keys_store:Nc \tlp_gset:cx {#1}
-%  },
-%  \c_keys_properties_path_tlp /.gstore~in~int:c/.code:n = {
-%    \keys_store:Nc \int_gset:cn {#1}
-%  },
-%  \c_keys_properties_path_tlp /.gstore~in~skip:c/.code:n = {
-%    \keys_store:Nc \skip_gset:cn {#1}
-%  },
-%  \c_keys_properties_path_tlp /.gstore~in~toks:c/.code:n = {
-%    \keys_store:Nc \toks_gset:cn {#1}
 %  },
 %    \end{macrocode}
 % Functions should not be stored in tlps.
@@ -1739,8 +1854,6 @@
 % Keys for programmers.
 %    \begin{macrocode}
 %  \c_keys_utilities_path_tlp /execute:n/.code:n = {#1},
-%  \c_keys_utilities_path_tlp /current~module:n/.store~in~tlp:N =
-%    \l_keys_current_module_tlp
 }
 %</package>
 %    \end{macrocode}

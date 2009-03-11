@@ -227,6 +227,10 @@
 %   Local
 %   Global
 % ----------------------------------------------------------------------
+\ExplSyntaxOn
+\tlp_new:N \l_module_local_tlp 
+\tlp_new:N \g_module_global_tlp
+\ExplSyntaxOff
 \SetModuleKeys{
   /keys/current_module:n = module,
   key one/.tlp_set:n = local,
@@ -237,6 +241,36 @@
 \ExplSyntaxOn
 \l_module_local_tlp \\
 \g_module_global_tlp
+\ExplSyntaxOff
+
+% Test eleven: Boolean keys are created in the same way as other storage
+% keys. However, the key will then only accept "true" and "false" as
+% input. The key name can be given alone, resulting in the switch being
+% set "true".
+% ----------------------------------------------------------------------
+% Local switch true
+% Global switch true
+% ----------------------------------------------------------------------
+% ! Key `/module name/key one' takes the Boolean values `true' and 
+% `false' only. The given value `rubbish' is being ignored.
+% ----------------------------------------------------------------------
+\ExplSyntaxOn
+\bool_new:N \localbool
+\bool_new:N \g_module_global_bool
+\ExplSyntaxOff
+\SetModuleKeys{
+  /keys/current_module:n = module,
+  key one/.bool_set:N = \localbool,
+  key two/.bool_gset:n = global,
+  key one = true,
+  key two = false,
+  key two,
+  key one = rubbish
+}
+\ExplSyntaxOn
+\bool_if:NTF \localbool { Local~switch~true } { Local~switch~false } \\
+\bool_if:NTF \g_module_global_bool 
+  { Global~switch~true } { Global~switch~false }
 \ExplSyntaxOff
 
 \end{document}

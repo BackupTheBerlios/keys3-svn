@@ -183,6 +183,30 @@
 % 
 %\subsection{Properties}
 %
+% \begin{function}{
+%   .bool_set:N|
+%   .bool_gset:N|
+% }
+%  \begin{syntax}
+%    <key>/.bool_set:N = <bool>
+%  \end{syntax}
+%  Defines <key> to set <bool> to <value> (which must be either 
+%  \texttt{true} or \texttt{false}).
+% \end{function}
+% 
+% \begin{function}{
+%   .bool_set:n|
+%   .bool_gset:n|
+% }
+%  \begin{syntax}
+%    <key>/.bool_set:n = <name>
+%  \end{syntax}
+%  Defines <key> to set switch with unique <name> to <value> (which 
+%  must be either \texttt{true} or \texttt{false}). The switch
+%  name will be constructed using the current <module> (if any), 
+%  prefixed by |\l_| and ending with |_int|.
+% \end{function}
+%
 % \begin{function}{.cd:}
 %  \begin{syntax}
 %    <key>/.cd:
@@ -239,8 +263,8 @@
 %    <key>/.int_set:n = <name>
 %  \end{syntax}
 %  Defines <key> to store <value> in a int with unique name <name>. The
-%  rest of the int name will be constructed using the current <module>
-%  (if any), prefixes by |\l_| and ending with |_int|.
+%  int name will be constructed using the current <module> (if any), 
+%  prefixed by |\l_| and ending with |_int|.
 % \end{function}
 % 
 % \begin{function}{
@@ -261,15 +285,15 @@
 %    <key>/.skip_set:n = <name>
 %  \end{syntax}
 %  Defines <key> to store <value> in a skip with unique name <name>. The
-%  rest of the skip name will be constructed using the current <module>
-%  (if any), prefixes by |\l_| and ending with |_skip|.
+%   skip name will be constructed using the current <module> (if any), 
+%   prefixed by |\l_| and ending with |_skip|.
 % \end{function}
 % 
 % \begin{function}{
 %   .tlp_set:N|
 %   .tlp_set_x:N|
 %   .tlp_gset:N|
-%   .tlp~gset_x:N|
+%   .tlp_gset_x:N|
 % }
 %  \begin{syntax}
 %    <key>/.tlp_set:N = <tlp>
@@ -283,14 +307,14 @@
 %   .tlp_set:n|
 %   .tlp_set_x:n|
 %   .tlp_gset:n|
-%   .tlp~gset_x:n|
+%   .tlp_gset_x:n|
 % }
 %  \begin{syntax}
 %    <key>/.tlp_set:n = <name>
 %  \end{syntax}
 %  Defines <key> to store <value> in a tlp with unique name <name>. The
-%  rest of the tlp name will be constructed using the current <module>
-%  (if any), prefixes by |\l_| and ending with |_tlp|.
+%  tlp name will be constructed using the current <module> (if any), 
+%  prefixed by |\l_| and ending with |_tlp|.
 % \end{function}
 % 
 % \begin{function}{
@@ -424,6 +448,20 @@
 %     "\keys_bool_new:n" <key>
 %   \end{syntax}
 %   Creates a switch <key>, which will be set to \texttt{true}.
+% \end{function}
+% 
+% \begin{function}{
+%   \keys_bool_set:nN|
+%   \keys_bool_set:nnn|
+%  }
+%   \begin{syntax}
+%     "\keys_bool_set:nN" <function> <boolean>
+%     "\keys_bool_set:nnn" <function> <prefix> <name>
+%   \end{syntax}
+%   Uses <function> (either \texttt{set} or \texttt{gset}) to use 
+%   <value> in setting <boolean>. If a <name> is given, it is used to 
+%   construct a csname for the switch including the current <module>. 
+%   The <prefix> should be |l_| or |g_|.
 % \end{function}
 % 
 % \begin{function}{\keys_clear_properties:n}
@@ -900,6 +938,42 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\keys_bool_set:nN}
+%\begin{macro}{\keys_bool_set:nnn}
+% Boolean keys are created by using the fact that only \texttt{true} and
+% \texttt{false} give the right result when looking for a setting 
+% function. A default is also set, so that the key name alone can be 
+% given.
+%    \begin{macrocode}
+\cs_new:NNn \keys_bool_set:nN 2 {
+  \keys_parse_list:n {
+    \c_keys_properties_path_tlp /.code:n = {
+      \cs_if_really_exist:cTF { bool_ #1 _ ##1 :N } {
+        \use:c { bool_ #1 _ ##1 :N } #2
+      }{
+        \keys_err_use:nn { boolean_expected } {##1}
+      }
+    },
+    \l_keys_current_path_tlp /.default:n = true
+  }
+}
+\cs_new:NNn \keys_bool_set:nnn 3 {
+  \keys_parse_list:n {
+    \c_keys_properties_path_tlp /.code:x = {
+      \exp_not:N \cs_if_really_exist:cTF { bool_ #1 _ ##1 :c } {
+        \exp_not:N \use:c { bool_ #1 _ ##1 :c } 
+          { #2 \l_keys_current_module_tlp #3 _bool }
+      }{
+        \exp_not:N \keys_err_use:nn { boolean_expected } {##1}
+      }
+    },
+    \l_keys_current_path_tlp /.default:n = true
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}{\keys_clear_properties:n}
 % To avoid problem on redefinition, all properties are removed.
 %    \begin{macrocode}
@@ -1198,7 +1272,6 @@
 %\end{macro}
 %\end{macro}
 %
-%
 %\begin{macro}{\keys_store:nn}
 %\begin{macro}{\keys_store:nx}
 % Direct storage of data in keys.
@@ -1318,8 +1391,9 @@
     ~\text_put_sp:~\text_put_sp:`#2'~is~being~ignored }
   { \err_help_return_or_X: } { }
 \keys_err_new:nNnnn { boolean_expected } 2
-  { Key~`#1'~takes~the~Boolean~values~`true'~and~`false'~\iow_newline:~
-   \text_put_sp:~\text_put_sp:~only.~The~given~value~`#2'~is~ignored }
+  { Key~`#1'~takes~the~Boolean~values~`true'~and~\iow_newline:~`false'~
+   \text_put_sp:~\text_put_sp:~only.~The~given~value~`#2'~is~being~
+   ignored }
   { \err_help_return_or_X: } { }
 \keys_err_new:nNnnn { not_boolean } 1
   { Key~`#1'~is~not~a~Boolean~key:~you~cannot~create~a~complement }
@@ -1587,55 +1661,39 @@
 %\end{macro}
 %\end{macro}
 %
-%------
-%
-%\begin{macro}{\keys_boolean:nN}
-%\begin{macro}{\keys_boolean:nc}
-% To allow code-sharing for switch control.
+%\begin{macro}{.bool_set:N}
+%\begin{macro}{.bool_gset:N}
+%\begin{macro}{.bool_set:n}
+%\begin{macro}{.bool_gset:n}
+% The properties for switches look similar, although internally things
+% are rather different.
 %    \begin{macrocode}
-\toks_new:N \l_keys_body_toks
-\cs_new:Npn \keys_boolean:nN #1#2 {
-  \cs_if_free:NT #1 {\bool_new:N #2}
-  \keys_parse_list:n {
-    \l_keys_current_path_tlp /.code:n = {
-      \cs_if_really_exist:cTF {bool_set_##1:c} {
-        \use:c {bool_#1_##1:N} #2
-      }{
-        \keys_err_use:nn { boolean_expected } 
-          { \toks_use:N \l_keys_current_value_toks }
-      }
-    },
-    \l_keys_current_path_tlp /.default:n = true
-  }
-  \keys_store:nn {\l_keys_current_path_tlp /._boolean} {\exp_not:N #2}
-}
-\cs_new:Npn \keys_boolean:nc #1#2 {
-  \keys_module_name:
-  \cs_if_free:cT {l_ \l_keys_tmpa_tlp #2_bool} {
-    \bool_new:c {l_ \l_keys_tmpa_tlp #2_bool}
-  }
-  \keys_parse_list:n {
-    \l_keys_current_path_tlp /.code:x = {
-      \exp_not:N \cs_if_really_exist:cTF {bool_set_##1:N} {
-        \exp_not:N \use:c {bool_#1_##1:N}
-          \exp_not:d {\use:c {l_ \l_keys_tmpa_tlp #2 _bool}}
-      }{
-        \exp_not:n {
-          \keys_err_use:nn {boolean_expected}
-            { \toks_use:N \l_keys_current_value_toks }
-        }
-      }
-    },
-    \l_keys_current_path_tlp /.default:n = true
-  }
-  \keys_store:nx {\l_keys_current_path_tlp /._boolean} {
-    \exp_not:N \exp_not:N \exp_not:d
-      {\use:c {l_ \l_keys_tmpa_tlp #2_bool}}
-  }
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.bool_set:N/.code:n = {
+    \keys_bool_set:nN { set } #1
+  },
+  \c_keys_properties_path_tlp /.bool_gset:N/.code:n = {
+    \keys_bool_set:nN { gset } #1
+  },
+  \c_keys_properties_path_tlp /.bool_set:n/.code:n = {
+    \keys_bool_set:nnn { set } { l_ } { #1 }
+  },
+  \c_keys_properties_path_tlp /.bool_gset:n/.code:n = {
+    \keys_bool_set:nnn { gset } { g_ } { #1 }
+  },
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%------
+%
+% To allow code-sharing for switch control.
+%    \begin{macrocode}
+\toks_new:N \l_keys_body_toks
+%    \end{macrocode}
 %\begin{macro}{\keys_choice_create:n}
 % The system to create choices is quite simple.
 %    \begin{macrocode}
@@ -1731,24 +1789,6 @@
 %    }
 %  },
 %    \end{macrocode} 
-% Boolean keys are created with a true default.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.boolean:N/.code:n = {
-%    \keys_boolean:nN {set} #1
-%  },
-%  \c_keys_properties_path_tlp /.boolean:c/.code:n = {
-%    \keys_boolean:nc {set} {#1}
-%  },
-%    \end{macrocode}
-% Once again global versions.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.gboolean:N/.code:n = {
-%    \keys_boolean:nN {gset} #1
-%  },
-%  \c_keys_properties_path_tlp /.gboolean:c/.code:n = {
-%    \keys_boolean:nc {gset} {#1}
-%  },
-%    \end{macrocode}
 % Creating an inverse needs a little work as the logic needs to be
 % reversed.
 %    \begin{macrocode}

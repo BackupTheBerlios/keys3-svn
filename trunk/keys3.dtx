@@ -182,6 +182,50 @@
 % \end{function}
 % 
 % \begin{function}{
+%   .int~set:N|
+%   .int~gset:N|
+% }
+%  \begin{syntax}
+%    <key>/.int~set:N = <int>
+%  \end{syntax}
+%  Defines <key> to store <value> in the <int> named.
+% \end{function}
+% 
+% \begin{function}{
+%   .skip~set:N|
+%   .skip~gset:N|
+% }
+%  \begin{syntax}
+%    <key>/.skip~set:N = <skip>
+%  \end{syntax}
+%  Defines <key> to store <value> in the <skip> named.
+% \end{function}
+% 
+% \begin{function}{
+%   .tlp~set:N|
+%   .tlp~set~x:N|
+%   .tlp~gset:N|
+%   .tlp~gset~x:N|
+% }
+%  \begin{syntax}
+%    <key>/.tlp~set:N = <tlp>
+%  \end{syntax}
+%  Defines <key> to store <value> in the <tlp> named. The \texttt{x}
+%  versions use \cs{tlp_(g)set:Nx} for this process, the standard 
+%  version \cs{tlp_(g)set:Nn}.
+% \end{function}
+% 
+% \begin{function}{
+%   .toks~set:N|
+%   .toks~gset:N|
+% }
+%  \begin{syntax}
+%    <key>/.toks~set:N = <toks>
+%  \end{syntax}
+%  Defines <key> to store <value> in the <toks> named.
+% \end{function}
+% 
+% \begin{function}{
 %   .value~forbidden:|
 %   .value~required:|
 % }
@@ -428,13 +472,13 @@
 % \end{function}
 % 
 % \begin{function}{
-%   \keys_set:nn|
-%   \keys_set:nx
+%   \keys_set:NN|
+%   \keys_set:Nc|
 %  }
 %   \begin{syntax}
-%     "\keys_set:nn" <key> <data>
+%     "\keys_set:NN" <function> <variable>
 %   \end{syntax}
-%   Stores <data> in <key> function.
+%   Uses <function> to store <value> in <variable>.
 % \end{function}
 % 
 % \begin{function}{\keys_set_eq:nn}
@@ -456,6 +500,16 @@
 %   \end{syntax}
 %   Creates a |._cmd:w| function for <key>, with definition <code>. The
 %   \texttt{N} variant can include <number> parameters.
+% \end{function}
+% 
+% \begin{function}{
+%   \keys_store:nn|
+%   \keys_store:nx
+%  }
+%   \begin{syntax}
+%     "\keys_store:nn" <key> <data>
+%   \end{syntax}
+%   Stores <data> in <key> function.
 % \end{function}
 % 
 % \begin{function}{\keys_toks_set:Nn}
@@ -535,7 +589,7 @@
 %<*package>
 \ProvidesExplPackage
   {\filename}{\filedate}{\fileversion}{\filedescription}
-\RequirePackage{l3keyval,l3messages,l3clist}
+\RequirePackage{l3keyval,l3messages,l3clist,l3skip}
 %    \end{macrocode}
 %
 %\subsubsection{Variables and contrasts}
@@ -807,7 +861,7 @@
       \bool_if:NTF \l_keys_no_value_bool {
         \keys_use:n { \l_keys_current_key_full_tlp }
       }{
-        \keys_set:nx { \l_keys_current_key_full_tlp }
+        \keys_store:nx { \l_keys_current_key_full_tlp }
           { \toks_use:N \l_keys_current_value_toks }
       }
     }{
@@ -983,15 +1037,24 @@
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\keys_set:nn}
-%\begin{macro}{\keys_set:nx}
-% Direct storage of data in keys.
+%\begin{macro}{\keys_set:NN}
+%\begin{macro}{\keys_store:Nc}
+% Storage of data in outside of keys.
 %    \begin{macrocode}
-\cs_new:NNn \keys_set:nn 2 {
-  \tlp_set:cn { \c_keys_cs_prefix_tlp #1 } {#2}
+\cs_new:NNn \keys_set:NN 2 {
+  \keys_parse_list:n {
+    \c_keys_properties_path_tlp /.code:n = {
+      #1 #2 {##1}
+    }
+  }
 }
-\cs_new:NNn \keys_set:nx 2 {
-  \tlp_set:cx { \c_keys_cs_prefix_tlp #1 } {#2}
+\cs_new:Npn \keys_store:Nc #1#2 {
+  \keys_module_name:
+  \keys_parse_list:n {
+    \c_keys_properties_path_tlp /.code:x = {
+      \exp_not:N #1 {l_ \l_keys_tmpa_tlp #2_tlp} {##1}
+    }
+  }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1028,18 +1091,33 @@
 \cs_new:NNn \keys_set_cmd:nNn 3 {
   \keys_clear_properties:n {#1}
   \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
-  \keys_set:nn { #1 /._num_args_tlp} {#2}
+  \keys_store:nn { #1 /._num_args_tlp} {#2}
 }
 \cs_new:NNn \keys_set_cmd:nNx 3 {
   \keys_clear_properties:n {#1}
   \cs_set:cNx { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
-  \keys_set:nn { #1 /._num_args_tlp} {#2}
+  \keys_store:nn { #1 /._num_args_tlp} {#2}
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %\end{macro}
 %\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%
+%\begin{macro}{\keys_store:nn}
+%\begin{macro}{\keys_store:nx}
+% Direct storage of data in keys.
+%    \begin{macrocode}
+\cs_new:NNn \keys_store:nn 2 {
+  \tlp_set:cn { \c_keys_cs_prefix_tlp #1 } {#2}
+}
+\cs_new:NNn \keys_store:nx 2 {
+  \tlp_set:cx { \c_keys_cs_prefix_tlp #1 } {#2}
+}
+%    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
@@ -1169,7 +1247,7 @@
 %\end{macro}
 %\begin{macro}{\keys_err_use:nw}
 %\begin{macro}{\keys_err_use:n}
-%\begin{macro}{\keys_err_use:nV}
+%\begin{macro}{\keys_err_use:nn}
 % Utilities for using errors: the first function is \texttt{nw} as it
 % may need one or two arguments in addition to the \texttt{n}.
 %    \begin{macrocode}
@@ -1219,17 +1297,6 @@
 }
 %    \end{macrocode}
 %    
-%\begin{macro}{.cd:}
-% The change-directory property simply alters the value of the default
-% path.
-%    \begin{macrocode}
-\keys_manage_quick:n {
-    \c_keys_properties_path_tlp /.cd:/.code:n = {
-    \tlp_set:Nx \l_keys_default_path_tlp { \l_keys_current_path_tlp / }
-  }
-}
-%    \end{macrocode}
-%\end{macro}
 %\begin{macro}{.code:x}
 %\begin{macro}{.code:Nx}
 % Fully-expanded versions of the basic \texttt{.code} properties.
@@ -1244,6 +1311,18 @@
 }
 %    \end{macrocode}
 %\end{macro}
+%\end{macro}
+%    
+%\begin{macro}{.cd:}
+% The change-directory property simply alters the value of the default
+% path. 
+%    \begin{macrocode}
+\keys_manage_quick:n {
+    \c_keys_properties_path_tlp /.cd:/.code:n = {
+    \tlp_set:Nx \l_keys_default_path_tlp { \l_keys_current_path_tlp / }
+  }
+}
+%    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{.value~forbidden:}
@@ -1275,11 +1354,72 @@
 %    \begin{macrocode}
 \keys_manage_quick:n {
   \c_keys_properties_path_tlp /.default:n/.code:n = {
-    \keys_set:nn { \l_keys_current_path_tlp /._default_tlp } {#1}
+    \keys_store:nn { \l_keys_current_path_tlp /._default_tlp } {#1}
     \keys_undefine:n { \l_keys_current_path_tlp /._required_bool }
   }
 }
 %    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{.tlp~set:N}
+%\begin{macro}{.tlp~set~x:N}
+%\begin{macro}{.tlp~gset:N}
+%\begin{macro}{.tlp~gset~x:N}
+% Storage of the value in a tlp, as given or expanded, local or global.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.tlp~set:N/.code:n = {
+    \keys_set:NN \tlp_set:Nn #1
+  },
+  \c_keys_properties_path_tlp /.tlp~set~x:N/.code:n = {
+    \keys_set:NN \tlp_set:Nx #1
+  },
+  \c_keys_properties_path_tlp /.tlp~gset:N/.code:n = {
+    \keys_set:NN \tlp_gset:Nn #1
+  },
+  \c_keys_properties_path_tlp /.tlp~gset~x:N/.code:n = {
+    \keys_set:NN \tlp_gset:Nx #1
+  },
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\begin{macro}{.int~set:N}
+%\begin{macro}{.int~gset:N}
+%\begin{macro}{.skip~set:N}
+%\begin{macro}{.skip~gset:N}
+%\begin{macro}{.toks~set:N}
+%\begin{macro}{.toks~gset:N}
+% For int, skip and toks storage, no expansion to worry about.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.int~set:N/.code:n = {
+    \keys_set:NN \int_set:Nn #1
+  },
+  \c_keys_properties_path_tlp /.int~gset:N/.code:n = {
+    \keys_set:NN \int_gset:Nn #1
+  },
+  \c_keys_properties_path_tlp /.skip~set:N/.code:n = {
+    \keys_set:NN \skip_set:Nn #1
+  },
+  \c_keys_properties_path_tlp /.skip~gset:N/.code:n = {
+    \keys_set:NN \skip_gset:Nn #1
+  },
+  \c_keys_properties_path_tlp /.toks~set:N/.code:n = {
+    \keys_set:NN \toks_set:Nn #1
+  },
+  \c_keys_properties_path_tlp /.toks~gset:N/.code:n = {
+    \keys_set:NN \toks_gset:Nn #1
+  },
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %
@@ -1303,7 +1443,7 @@
     },
     \l_keys_current_path_tlp /.default:n = true
   }
-  \keys_set:nn {\l_keys_current_path_tlp /._boolean} {\exp_not:N #2}
+  \keys_store:nn {\l_keys_current_path_tlp /._boolean} {\exp_not:N #2}
 }
 \cs_new:Npn \keys_boolean:nc #1#2 {
   \keys_module_name:
@@ -1324,7 +1464,7 @@
     },
     \l_keys_current_path_tlp /.default:n = true
   }
-  \keys_set:nx {\l_keys_current_path_tlp /._boolean} {
+  \keys_store:nx {\l_keys_current_path_tlp /._boolean} {
     \exp_not:N \exp_not:N \exp_not:d
       {\use:c {l_ \l_keys_tmpa_tlp #2_bool}}
   }
@@ -1360,28 +1500,6 @@
 }
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\keys_store:NN}
-%\begin{macro}{\keys_store:Nc}
-% Generic storage functions.
-%    \begin{macrocode}
-\cs_new:Npn \keys_store:NN #1#2 {
-  \keys_parse_list:n {
-    \c_keys_properties_path_tlp /.code:n = {
-      #1 #2 {##1}
-    }
-  }
-}
-\cs_new:Npn \keys_store:Nc #1#2 {
-  \keys_module_name:
-  \keys_parse_list:n {
-    \c_keys_properties_path_tlp /.code:x = {
-      \exp_not:N #1 {l_ \l_keys_tmpa_tlp #2_tlp} {##1}
-    }
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %\begin{macro}{\keys_try:}
 % Trying something without errors.
 %    \begin{macrocode}
@@ -1414,19 +1532,8 @@
 %    \end{macrocode}
 %\end{macro}
 %
-% The remaining definitions can all be carried out using the package
-% itself. Here, the |_quick| method is used as there is no need to
-% worry about spaces or catcodes.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-%  \c_keys_properties_path_tlp /.module:/.code:n = {
-%    \keys_manage_internal:n {
-%      \l_keys_current_path_tlp /.code:x = {
-%        \exp_not:N \tlp_set:Nx \exp_not:N \l_keys_default_path_tlp
-%          {\l_keys_current_path_tlp /}
-%      }
-%    }
-%  },
 %    \end{macrocode}
 % Pre-built lists of keys can be created for regular use.
 %    \begin{macrocode}
@@ -1457,32 +1564,17 @@
 % That is all of the lower-level things done.  Now use them to build
 % some higher-level functionality.
 %    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.store~in~tlp:N/.code:n = {
-%    \keys_store:NN \tlp_set:Nn #1
-%  },
-%  \c_keys_properties_path_tlp /.estore~in~tlp:N/.code:n = {
-%    \keys_store:NN \tlp_set:Nx #1
-%  },
 %  \c_keys_properties_path_tlp /.store~in~tlp:c/.code:n = {
 %    \keys_store:Nc \tlp_set:cn {#1}
 %  },
 %  \c_keys_properties_path_tlp /.estore~in~tlp:c/.code:n = {
 %    \keys_store:Nc \tlp_set:cx {#1}
 %  },
-%  \c_keys_properties_path_tlp /.store~in~int:N/.code:n = {
-%    \keys_store:NN \int_set:Nn #1
-%  },
 %  \c_keys_properties_path_tlp /.store~in~int:c/.code:n = {
 %    \keys_store:Nc \int_set:cn {#1}
 %  },
-%  \c_keys_properties_path_tlp /.store~in~skip:N/.code:n = {
-%    \keys_store:NN \skip_set:Nn #1
-%  },
 %  \c_keys_properties_path_tlp /.store~in~skip:c/.code:n = {
 %    \keys_store:Nc \skip_set:cn {#1}
-%  },
-%  \c_keys_properties_path_tlp /.store~in~toks:N/.code:n = {
-%    \keys_store:NN \toks_set:Nn #1
 %  },
 %  \c_keys_properties_path_tlp /.store~in~toks:c/.code:n = {
 %    \keys_store:Nc \toks_set:cn {#1}
@@ -1490,32 +1582,17 @@
 %    \end{macrocode}
 % Global versions of all of the above storage properties.
 %    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.gstore~in~tlp:N/.code:n = {
-%    \keys_store:NN \tlp_gset:Nn #1
-%  },
-%  \c_keys_properties_path_tlp /.xstore~in~tlp:N/.code:n = {
-%    \keys_store:NN \tlp_gset:Nx #1
-%  },
 %  \c_keys_properties_path_tlp /.gstore~in~tlp:c/.code:n = {
 %    \keys_store:Nc \tlp_gset:cn {#1}
 %  },
 %  \c_keys_properties_path_tlp /.xstore~in~tlp:c/.code:n = {
 %    \keys_store:Nc \tlp_gset:cx {#1}
 %  },
-%  \c_keys_properties_path_tlp /.gstore~in~int:N/.code:n = {
-%    \keys_store:NN \int_gset:Nn #1
-%  },
 %  \c_keys_properties_path_tlp /.gstore~in~int:c/.code:n = {
 %    \keys_store:Nc \int_gset:cn {#1}
 %  },
-%  \c_keys_properties_path_tlp /.gstore~in~skip:N/.code:n = {
-%    \keys_store:NN \skip_gset:Nn #1
-%  },
 %  \c_keys_properties_path_tlp /.gstore~in~skip:c/.code:n = {
 %    \keys_store:Nc \skip_gset:cn {#1}
-%  },
-%  \c_keys_properties_path_tlp /.gstore~in~toks:N/.code:n = {
-%    \keys_store:NN \toks_gset:Nn #1
 %  },
 %  \c_keys_properties_path_tlp /.gstore~in~toks:c/.code:n = {
 %    \keys_store:Nc \toks_gset:cn {#1}

@@ -148,4 +148,76 @@
   key
 }
 
+% Test seven: Keys can be created to store data tlp variable both 
+% locally and globally.
+% ----------------------------------------------------------------------
+%   Some content
+%   Outside
+%   Some content
+%   Some content
+% ----------------------------------------------------------------------
+\renewcommand*{\temp}{Outside}
+\SetModuleKeys{
+  key one/.tlp set:N = \temp,
+}
+\begingroup
+\SetModuleKeys{
+  key = Some content
+}
+\temp\\
+\endgroup
+\temp\\
+\SetModuleKeys{
+  key/.tlp gset:N = \temp
+}
+\begingroup
+\SetModuleKeys{
+  key = Some content
+}
+\temp\\
+\endgroup
+\temp\\
+
+% Test eight: An expanded version of .tkp set:N is available.
+% ----------------------------------------------------------------------
+%   Unexpanded
+%   Expanded
+% ----------------------------------------------------------------------
+\renewcommand*{\temp}{Expanded}
+\newcommand*{\tempa}{}
+\newcommand*{\tempb}{}
+\SetModuleKeys{
+  key one/.tlp set:N   = \tempa,
+  key two/.tlp set x:N = \tempb,
+  key one = \temp,
+  key two = \temp,
+}
+\renewcommand*{\temp}{Unexpanded}
+\tempa\\
+\tempb\\
+
+% Test nine: Storage functions for int, skip and toks variables are also
+% available. Both local and global setting is possible, although there
+% are no "x" versions.
+% ----------------------------------------------------------------------
+%   12345
+%   10.00002pt
+%   abc
+% ----------------------------------------------------------------------
+\newcount\tempint
+\newskip\tempskip
+\newtoks\temptoks
+\SetModuleKeys{
+  key/.int set:N  = \tempint,
+  key = 12345,
+  key/.skip set:N = \tempskip,
+  key = 1 em,
+  key/.toks set:N = \temptoks,
+  key = abc
+}
+\the\tempint\\
+\the\tempskip\\
+\the\temptoks
+
 \end{document}
+

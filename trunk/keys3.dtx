@@ -195,6 +195,30 @@
 % \end{function}
 % 
 % \begin{function}{
+%   .bool_set_inverse:n|
+%   .bool_gset_inverse:n|
+% }
+%  \begin{syntax}
+%    <key>/.bool_set_inverse:n = <name>
+%  \end{syntax}
+%  Defines <key> to set switch with unique <name> to <value> (which 
+%  must be either \texttt{true} or \texttt{false}), with reversed logic. 
+%  The switch name will be constructed using the current <module> (if 
+%  any), prefixed by |\l_| and ending with |_int|.
+% \end{function}
+% 
+% \begin{function}{
+%   .bool_set_inverse:N|
+%   .bool_gset_inverse:N|
+% }
+%  \begin{syntax}
+%    <key>/.bool_set_inverse:N = <bool>
+%  \end{syntax}
+%  Defines <key> to set <bool> to <value> (which must be either 
+%  \texttt{true} or \texttt{false}), with reversed logic.
+% \end{function}
+% 
+% \begin{function}{
 %   .bool_set:n|
 %   .bool_gset:n|
 % }
@@ -462,6 +486,23 @@
 %   <value> in setting <boolean>. If a <name> is given, it is used to 
 %   construct a csname for the switch including the current <module>. 
 %   The <prefix> should be |l_| or |g_|.
+% \end{function}
+% 
+% \begin{function}{
+%   \keys_bool_set_inverse:n|
+%   \keys_bool_set_inverse:nN|
+%   \keys_bool_set_inverse:nnn|
+%  }
+%   \begin{syntax}
+%     "\keys_bool_set:n" <switch>
+%     "\keys_bool_set:nN" <function> <boolean>
+%     "\keys_bool_set:nnn" <function> <prefix> <name>
+%   \end{syntax}
+%   Uses <function> (either \texttt{set} or \texttt{gset}) to use 
+%   <value> in setting <boolean>. If a <name> is given, it is used to 
+%   construct a csname for the switch including the current <module>. 
+%   The <prefix> should be |l_| or |g_|. The logic of the setting is
+%   reversed compared to the \cs{keys_bool_set:} functions.
 % \end{function}
 % 
 % \begin{function}{\keys_clear_properties:n}
@@ -971,6 +1012,47 @@
   }
 }
 %    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\keys_bool_set_inverse:n}
+%\begin{macro}{\keys_bool_set_inverse:nN}
+%\begin{macro}{\keys_bool_set_inverse:nnn}
+% To set keys with reversed logic, the basics can be done in the same 
+% way as for the standard switches.  The only thing needed is a 
+% reversal of \texttt{true}/\texttt{false}.
+%    \begin{macrocode}
+\cs_new:NNn \keys_bool_set_inverse:n 1 {
+  \tlist_if_eq:nnTF {#1} { true } { false } { true }
+}
+\cs_new:NNn \keys_bool_set_inverse:nN 2 {
+  \keys_parse_list:n {
+    \c_keys_properties_path_tlp /.code:n = {
+      \cs_if_really_exist:cTF { bool_ #1 _ ##1 :N } {
+        \use:c { bool_ #1 _ \keys_bool_set_inverse:n {##1} :N } #2
+      }{
+        \keys_err_use:nn { boolean_expected } {##1}
+      }
+    },
+    \l_keys_current_path_tlp /.default:n = true
+  }
+}
+\cs_new:NNn \keys_bool_set_inverse:nnn 3 {
+  \keys_parse_list:n {
+    \c_keys_properties_path_tlp /.code:x = {
+      \exp_not:N \cs_if_really_exist:cTF { bool_ #1 _ ##1 :c } {
+         \exp_not:N \use:c { 
+           bool_ #1 _ \exp_not:N \keys_bool_set_inverse:n {##1} :c 
+         } { #2 \l_keys_current_module_tlp #3 _bool }
+      }{
+        \exp_not:N \keys_err_use:nn { boolean_expected } {##1}
+      }
+    },
+    \l_keys_current_path_tlp /.default:n = true
+  }
+}
+%    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %
@@ -1680,6 +1762,33 @@
   },
   \c_keys_properties_path_tlp /.bool_gset:n/.code:n = {
     \keys_bool_set:nnn { gset } { g_ } { #1 }
+  },
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{.bool_set_inverse:N}
+%\begin{macro}{.bool_gset_inverse:N}
+%\begin{macro}{.bool_set_inverse:n}
+%\begin{macro}{.bool_gset_inverse:n}
+% The inverse versions of the switches are handled in the same way
+% here.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.bool_set_inverse:N/.code:n = {
+    \keys_bool_set_inverse:nN { set } #1
+  },
+  \c_keys_properties_path_tlp /.bool_gset_inverse:N/.code:n = {
+    \keys_bool_set_inverse:nN { gset } #1
+  },
+  \c_keys_properties_path_tlp /.bool_set_inverse:n/.code:n = {
+    \keys_bool_set_inverse:nnn { set } { l_ } { #1 }
+  },
+  \c_keys_properties_path_tlp /.bool_gset_inverse:n/.code:n = {
+    \keys_bool_set_inverse:nnn { gset } { g_ } { #1 }
   },
 }
 %    \end{macrocode}

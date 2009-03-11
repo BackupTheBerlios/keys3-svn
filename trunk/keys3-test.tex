@@ -273,5 +273,27 @@
   { Global~switch~true } { Global~switch~false }
 \ExplSyntaxOff
 
+% Test twelve: The logic for Boolean keys can be reversed using the
+% .bool_set_inverse:N and related properties. This can be used with
+% in concert with .bool_set:N to create complementary keys.
+% ----------------------------------------------------------------------
+% Local switch false
+% Global switch false
+% ----------------------------------------------------------------------
+\SetModuleKeys{
+  /keys/current_module:n = module,
+  key one/.bool_set_inverse:N = \localbool,
+  key two/.bool_gset_inverse:n = global,
+  key one,
+  key two = true,
+}
+\ExplSyntaxOn
+\bool_if:NTF \localbool { Local~switch~true } { Local~switch~false } \\
+\bool_if:NTF \g_module_global_bool 
+  { Global~switch~true } { Global~switch~false }
+\ExplSyntaxOff
+
+\expandafter\show\csname keys-root/module name/key two/._cmd:w\endcsname
+
 \end{document}
 

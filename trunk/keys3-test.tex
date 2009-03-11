@@ -112,7 +112,7 @@
 }
 
 % Test five: Values can be required and forbidden with the 
-% .value required: and .value forbidden: properties.
+% .value_required: and .value_forbidden: properties.
 % ----------------------------------------------------------------------
 %   All okay
 %   All okay
@@ -124,11 +124,11 @@
 % ----------------------------------------------------------------------
 \SetModuleKeys{
   key/.code:n = {All okay\\},
-  key/.value forbidden:,
+  key/.value_forbidden:,
   key,
   key = Not allowed,
   key/.code:n = #1,
-  key/.value required:,
+  key/.value_required:,
   key = {All okay},
   key
 }
@@ -158,7 +158,7 @@
 % ----------------------------------------------------------------------
 \renewcommand*{\temp}{Outside}
 \SetModuleKeys{
-  key one/.tlp set:N = \temp,
+  key one/.tlp_set:N = \temp,
 }
 \begingroup
 \SetModuleKeys{
@@ -168,7 +168,7 @@
 \endgroup
 \temp\\
 \SetModuleKeys{
-  key/.tlp gset:N = \temp
+  key/.tlp_gset:N = \temp
 }
 \begingroup
 \SetModuleKeys{
@@ -178,7 +178,7 @@
 \endgroup
 \temp\\
 
-% Test eight: An expanded version of .tkp set:N is available.
+% Test eight: An expanded version of .tkp_set:N is available.
 % ----------------------------------------------------------------------
 %   Unexpanded
 %   Expanded
@@ -187,8 +187,8 @@
 \newcommand*{\tempa}{}
 \newcommand*{\tempb}{}
 \SetModuleKeys{
-  key one/.tlp set:N   = \tempa,
-  key two/.tlp set x:N = \tempb,
+  key one/.tlp_set:N   = \tempa,
+  key two/.tlp_set_x:N = \tempb,
   key one = \temp,
   key two = \temp,
 }
@@ -208,11 +208,11 @@
 \newskip\tempskip
 \newtoks\temptoks
 \SetModuleKeys{
-  key/.int set:N  = \tempint,
+  key/.int_set:N  = \tempint,
   key = 12345,
-  key/.skip set:N = \tempskip,
+  key/.skip_set:N = \tempskip,
   key = 1 em,
-  key/.toks set:N = \temptoks,
+  key/.toks_set:N = \temptoks,
   key = abc
 }
 \the\tempint\\

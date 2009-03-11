@@ -182,33 +182,33 @@
 % \end{function}
 % 
 % \begin{function}{
-%   .int~set:N|
-%   .int~gset:N|
+%   .int_set:N|
+%   .int_gset:N|
 % }
 %  \begin{syntax}
-%    <key>/.int~set:N = <int>
+%    <key>/.int_set:N = <int>
 %  \end{syntax}
 %  Defines <key> to store <value> in the <int> named.
 % \end{function}
 % 
 % \begin{function}{
-%   .skip~set:N|
-%   .skip~gset:N|
+%   .skip_set:N|
+%   .skip_gset:N|
 % }
 %  \begin{syntax}
-%    <key>/.skip~set:N = <skip>
+%    <key>/.skip_set:N = <skip>
 %  \end{syntax}
 %  Defines <key> to store <value> in the <skip> named.
 % \end{function}
 % 
 % \begin{function}{
-%   .tlp~set:N|
-%   .tlp~set~x:N|
-%   .tlp~gset:N|
+%   .tlp_set:N|
+%   .tlp_set_x:N|
+%   .tlp_gset:N|
 %   .tlp~gset~x:N|
 % }
 %  \begin{syntax}
-%    <key>/.tlp~set:N = <tlp>
+%    <key>/.tlp_set:N = <tlp>
 %  \end{syntax}
 %  Defines <key> to store <value> in the <tlp> named. The \texttt{x}
 %  versions use \cs{tlp_(g)set:Nx} for this process, the standard 
@@ -216,21 +216,21 @@
 % \end{function}
 % 
 % \begin{function}{
-%   .toks~set:N|
-%   .toks~gset:N|
+%   .toks_set:N|
+%   .toks_gset:N|
 % }
 %  \begin{syntax}
-%    <key>/.toks~set:N = <toks>
+%    <key>/.toks_set:N = <toks>
 %  \end{syntax}
 %  Defines <key> to store <value> in the <toks> named.
 % \end{function}
 % 
 % \begin{function}{
-%   .value~forbidden:|
-%   .value~required:|
+%   .value_forbidden:|
+%   .value_required:|
 % }
 %  \begin{syntax}
-%    <key>/.value forbidden:
+%    <key>/.value_forbidden:
 %  \end{syntax}
 %  Flags for forbidding and requiring a <value> for <key>.
 % \end{function}
@@ -1325,18 +1325,18 @@
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{.value~forbidden:}
+%\begin{macro}{.value_forbidden:}
 %\begin{macro}{._required_bool}
-%\begin{macro}{.value~required:}
+%\begin{macro}{.value_required:}
 %\begin{macro}{._forbidden_bool}
 % Values are required or forbidden by creating the appropriate flags.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.value~required:/.code:n = {
+  \c_keys_properties_path_tlp /.value_required:/.code:n = {
     \keys_bool_new:n { \l_keys_current_path_tlp /._required_bool }
     \keys_undefine:n { \l_keys_current_path_tlp /._forbidden_bool }
   },
-  \c_keys_properties_path_tlp /.value~forbidden:/.code:n = {
+  \c_keys_properties_path_tlp /.value_forbidden:/.code:n = {
     \keys_bool_new:n { \l_keys_current_path_tlp /._forbidden_bool }
     \keys_undefine:n { \l_keys_current_path_tlp /._required_bool }
   }
@@ -1362,20 +1362,20 @@
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{.tlp~set:N}
-%\begin{macro}{.tlp~set~x:N}
-%\begin{macro}{.tlp~gset:N}
+%\begin{macro}{.tlp_set:N}
+%\begin{macro}{.tlp_set_x:N}
+%\begin{macro}{.tlp_gset:N}
 %\begin{macro}{.tlp~gset~x:N}
 % Storage of the value in a tlp, as given or expanded, local or global.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.tlp~set:N/.code:n = {
+  \c_keys_properties_path_tlp /.tlp_set:N/.code:n = {
     \keys_set:NN \tlp_set:Nn #1
   },
-  \c_keys_properties_path_tlp /.tlp~set~x:N/.code:n = {
+  \c_keys_properties_path_tlp /.tlp_set_x:N/.code:n = {
     \keys_set:NN \tlp_set:Nx #1
   },
-  \c_keys_properties_path_tlp /.tlp~gset:N/.code:n = {
+  \c_keys_properties_path_tlp /.tlp_gset:N/.code:n = {
     \keys_set:NN \tlp_gset:Nn #1
   },
   \c_keys_properties_path_tlp /.tlp~gset~x:N/.code:n = {
@@ -1387,31 +1387,31 @@
 %\end{macro}
 %\end{macro}
 %\end{macro}
-%\begin{macro}{.int~set:N}
-%\begin{macro}{.int~gset:N}
-%\begin{macro}{.skip~set:N}
-%\begin{macro}{.skip~gset:N}
-%\begin{macro}{.toks~set:N}
-%\begin{macro}{.toks~gset:N}
+%\begin{macro}{.int_set:N}
+%\begin{macro}{.int_gset:N}
+%\begin{macro}{.skip_set:N}
+%\begin{macro}{.skip_gset:N}
+%\begin{macro}{.toks_set:N}
+%\begin{macro}{.toks_gset:N}
 % For int, skip and toks storage, no expansion to worry about.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.int~set:N/.code:n = {
+  \c_keys_properties_path_tlp /.int_set:N/.code:n = {
     \keys_set:NN \int_set:Nn #1
   },
-  \c_keys_properties_path_tlp /.int~gset:N/.code:n = {
+  \c_keys_properties_path_tlp /.int_gset:N/.code:n = {
     \keys_set:NN \int_gset:Nn #1
   },
-  \c_keys_properties_path_tlp /.skip~set:N/.code:n = {
+  \c_keys_properties_path_tlp /.skip_set:N/.code:n = {
     \keys_set:NN \skip_set:Nn #1
   },
-  \c_keys_properties_path_tlp /.skip~gset:N/.code:n = {
+  \c_keys_properties_path_tlp /.skip_gset:N/.code:n = {
     \keys_set:NN \skip_gset:Nn #1
   },
-  \c_keys_properties_path_tlp /.toks~set:N/.code:n = {
+  \c_keys_properties_path_tlp /.toks_set:N/.code:n = {
     \keys_set:NN \toks_set:Nn #1
   },
-  \c_keys_properties_path_tlp /.toks~gset:N/.code:n = {
+  \c_keys_properties_path_tlp /.toks_gset:N/.code:n = {
     \keys_set:NN \toks_gset:Nn #1
   },
 }

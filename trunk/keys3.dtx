@@ -1,5 +1,4 @@
 %\iffalse
-% !TEX encoding = ISO-8859-1
 % !TEX program  = pdflatex
 %% File: keys3.dtx Copyright (C) 2008-2009 Joseph Wright
 %%
@@ -260,6 +259,19 @@
 %  include <number> parameters, which can be in the range 0--9.
 % \end{function}
 % 
+% \begin{function}{
+%   .create_choices:nn|
+%   .create_choices:nx|
+% }
+%  \begin{syntax}
+%    <key>/.create_choices:nn = <list> <code>
+%  \end{syntax}
+%  Creates a sub-key of <key> for each <choice> in the comma-separated
+%  <list>. Each <choice> will have <code> associated with it. The 
+%  current choice text is available as \cs{l_keys_current_choice_tlp},
+%  and its position in the <list> as \cs{l_keys_current_choice_int}.
+% \end{function}
+% 
 % \begin{function}{.default:n}
 %  \begin{syntax}
 %    <key>/.default:n = <content>
@@ -267,6 +279,14 @@
 %  Creates a default value for <key>, which is used if no value is 
 %  given. The <content> is stored as a tlp, and so must be compatible
 %  with this variable type.
+% \end{function}
+% 
+% \begin{function}{.expects_choice:}
+%  \begin{syntax}
+%    <key>/.expects_choice:
+%  \end{syntax}
+%  Indicates that the <value> given for <key> should be a sub-key of
+%  <key>. In this way, <key> accepts one of a limited range of choices.
 % \end{function}
 % 
 % \begin{function}{
@@ -309,8 +329,8 @@
 %    <key>/.skip_set:n = <name>
 %  \end{syntax}
 %  Defines <key> to store <value> in a skip with unique name <name>. The
-%   skip name will be constructed using the current <module> (if any), 
-%   prefixed by |\l_| and ending with |_skip|.
+%  skip name will be constructed using the current <module> (if any), 
+%  prefixed by |\l_| and ending with |_skip|.
 % \end{function}
 % 
 % \begin{function}{
@@ -404,6 +424,11 @@
 % 
 % \begin{variable}{\c_keys_root_tlp}
 %   The root path for keys.
+% \end{variable}
+% 
+% \begin{variable}{\l_keys_choice_code_tlp}
+%   The code to execute for each multiple choice when created \emph{en 
+%   masse}.
 % \end{variable}
 % 
 % \begin{variable}{
@@ -510,6 +535,24 @@
 %     "\keys_clear_properties:n" <key>
 %   \end{syntax}
 %   Clears the internal properties of <key>.
+% \end{function}
+% 
+% \begin{function}{\keys_choice_create:n}
+%   \begin{syntax}
+%     "\keys_choice_create:n" <choice>
+%   \end{syntax}
+%   Creates <choice> as a sub-key of <key>.
+% \end{function}
+% 
+% \begin{function}{\keys_choices_create:Nnn}
+%   \begin{syntax}
+%     "\keys_choices_create:Nnn" <expansion> <list> <code>
+%   \end{syntax}
+%   Takes a comma separated <list> and makes a <choice> as a sub-key of
+%   the current <key> for each. The <choice> will execute <code>, which
+%   is processed according to <expansion> (either \texttt{n} or 
+%   \texttt{x}). The <code> has access to \cs{l_keys_current_choice_tlp}
+%   and \cs{l_keys_current_choice_int}, which indicate the choice given.
 % \end{function}
 % 
 % \begin{function}{\keys_default_add:}
@@ -829,6 +872,13 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\l_keys_choice_code_tlp}
+% When making choices, the code for each key has to be stored.
+%    \begin{macrocode}
+\tlp_new:N \l_keys_choice_code_tlp
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\l_keys_current_choice_tlp}
 %\begin{macro}{\l_keys_current_choice_int}
 % Multiple choices need some storage.
@@ -1052,6 +1102,43 @@
   }
 }
 %    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\keys_choices_create:Nnn}
+%\begin{macro}[aux]{\keys_choices_create_aux:n}
+%\begin{macro}[aux]{\keys_choices_create_aux:x}
+%\begin{macro}{\keys_choice_create:n}
+% When making multiple choices, the code for each choice is the same.
+% Only the path and counter need to be altered. 
+%    \begin{macrocode}
+\cs_new:NNn \keys_choices_create:Nnn 3 {
+  \tlp_set_eq:NN \l_keys_choice_path_tlp \l_keys_current_path_tlp
+  \int_zero:N \l_keys_current_choice_int
+  \use:c { keys_choices_create_aux: #1 } {#3}
+  \clist_map_function:nN {#2} \keys_choice_create:n
+  \keys_manage_internal:n { \l_keys_choice_path_tlp  /.expects_choice: }
+}
+\cs_new:NNn \keys_choices_create_aux:n 1 {
+  \tlp_set:Nn \l_keys_choice_code_tlp { \exp_not:n {#1} }
+}
+\cs_new:NNn \keys_choices_create_aux:x 1 {
+  \tlp_set:Nn \l_keys_choice_code_tlp {#1}
+}
+\cs_new:NNn \keys_choice_create:n 1 {
+  \int_incr:N \l_keys_current_choice_int
+  \keys_parse_list:n {
+    \l_keys_choice_path_tlp / #1 /.code:x = {
+      \exp_not:n { \int_set:Nn \l_keys_current_choice_int }
+        { \int_use:N \l_keys_current_choice_int }
+      \exp_not:n { \tlp_set:Nn \l_keys_current_choice_tlp } {#1}
+      \l_keys_choice_code_tlp
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %\end{macro}
@@ -1797,29 +1884,46 @@
 %\end{macro}
 %\end{macro}
 %
-%------
-%
-% To allow code-sharing for switch control.
+%\begin{macro}{.expects_choice:}
+% Multiple choice keys are created by searching sub-keys. So the
+% code to make a key into a multiple choice is quite simple.
 %    \begin{macrocode}
-\toks_new:N \l_keys_body_toks
-%    \end{macrocode}
-%\begin{macro}{\keys_choice_create:n}
-% The system to create choices is quite simple.
-%    \begin{macrocode}
-\cs_new:Npn \keys_choice_create:n #1 {
-  \int_incr:N \l_keys_current_choice_int
-  \keys_parse_list:n {
-    \l_keys_choice_path_tlp /#1/.code:x = {
-      \exp_not:n {\int_set:Nn \l_keys_current_choice_int}
-        {\int_use:N \l_keys_current_choice_int}
-      \exp_not:n {\tlp_set:Nn \l_keys_current_choice_tlp} {#1}
-      \toks_use:N \l_keys_body_toks
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.expects_choice:/.code:n = {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.cd:,
+      .code:n = {
+        \tlp_set:Nn \l_keys_current_choice_tlp {##1}
+        \int_zero:N \l_keys_current_choice_int
+        \exp_args:No \keys_parse_list:n 
+          { \l_keys_current_key_full_tlp / ##1 }
+      },
+      unknown/.code:n = {
+        \keys_err_use:nn { unknown_choice } 
+          { \l_keys_current_key_name_tlp }
+      }
     }
-  }
+  },
 }
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\keys_try:}
+%\begin{macro}{.create_choices:nn}
+%\begin{macro}{.create_choices:nx}
+% Creating choices as a block.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.create_choices:nn/.code:Nn = 2 {
+    \keys_choices_create:Nnn n {#1} {#2}
+  },
+  \c_keys_properties_path_tlp /.create_choices:nx/.code:Nn = 2 {
+    \keys_choices_create:Nnn x {#1} {#2}
+  },
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%------
 % Trying something without errors.
 %    \begin{macrocode}
 \cs_new:Npn \keys_try: {
@@ -1849,13 +1953,9 @@
   }
 }
 %    \end{macrocode}
-%\end{macro}
 %
 %    \begin{macrocode}
 \keys_manage_quick:n {
-%    \end{macrocode}
-% Pre-built lists of keys can be created for regular use.
-%    \begin{macrocode}
 %  \c_keys_properties_path_tlp /.apply~keys:n/.code:n = {
 %    \keys_manage_internal:n {
 %      \l_keys_current_path_tlp /.code:n = {\keys_parse_list:n {#1}}
@@ -1879,9 +1979,6 @@
 %        {#1} {\exp_not:N \keys_parse_list:n {#2}}
 %    }
 %  },
-%    \end{macrocode}
-% Functions should not be stored in tlps.
-%    \begin{macrocode}
 %  \c_keys_properties_path_tlp /.let~to~func:N/.code:n = {
 %    \keys_parse_list:n {
 %      \c_keys_properties_path_tlp /.code:n = {
@@ -1897,71 +1994,6 @@
 %      }
 %    }
 %  },
-%    \end{macrocode} 
-% Creating an inverse needs a little work as the logic needs to be
-% reversed.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.inverse~key:n/.code:n = {
-%    \keys_if_really_exist:nTF {\l_keys_current_path_tlp /._boolean} {
-%      \tlp_set_eq:NN \l_keys_tmpa_tlp \l_keys_current_path_tlp
-%      \tlp_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp
-%      \keys_separate_path:
-%      \keys_parse_list:n {
-%        \l_keys_current_path_tlp /#1/.code:x = {
-%          \exp_not:N \tlist_if_eq:nnTF {true} {##1} {
-%            \exp_not:N \bool_set_false:N \keys_use:n
-%              {\l_keys_tmpa_tlp /._boolean}
-%          }{
-%            \exp_not:N \tlist_if_eq:nnTF {false} {##1} {
-%              \exp_not:N \bool_set_true:N \keys_use:n
-%                {\l_keys_tmpa_tlp /._boolean}
-%            }{
-%              \exp_not:n {
-%                \keys_err_use:nw {boolean_expected}
-%                  \l_keys_current_key_full_tlp
-%                  {\toks_use:N \l_keys_current_value_toks}
-%              }
-%            }
-%          }
-%        },
-%        \l_keys_current_path_tlp /#1/.default:n = true
-%      }
-%    }{
-%      \keys_err_use:nw {not_boolean} \l_keys_current_path_tlp
-%    }
-%  },
-%    \end{macrocode}
-% Choices are handled in a slightly different way.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.choice:/.code:n = {
-%    \keys_manage_internal:n {
-%      \l_keys_current_path_tlp /.cd:,
-%      .code:n = {
-%        \tlp_set:Nn \l_keys_current_choice_tlp {##1}
-%        \int_zero:N \l_keys_current_choice_int
-%        \exp_args:No \keys_parse_list:n {\l_keys_current_key_full_tlp /##1}
-%      },
-%      unknown/.code:n = {
-%        \keys_err_use:nw {unknown_choice} \l_keys_current_path_tlp
-%          {\l_keys_current_key_name_tlp}
-%      }
-%    }
-%  },
-%    \end{macrocode}
-% Multiple choices can also be created.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.choices:nn/.code:nn = {#1#2} {
-%    \tlp_set_eq:NN \l_keys_choice_path_tlp \l_keys_current_path_tlp
-%    \toks_set:Nn \l_keys_body_toks {#2}
-%    \int_zero:N \l_keys_current_choice_int
-%    \clist_map_function:nN {#1} \keys_choice_create:n
-%    \keys_manage_internal:n {
-%      \l_keys_choice_path_tlp  /.choice:
-%    }
-%  },
-%    \end{macrocode}
-% Different names for the same thing.
-%    \begin{macrocode}
 %  \c_keys_properties_path_tlp /.equivalent~key:n/.code:n = {
 %    \keys_if_really_exist:nT {\l_keys_current_path_tlp /._cmd:w} {
 %      \tlp_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp
@@ -1970,9 +2002,6 @@
 %        {\l_keys_current_key_full_tlp /._cmd:w}
 %    }
 %  },
-%    \end{macrocode}
-% Expansion keys need to be available.
-%    \begin{macrocode}
 %  \c_keys_properties_path_tlp /.expand:o/.code:n = {
 %    \exp_args:No \keys_expand:n {#1}
 %  },
@@ -1982,9 +2011,6 @@
 %  \c_keys_properties_path_tlp /.expand:x/.code:n = {
 %    \exp_args:Nx \keys_expand:n {#1}
 %  },
-%    \end{macrocode}
-% ``Trying'' a key.
-%    \begin{macrocode}
 %  \c_keys_properties_path_tlp /.try:n/.code:n = {\keys_try:},
 %  \c_keys_properties_path_tlp /.retry:n/.code:n = {
 %    \bool_if:NF \l_keys_success_bool {\keys_try:}

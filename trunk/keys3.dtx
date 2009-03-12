@@ -344,6 +344,18 @@
 % \end{function}
 % 
 % \begin{function}{
+%   .show_code:|
+%   .skip_key:|
+% }
+%  \begin{syntax}
+%    <key>/.skip_code:
+%    <key>/.skip_key:
+%  \end{syntax}
+%  Shows the function for the current key or the code associated with
+%  the current key.
+% \end{function}
+% 
+% \begin{function}{
 %   .skip_set:N|
 %   .skip_gset:N|
 % }
@@ -638,13 +650,6 @@
 %   \end{syntax}
 %   Issues error <name>, with or without <content>. The \texttt{w} 
 %   variant may take one or two arguments.
-% \end{function}
-% 
-% \begin{function}{\keys_expand:n}
-%   \begin{syntax}
-%     "\keys_expand:n" <code>
-%   \end{syntax}
-%   A helper function used to expand <code>.
 % \end{function}
 % 
 % \begin{function}{
@@ -1225,15 +1230,6 @@
       \bool_set_false:N \l_keys_no_value_bool
     }
   }
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_expand:n}
-% A helper for expansion.
-%    \begin{macrocode}
-\cs_new:NNn \keys_expand:n 1 {
-  \keys_parse_list:n { \l_keys_current_path_tlp = #1 }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -2016,6 +2012,25 @@
 %\end{macro}
 %\end{macro}
 %
+%\begin{macro}{.show_code:}
+%\begin{macro}{.show_key:}
+% Finally, two keys for debugging problems.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.show_code:/.code:n = {
+    \cs_show:c { 
+      \c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._cmd:w 
+    }
+  },
+  \c_keys_properties_path_tlp /.show_key:/.code:n = {
+    \cs_show:c { \c_keys_cs_prefix_tlp \l_keys_current_path_tlp }
+  }
+}
+%</package>
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %------
 % Trying something without errors.
 %    \begin{macrocode}
@@ -2045,39 +2060,11 @@
     }
   }
 }
-%    \end{macrocode}
-%
-%    \begin{macrocode}
-\keys_manage_quick:n {
-%  \c_keys_properties_path_tlp /.expand:o/.code:n = {
-%    \exp_args:No \keys_expand:n {#1}
-%  },
-%  \c_keys_properties_path_tlp /.expand:d/.code:n = {
-%    \exp_args:NNo \exp_args:No \keys_expand:n {#1}
-%  },
-%  \c_keys_properties_path_tlp /.expand:x/.code:n = {
-%    \exp_args:Nx \keys_expand:n {#1}
-%  },
 %  \c_keys_properties_path_tlp /.try:n/.code:n = {\keys_try:},
 %  \c_keys_properties_path_tlp /.retry:n/.code:n = {
 %    \bool_if:NF \l_keys_success_bool {\keys_try:}
 %  },
-%    \end{macrocode}
 %
-% Some debugging keys.
-%    \begin{macrocode}
-%  \c_keys_properties_path_tlp /.show~code:/.code:n = {
-%    \cs_show:c {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._cmd:w}
-%  },
-%  \c_keys_properties_path_tlp /.show:/.code:n = {
-%    \cs_show:c {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
-%  },
-%    \end{macrocode}
-% Keys for programmers.
-%    \begin{macrocode}
-%  \c_keys_utilities_path_tlp /execute:n/.code:n = {#1},
-}
-%</package>
 %    \end{macrocode}
 %
 %\Finale

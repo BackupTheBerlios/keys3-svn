@@ -343,12 +343,12 @@
 %  prefixed by |\l_| and ending with |_int|.
 % \end{function}
 % 
-% \begin{function}{.retry:}
+% \begin{function}{.retry:n}
 %  \begin{syntax}
-%    <key>/.retry:
+%    <key>/.retry:n = <data>
 %  \end{syntax}
-%  Executes <key> if it exists and if the previous \texttt{.try:} 
-%  failed.
+%  Executes <key> if it exists and if the previous \texttt{.try:n} 
+%  failed. The <data> is passed to <key>, if successful.
 % \end{function}
 % 
 % \begin{function}{
@@ -435,11 +435,12 @@
 %  (if any), prefixes by |\l_| and ending with |_toks|.
 % \end{function}
 % 
-% \begin{function}{.try:}
+% \begin{function}{.try:n}
 %  \begin{syntax}
-%    <key>/.try:
+%    <key>/.try:n = <data>
 %  \end{syntax}
-%  Executes <key> if defined, and does nothing otherwise.
+%  Executes <key> if defined, and does nothing otherwise.  The <data> is
+%  passed to <key>, if successful.
 % \end{function}
 % 
 % \begin{function}{
@@ -1543,7 +1544,7 @@
 % it if found.
 %    \begin{macrocode}
 \cs_new:NNn \keys_try: 0 {
-   \bool_set_false:N \l_keys_success_bool
+  \bool_set_false:N \l_keys_success_bool
   \keys_if_cmd_really_exist:nT { \l_keys_current_path_tlp } {
     \bool_set_true:N \l_keys_success_bool
     \bool_if:NT \l_keys_no_value_bool {
@@ -2056,8 +2057,8 @@
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{.try:}
-%\begin{macro}{.retry:}
+%\begin{macro}{.try:n}
+%\begin{macro}{.retry:n}
 % For attempting to set keys without assuming they exist.
 %    \begin{macrocode}
 \keys_manage_quick:n {

@@ -336,5 +336,43 @@
   key three = {Fred} {Ginger}
 }
 
+% Test fifteen: The .try:w and .retry:w properties attempt to set a key
+% only if it exists.  The .try:w property does this for every key it
+% is given, whereas .retry: only works if the previous .try:w failed.
+% ----------------------------------------------------------------------
+% Hello
+% World
+% Seen
+% ----------------------------------------------------------------------
+\SetModuleKeys{
+  key one/.code:n = {#1\\},
+  key two/.code:n = {#1\\},
+  key one/.try:n = Hello,
+  key ten/.try:n = Rubbish,
+  key two/.try:n = World,
+  key two/.retry:n = Not seen,
+  key ten/.try:n = Rubbish,
+  key two/.retry:n = Seen,
+}
+
+% Test sixteen: Two programmers tools, .show_code: and .show_key:, do
+% pretty much what might be expected. .show_key: is mainly useful for
+% internal keys.
+% ----------------------------------------------------------------------
+% a or b
+% ----------------------------------------------------------------------
+% > \keys-root/module name/key one/._cmd:w=\long macro:
+% #1#2->#1 or #2.
+%
+% > \keys-root/module name/key one/._num_args_tlp=macro:
+% ->2.
+% ----------------------------------------------------------------------
+\SetModuleKeys{
+  key one/.code:Nn = 2 {#1 or #2},
+  key one = ab,
+  key one/.show_code:,
+  key one/._num_args_tlp/.show_key:,
+}
+
 \end{document}
 

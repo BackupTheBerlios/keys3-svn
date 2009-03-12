@@ -343,13 +343,21 @@
 %  prefixed by |\l_| and ending with |_int|.
 % \end{function}
 % 
+% \begin{function}{.retry:}
+%  \begin{syntax}
+%    <key>/.retry:
+%  \end{syntax}
+%  Executes <key> if it exists and if the previous \texttt{.try:} 
+%  failed.
+% \end{function}
+% 
 % \begin{function}{
 %   .show_code:|
-%   .skip_key:|
+%   .show_key:|
 % }
 %  \begin{syntax}
-%    <key>/.skip_code:
-%    <key>/.skip_key:
+%    <key>/.show_code:
+%    <key>/.show_key:
 %  \end{syntax}
 %  Shows the function for the current key or the code associated with
 %  the current key.
@@ -427,9 +435,16 @@
 %  (if any), prefixes by |\l_| and ending with |_toks|.
 % \end{function}
 % 
+% \begin{function}{.try:}
+%  \begin{syntax}
+%    <key>/.try:
+%  \end{syntax}
+%  Executes <key> if defined, and does nothing otherwise.
+% \end{function}
+% 
 % \begin{function}{
 %   .use_keys:n|
-%   .use_keys:n|
+%   .use_keys:x|
 % }
 %  \begin{syntax}
 %    <key>/.use_keys:n = <keyval list>
@@ -441,7 +456,7 @@
 % 
 % \begin{function}{
 %   .use_keys:Nn|
-%   .use_keys:Nn|
+%   .use_keys:Nx|
 % }
 %  \begin{syntax}
 %    <key>/.use_keys:Nn = <number> <keyval list>
@@ -793,6 +808,13 @@
 %     "\keys_toks_set:Nn" <toks> <key>
 %   \end{syntax}
 %   Sets <toks> equal to the content of <key>
+% \end{function}
+% 
+% \begin{function}{\keys_try:}
+%   \begin{syntax}
+%     "\keys_try:"
+%   \end{syntax}
+%   Attempt to execute a key, with no error if the key is unknown.
 % \end{function}
 % 
 % \begin{function}{\keys_undefine:n}
@@ -1516,6 +1538,28 @@
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\keys_try:}
+% A function to look for the |._cmd:w| property of a key, and executes
+% it if found.
+%    \begin{macrocode}
+\cs_new:NNn \keys_try: 0 {
+   \bool_set_false:N \l_keys_success_bool
+  \keys_if_cmd_really_exist:nT { \l_keys_current_path_tlp } {
+    \bool_set_true:N \l_keys_success_bool
+    \bool_if:NT \l_keys_no_value_bool {
+      \keys_if_really_exist:nT
+        { \l_keys_current_path_tlp /._default_tlp } {
+        \keys_toks_set:Nn \l_keys_current_value_toks
+          { \l_keys_current_path_tlp /._default_tlp }
+      }
+    }
+    \let:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp 
+    \keys_use_cmd:n { \l_keys_current_path_tlp }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\keys_undefine:n}
 % To remove a key.
 %    \begin{macrocode}
@@ -1978,7 +2022,7 @@
 %\begin{macro}{.use_keys:n}
 %\begin{macro}{.use_keys:x}
 %\begin{macro}{.use_keys:Nn}
-%\begin{macro}{.use_keys:Nn}
+%\begin{macro}{.use_keys:Nx}
 % Keys calling other keys is actually quite easy.
 %    \begin{macrocode}
 \keys_manage_quick:n {
@@ -2012,6 +2056,20 @@
 %\end{macro}
 %\end{macro}
 %
+%\begin{macro}{.try:}
+%\begin{macro}{.retry:}
+% For attempting to set keys without assuming they exist.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.try:n/.code:n = { \keys_try: },
+  \c_keys_properties_path_tlp /.retry:n/.code:n = {
+    \bool_if:NF \l_keys_success_bool { \keys_try: }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}{.show_code:}
 %\begin{macro}{.show_key:}
 % Finally, two keys for debugging problems.
@@ -2030,41 +2088,5 @@
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
-%
-%------
-% Trying something without errors.
-%    \begin{macrocode}
-\cs_new:Npn \keys_try: {
-  \keys_if_really_exist:nTF {\l_keys_current_path_tlp /._cmd:w} {
-    \bool_if:NT \l_keys_no_value_bool {
-      \keys_if_really_exist:nT
-        {\l_keys_current_path_tlp /._default_tlp} {
-        \keys_toks_set:Nn \l_keys_current_value_toks
-          {\l_keys_current_path_tlp /._default_tlp}
-      }
-    }
-    \let:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp 
-    \keys_use_cmd:n {\l_keys_current_path_tlp}
-    \bool_set_true:N \l_keys_success_bool
-  }{
-    \keys_if_really_exist:nTF {\l_keys_current_path_tlp} {
-      \bool_if:NTF \l_keys_no_value_bool {
-        \keys_use:n {\l_keys_current_path_tlp}
-      }{
-        \tlp_set:co {\c_keys_cs_prefix_tlp \l_keys_current_path_tlp}
-          {\toks_use:N \l_keys_current_value_toks}
-      }
-      \bool_set_true:N \l_keys_success_bool
-    }{
-      \bool_set_false:N \l_keys_success_bool
-    }
-  }
-}
-%  \c_keys_properties_path_tlp /.try:n/.code:n = {\keys_try:},
-%  \c_keys_properties_path_tlp /.retry:n/.code:n = {
-%    \bool_if:NF \l_keys_success_bool {\keys_try:}
-%  },
-%
-%    \end{macrocode}
 %
 %\Finale

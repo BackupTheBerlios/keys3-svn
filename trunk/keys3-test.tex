@@ -277,8 +277,8 @@
 % .bool_set_inverse:N and related properties. This can be used with
 % in concert with .bool_set:N to create complementary keys.
 % ----------------------------------------------------------------------
-% Local switch false
-% Global switch false
+% Hello World
+% Hello User
 % ----------------------------------------------------------------------
 \SetModuleKeys{
   /keys/current_module:n = module,
@@ -293,7 +293,29 @@
   { Global~switch~true } { Global~switch~false }
 \ExplSyntaxOff
 
-\expandafter\show\csname keys-root/module name/key two/._cmd:w\endcsname
+% Test thirteen: Choices can be created either from a list of options or
+% one by one. Both are tested here by creating a list then adding to it
+% with an extra key. Unknown choices lead to an error message.
+% ----------------------------------------------------------------------
+% Choice `a' is number 1
+% Choice `b' is number 2
+% Choice `c' is number 3
+% An extra choice
+% ----------------------------------------------------------------------
+% ! Choice `e' unknown for key `/module name/key/e': 
+%  the key is being ignored.
+% ----------------------------------------------------------------------
+\SetModuleKeys{
+  key/.create_choices:nn = {a,b,c}
+    {Choice `\csname l_keys_current_choice_tlp\endcsname' is number
+     \the\csname l_keys_current_choice_int\endcsname \\},
+  key/d/.code:n = {An extra choice \\},
+  key = a,
+  key = b,
+  key = c,
+  key = d,
+  key = e
+}
 
 \end{document}
 

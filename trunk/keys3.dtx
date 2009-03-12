@@ -180,6 +180,38 @@
 % appropriate prefix (\cs{l_} or \cs{g_}) and suffix (|_int|, |_skip|, 
 % |_tlp| or |_toks|) is always added.
 % 
+%\subsubsection{Multiple choice keys}
+%
+% Multiple choice keys are created in \textsf{keys3} using the 
+% \texttt{.expects_choice:} property. Each choice is then a sub-key of 
+% the choice key.
+%\begin{verbatim}
+%  \keys_manage:n{
+%    /module/key/.expects_choice:,
+%    /module/key/choice~a/.code:n = Some code,
+%    /module/key/choice~b/.code:n = Some other code,
+%  }
+%\end{verbatim}
+% In this way, choices which execute arbitrary code can be created. 
+% Notice that the \m{code} should \emph{not} include a parameter (|#1|).
+% 
+% Often it is desirable to create a family of similar choices, which 
+% only require either the text of the choice, or the position of the 
+% choice in a list, to be used.  To create this type of simple choice,
+% \textsf{keys3} provides the \texttt{.create_choices:nn} property. This
+% applies the same code to a list of choice text. Inside the code,
+% the name of the choice given is available as 
+% \cs{l_keys_current_choice_tlp}. The position of the choice in the 
+% lists is also available, as \cs{l_keys_current_choice_int}. 
+%\begin{verbatim}
+%  \keys_manage:n {
+%    /module/key/.create_choices:nn = {choice~a, choice~b, choice~c} {
+%      You~gave~choice~``\l_keys_current_choice_tlp'',~which~is~in~
+%      position~\l_keys_current_choice_int~in~the~list.
+%    }
+%  }
+%\end{verbatim}
+% 
 %\subsection{Properties}
 %
 % \begin{function}{

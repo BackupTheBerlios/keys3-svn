@@ -416,6 +416,30 @@
 % \end{function}
 % 
 % \begin{function}{
+%   .use_keys:n|
+%   .use_keys:n|
+% }
+%  \begin{syntax}
+%    <key>/.use_keys:n = <keyval list>
+%  \end{syntax}
+%  Calling <key> applies the <keyval list> as a block. Thus one <key> 
+%  can make many related settings. As usual, |#1| is available in the
+%  <keyval list> as <key> will take one argument.
+% \end{function}
+% 
+% \begin{function}{
+%   .use_keys:Nn|
+%   .use_keys:Nn|
+% }
+%  \begin{syntax}
+%    <key>/.use_keys:Nn = <number> <keyval list>
+%  \end{syntax}
+%  Calling <key> applies the <keyval list> as a block. Thus one <key> 
+%  can make many related settings. The <key> will take <number> of 
+%  arguments, which can be used inside the <keyval list>.
+% \end{function}
+% 
+% \begin{function}{
 %   .value_forbidden:|
 %   .value_required:|
 % }
@@ -1592,9 +1616,9 @@
     ~\text_put_sp:~\text_put_sp:`#2'~is~being~ignored }
   { \err_help_return_or_X: } { }
 \keys_err_new:nNnnn { boolean_expected } 2
-  { Key~`#1'~takes~the~Boolean~values~`true'~and~\iow_newline:~`false'~
-   \text_put_sp:~\text_put_sp:~only.~The~given~value~`#2'~is~being~
-   ignored }
+  { Key~`#1'~takes~the~Boolean~values~`true'~and~\iow_newline:~
+   \text_put_sp:~\text_put_sp:`false'~only.~The~given~value~`#2'~is~
+   being~ignored }
   { \err_help_return_or_X: } { }
 \keys_err_new:nNnnn { not_boolean } 1
   { Key~`#1'~is~not~a~Boolean~key:~you~cannot~create~a~complement }
@@ -1955,6 +1979,43 @@
 %\end{macro}
 %\end{macro}
 %
+%\begin{macro}{.use_keys:n}
+%\begin{macro}{.use_keys:x}
+%\begin{macro}{.use_keys:Nn}
+%\begin{macro}{.use_keys:Nn}
+% Keys calling other keys is actually quite easy.
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tlp /.use_keys:n/.code:n = {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.code:n = { \keys_parse_list:n {#1} }
+    }
+  },
+  \c_keys_properties_path_tlp /.use_keys:x/.code:n = {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.code:x = {
+        \exp_not:N \keys_parse_list:n {#1}
+      }
+    }
+  },
+  \c_keys_properties_path_tlp /.use_keys:Nn/.code:Nn = 2 {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.code:Nn = #1 { \keys_parse_list:n {#2} }
+    }
+  },
+  \c_keys_properties_path_tlp /.use_keys:Nx/.code:Nn = 2 {
+    \keys_manage_internal:n {
+      \l_keys_current_path_tlp /.code:Nx =
+        #1 { \exp_not:N \keys_parse_list:n {#2} }
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
 %------
 % Trying something without errors.
 %    \begin{macrocode}
@@ -1988,52 +2049,6 @@
 %
 %    \begin{macrocode}
 \keys_manage_quick:n {
-%  \c_keys_properties_path_tlp /.apply~keys:n/.code:n = {
-%    \keys_manage_internal:n {
-%      \l_keys_current_path_tlp /.code:n = {\keys_parse_list:n {#1}}
-%    }
-%  },
-%  \c_keys_properties_path_tlp /.apply~keys:x/.code:n = {
-%    \keys_manage_internal:n {
-%      \l_keys_current_path_tlp /.code:x = {
-%        \exp_not:N \keys_parse_list:n {#1}
-%      }
-%    }
-%  },
-%  \c_keys_properties_path_tlp /.apply~keys:nn/.code:nn = {#1#2} {
-%    \keys_manage_internal:n {
-%      \l_keys_current_path_tlp /.code:nn = {#1} {\keys_parse_list:n {#2}}
-%    }
-%  },
-%  \c_keys_properties_path_tlp /.apply~keys:nx/.code:nn = {#1#2} {
-%    \keys_manage_internal:n {
-%      \l_keys_current_path_tlp /.code:x =
-%        {#1} {\exp_not:N \keys_parse_list:n {#2}}
-%    }
-%  },
-%  \c_keys_properties_path_tlp /.let~to~func:N/.code:n = {
-%    \keys_parse_list:n {
-%      \c_keys_properties_path_tlp /.code:n = {
-%        \let:NN #1 ##1
-%      }
-%    }
-%  },
-%  \c_keys_properties_path_tlp /.let~to~func:c/.code:n = {
-%    \keys_module_name:
-%    \keys_parse_list:n {
-%      \c_keys_properties_path_tlp /.code:x = {
-%        \exp_not:N \let:cN {\l_keys_tmpa_tlp #1:w} ##1
-%      }
-%    }
-%  },
-%  \c_keys_properties_path_tlp /.equivalent~key:n/.code:n = {
-%    \keys_if_really_exist:nT {\l_keys_current_path_tlp /._cmd:w} {
-%      \tlp_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp
-%      \keys_separate_path:
-%      \keys_set_eq:nn {\l_keys_current_path_tlp /#1/._cmd:w}
-%        {\l_keys_current_key_full_tlp /._cmd:w}
-%    }
-%  },
 %  \c_keys_properties_path_tlp /.expand:o/.code:n = {
 %    \exp_args:No \keys_expand:n {#1}
 %  },

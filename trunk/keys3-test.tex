@@ -317,5 +317,24 @@
   key = e
 }
 
+% Test fourteen: Keys can be used to set other keys.  One or more 
+% arguments can be accepted when this happens, allowing complex key 
+% setting to be carried out easily. There are expanded versions of these
+% properties, which work similarly.
+% ----------------------------------------------------------------------
+% Hello Fred.
+% How are you, Fred?
+% Hello Fred.
+% How are you, Ginger?
+% ----------------------------------------------------------------------
+\SetModuleKeys{
+  key one/.code:n = {Hello #1.\\},
+  key two/.code:n = {How are you, #1?\\},
+  key three/.use_keys:n = { key one = #1, key two = #1},
+  key three = Fred,
+  key three/.use_keys:Nn = 2 { key one = #1, key two = #2},
+  key three = {Fred} {Ginger}
+}
+
 \end{document}
 

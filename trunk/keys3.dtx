@@ -1,21 +1,125 @@
 %\iffalse
 % !TEX program  = pdflatex
-%% File: keys3.dtx Copyright (C) 2008-2009 Joseph Wright
-%%
-%% It may be distributed and/or modified under the conditions of the
-%% LaTeX Project Public License (LPPL), either version 1.3c of this
-%% license or (at your option) any later version.  The latest version
-%% of this license is in the file
-%%
-%%    http://www.latex-project.org/lppl.txt
-%%
-%% -----------------------------------------------------------------------
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+---------------------------------------------------------------
+The keys3 package --- Key management for LaTeX3
+Maintained by Joseph Wright 
+E-mail: joseph.wright@morningstar2.co.uk
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+---------------------------------------------------------------
+
+The keys3 package is an experimental implementation of key
+management for LaTeX3.  The entire package is written in
+expl3 code rather than in traditional TeX/LaTeX.  The key
+module used by keys3 is based on that introduced by the
+pgfkeys package from the pgf/TiKZ bundle. Keys are thus
+addressed in a path-like manner, and are controlled by key
+properties:
+
+/module/key/.code:n = <code>,
+/module/key/.value_required:,
+/module/key = <value>
+
+The keys3 package is intended as a method for testing how key
+management might be implemented in LaTeX3.  Both the methods
+used inside the package and the interface provided are intended
+to be discussed.  Feedback is welcomed either by e-mail
+(joseph.wright@morningstar2.co.uk) or at the package website
+(http://keys3.berlios.de).
+
+The experimental nature of keys3 and the underlying expl3
+system means that it should not be used in production
+documents.  However, programmers testing expl3, or keen to work
+on improved key management systems, are encouraged to try the
+package and provide feedback.
+
+keys3 is *not* an official LaTeX3 team package.  Whether any of
+the ideas explored here will be taken up by the team is
+therefore unknown.  However, the keys3 package should provide
+ideas on what needs to be available for key management and how
+it can be implemented.
+%</readme>
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+---------------------------------------------------------------
+The keys3 package --- Key management for LaTeX3
+Maintained by Joseph Wright 
+E-mail: joseph.wright@morningstar2.co.uk
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+---------------------------------------------------------------
+
+EXPERIMENTAL CODE
+
+Do not distribute this file without also distributing the
+source files specified above.
+
+Do not distribute a modified version of this file.
+
+\endpreamble
+\postamble
+
+Copyright (C) 2008-2009 by
+  Joseph Wright <joseph.wright@morningstar2.co.uk>
+
+It may be distributed and/or modified under the conditions of
+the LaTeX Project Public License (LPPL), either version 1.3c of
+this license or (at your option) any later version.  The latest
+version of this license is in the file:
+
+   http://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status) by
+  Joseph Wright.
+
+This work consists of the file  keys3.dtx
+          and the derived files keys3.pdf,
+                                keys3.sty and
+                                keys3.ins.
+
+\endpostamble
+\usedir{tex/latex/keys3}
+\generate{
+  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+}
+%</install>
+%<install>\endbatchfile
+%<*internal>
+\usedir{source/latex/keys3}
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\nopreamble\nopostamble
+\usedir{doc/latex/keys3}
+\generate{
+  \file{README.txt}{\from{\jobname.dtx}{readme}}
+}
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+%</internal>
 %<*driver|package>
 \RequirePackage{l3names}
-%</driver|package>
-%\fi
 \GetIdInfo$Id$
   {Key management for LaTeX3}
+%</driver|package>
+%\fi
 %\iffalse
 %<*driver>
 %\fi

@@ -1372,10 +1372,10 @@
 % The code to check for a path looks for a |/| at the start of the key.
 %    \begin{macrocode}
 \cs_new:NNn \keys_path_add:N 1 {
-  \exp_after:NN \keys_path_add:w #1 \q_stop
+  \exp_after:wN \keys_path_add:w #1 \q_stop
 }
 \cs_new:Npn \keys_path_add:w {
-  \exp_after:NN \peek_meaning:NTF \c_keys_root_tlp {
+  \exp_after:wN \peek_meaning:NTF \c_keys_root_tlp {
     \use_none_delimit_by_q_stop:w
   }{
     \keys_path_add_aux:w
@@ -1433,7 +1433,7 @@
 %    \begin{macrocode}
 \cs_new:NNn \keys_separate_path: 0 {
   \tlp_clear:N \l_keys_current_path_tlp
-  \exp_after:NN \keys_separate_path:w \l_keys_current_key_full_tlp 
+  \exp_after:wN \keys_separate_path:w \l_keys_current_key_full_tlp 
     / \q_stop
 }
 \cs_new:Npn \keys_separate_path:w / #1 / #2 \q_stop {
@@ -1603,7 +1603,7 @@
     \cs_set:NNn \keys_use_cmd_aux:w 0 {
       \keys_use:n { #1 /._cmd:w }
     }
-    \exp_after:NN \exp_after:NN \exp_after:NN \keys_use_cmd_aux:w 
+    \exp_after:wN \exp_after:wN \exp_after:wN \keys_use_cmd_aux:w 
       \cs:w
         c_keys_ \keys_use:n { #1 /._num_args_tlp } _empty_tlp
       \cs_end:

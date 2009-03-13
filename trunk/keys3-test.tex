@@ -1,5 +1,10 @@
 % !TEX program  = pdflatex
-\immediate\write18{tex keys3.ins}
+% 
+% This is a test file demonstrating the keys3 experimental LaTeX3 
+% package. This file illustrates the methods made available by keys3
+% for managing key-value input. It also acts as a check, as almost all
+% of the keys3 methods are used (with known output) and because a number
+% of errors are deliberately raised.
 
 \documentclass{article}
 \usepackage{keys3,xparse}
@@ -372,6 +377,14 @@
   key one = ab,
   key one/.show_code:,
   key one/._num_args_tlp/.show_key:,
+}
+
+% Test seventeen: A completely unknown key should cause an error.
+% ----------------------------------------------------------------------
+% ! The key `/module name/unknown key' is unknown and is being ignored.
+% ----------------------------------------------------------------------
+\SetModuleKeys{
+  unknown key = some value
 }
 
 \end{document}

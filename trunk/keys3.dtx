@@ -1335,7 +1335,6 @@ This work consists of the file  keys3.dtx
 % To avoid problem on redefinition, all properties are removed.
 %    \begin{macrocode}
 \cs_new:NNn \keys_clear_properties:n 1 {
-  \keys_undefine:n { #1/._boolean }     
   \keys_undefine:n { #1/._cmd:w }      
   \keys_undefine:n { #1/._default_tlp }  
   \keys_undefine:n { #1/._forbidden_bool } 
@@ -1454,7 +1453,7 @@ This work consists of the file  keys3.dtx
 % \textsf{l3keyval}.  There are two possible options, and so at this
 % stage the macro is simply reserved.
 %    \begin{macrocode}
-\cs_new:NNn \keys_parse:n 1 {\ERROR}
+\cs_new:NNn \keys_parse:n 1 { \ERROR }
 %    \end{macrocode}
 %\end{macro}
 %

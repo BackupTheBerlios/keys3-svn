@@ -1,20 +1,96 @@
 %\iffalse
-%% File: keys3opts2.dtx Copyright (C) 2008 Joseph Wright
-%%
-%% It may be distributed and/or modified under the conditions of the
-%% LaTeX Project Public License (LPPL), either version 1.3c of this
-%% license or (at your option) any later version.  The latest version
-%% of this license is in the file
-%%
-%%    http://www.latex-project.org/lppl.txt
-%%
-%% -----------------------------------------------------------------------
+% !TEX program  = pdflatex
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+---------------------------------------------------------------
+The keys3opts2 package --- Using keys3 for LaTeX2e options
+Maintained by Joseph Wright 
+E-mail: joseph.wright@morningstar2.co.uk
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+---------------------------------------------------------------
+
+The keys3 package is an experimental implementation of key
+management for LaTeX3.  The entire package is written in
+expl3 code rather than in traditional TeX/LaTeX.  The 
+keys3opts2 package provides a mechanism to allow load-time
+option processed using keys3 in LaTeX2e.
+
+%</readme>
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+\input docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+---------------------------------------------------------------
+The keys3opts2 package --- Using keys3 for LaTeX2e options
+Maintained by Joseph Wright 
+E-mail: joseph.wright@morningstar2.co.uk
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+---------------------------------------------------------------
+
+EXPERIMENTAL CODE
+
+Do not distribute this file without also distributing the
+source files specified above.
+
+Do not distribute a modified version of this file.
+
+\endpreamble
+\postamble
+
+Copyright (C) 2008-2009 by
+  Joseph Wright <joseph.wright@morningstar2.co.uk>
+
+It may be distributed and/or modified under the conditions of
+the LaTeX Project Public License (LPPL), either version 1.3c of
+this license or (at your option) any later version.  The latest
+version of this license is in the file:
+
+   http://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status) by
+  Joseph Wright.
+
+This work consists of the file  keys3opts2.dtx
+          and the derived files keys3opts2.pdf,
+                                keys3opts2.sty and
+                                keys3opts2.ins.
+
+\endpostamble
+\usedir{tex/latex/keys3}
+\generate{
+  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+}
+%</install>
+%<install>\endbatchfile
+%<*internal>
+\usedir{source/latex/keys3}
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+%</internal>
 %<*driver|package>
 \RequirePackage{l3names}
-%</driver|package>
-%\fi
 \GetIdInfo$Id$
   {Using keys3 for LaTeX2e options}
+%</driver|package>
+%\fi
 %\iffalse
 %<*driver>
 %\fi
@@ -23,7 +99,7 @@
 %\iffalse
 \documentclass[full]{l3doc}
 \begin{document}
-\DocInput{\filename.\filenameext}
+  \DocInput{\filename.\filenameext}
 \end{document}
 %</driver>
 % \fi
@@ -56,18 +132,19 @@
 %
 % \begin{function}{\keys_options_ltx:n}
 %   \begin{syntax}
-%     "\keys_options_ltx:n" \Arg{module}
+%     "\keys_options_ltx:n" <module>
 %   \end{syntax}
 %   The only macro for outside use. Processes the current option list
 %   using the currently defined keys, checking if they exist for
 %   <module>.
 % \end{function}
 %
-% \begin{function}{%
+% \begin{function}{
 %   \keys_options_ltx_cls:n|
-%   \keys_options_ltx_pkg:n}
+%   \keys_options_ltx_pkg:n
+% }
 %   \begin{syntax}
-%     "\keys_options_ltx_cls:n" \Arg{option}
+%     "\keys_options_ltx_cls:n" <option>
 %   \end{syntax}
 %   Helper macros for processing class and package options,
 %   respectively.
@@ -77,7 +154,7 @@
 %   \begin{syntax}
 %     "\keys_options_ltx_strip_eq:w" <option> "\q_stop"
 %   \end{syntax}
-%   Used to strip ``|=|'' out of options.
+%   Used to strip ``\texttt{=} '' out of options.
 % \end{function}
 %
 % \begin{variable}{\l_keys_options_ltx_clist}
@@ -91,9 +168,8 @@
 % with \textsf{pgfkeys}.
 %
 % As this package is an add-on to \textsf{keys3}, the same internal
-% module name (|\keys_|) is used here as in the main package.
-%
-% The usual preliminaries.
+% module name (|\keys_|) is used here as in the main package. The lead 
+% off as usual.
 %    \begin{macrocode}
 %<*package>
 \ProvidesExplPackage
@@ -102,6 +178,7 @@
 %    \end{macrocode}
 %
 %\begin{macro}{\l_keys_options_ltx_clist}
+% A simple storage area.
 %    \begin{macrocode}
 \clist_new:N \l_keys_options_ltx_clist
 %    \end{macrocode}
@@ -114,50 +191,39 @@
 % argument given. The path we need to process is then stored in
 % \cs{l_keys_current_key_tlp}.
 %    \begin{macrocode}
-\def_new:Npn \keys_options_ltx:n #1 {
+\cs_new:NNn \keys_options_ltx:n 1 {
   \tlp_set:Nx \l_keys_current_key_tlp {#1}
-  \exp_after:NN \keys_path_add:w \l_keys_current_key_tlp \q_stop
+  \keys_path_add:N \l_keys_current_key_tlp
   \clist_clear:N \l_keys_options_ltx_clist
-%    \end{macrocode}
-% Processing now depends on whether a class is being processed.
-% If it is and there are options, only known ones should be processed
-% as unknown ones are passed thought to packages.
-%    \begin{macrocode}
   \cs_if_eq:NNTF \@currext \@clsextension {
-    \cs_if_free:cF {opt@ \@currname . \@currext} {
-      \clist_map_function:cN {opt@ \@currname . \@currext}
+    \cs_if_free:cF { opt@ \@currname . \@currext }{
+      \clist_map_function:cN { opt@ \@currname . \@currext }
         \keys_options_ltx_cls:n
     }
   }{
-%    \end{macrocode}
-% When not processing a class, only the global options that are known
-% to the package should be looked at.
-%    \begin{macrocode}
     \cs_if_free:NF \@classoptionslist {
       \clist_map_function:NN \@classoptionslist \keys_options_ltx_pkg:n
     }
-    \cs_if_free:cF {opt@ \@currname . \@currext} {
+    \cs_if_free:cF { opt@ \@currname . \@currext }{
       \exp_args:NNc \clist_concat:NNN \l_keys_options_ltx_clist
-        {opt@ \@currname . \@currext} \l_keys_options_ltx_clist
+        { opt@ \@currname . \@currext } \l_keys_options_ltx_clist
     }
   }
-  \clist_put_left:Nn \l_keys_options_ltx_clist {#1/.cd:}
-  \exp_args:No \keys_manage:n {\l_keys_options_ltx_clist}
-  \AtEndOfPackage {\let:NN \@unprocessedoptions \scan_stop:}
+  \clist_put_left:Nn \l_keys_options_ltx_clist { #1 /.cd: }
+  \exp_args:NV \keys_manage:n \l_keys_options_ltx_clist
+  \AtEndOfPackage { \cs_set_eq:NN \@unprocessedoptions \scan_stop: }
 }
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\keys_options_ltx_cls:n}
 % This macro checks if the current class option is a known key. To do
-% that, any ``|=|'' part has to be removed first. The code key is
+% that, any ``\texttt{=}'' part has to be removed first. The code key is
 % checked for, hence the |/._cmd:w| part.
 %    \begin{macrocode}
-\def_new:Npn \keys_options_ltx_cls:n #1 {
-  \keys_if_really_exist:cTF {
-    \l_keys_current_key_tlp /
-    \keys_options_ltx_strip_eq:w #1 = \q_stop
-    /._cmd:w
-  } {
+\cs_new:NNn \keys_options_ltx_cls:n 1 {
+  \keys_if_cmd_really_exist:nTF {
+    \l_keys_current_key_tlp / \keys_options_ltx_strip_eq:w #1 = \q_stop
+  }{
     \clist_put_right:Nn \l_keys_options_ltx_clist {#1}
   }{
     \clist_put_right:Nn \@unusedoptionlist {#1}
@@ -166,33 +232,28 @@
 %    \end{macrocode}
 %\end{macro}
 %\begin{macro}{\keys_options_ltx_pkg:n}
-% For packages, options need to be removed from the global list.
+% For packages, options need to be removed from the global list. At 
+% present, the \LaTeXe\ macro \cs{@removeelement} still needs to be 
+% used.
 %    \begin{macrocode}
-\def_new:Npn \keys_options_ltx_pkg:n #1 {
-  \keys_if_really_exist:cT {
-    \l_keys_current_key_tlp /
-    \keys_options_ltx_strip_eq:w #1 = \q_stop
-    /._cmd:w
-  } {
+\cs_new:NNn \keys_options_ltx_pkg:n 1 {
+  \keys_if_cmd_really_exist:nT {
+    \l_keys_current_key_tlp / \keys_options_ltx_strip_eq:w #1 = \q_stop
+  }{
     \clist_put_right:Nn \l_keys_options_ltx_clist {#1}
-%    \end{macrocode}
-% At this stage, some \LaTeXe\ is needed; the option is removed from
-% the unused list.
-%    \begin{macrocode}
     \exp_args:Nnx \@removeelement {#1} \@unusedoptionlist
       \@unusedoptionlist
   }
 }
 %    \end{macrocode}
 %\end{macro}
-%\begin{macro}{\keys_options_ltx_strip_eq:w}
-%    \begin{macrocode}
-\def_new:Npn \keys_options_ltx_strip_eq:w #1=#2 \q_stop {#1}
-%    \end{macrocode}
-%\end{macro}
 %
+%\begin{macro}{\keys_options_ltx_strip_eq:w}
+% A simple method to remove an equals sign plus any trailing data.
 %    \begin{macrocode}
+\cs_new:Npn \keys_options_ltx_strip_eq:w #1 = #2 \q_stop {#1}
 %</package>
 %    \end{macrocode}
+%\end{macro}
 %
 %\Finale

@@ -1154,7 +1154,7 @@ This work consists of the file  keys3.dtx
   \keys_manage_internal:n {#1}
 }
 \cs_new:NNn \keys_manage_quick:n 1 {
-  \let:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
+  \cs_set_eq:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
   \tlp_clear:N \l_keys_current_module_tlp
   \keys_manage_internal:n {#1}
 }
@@ -1182,11 +1182,11 @@ This work consists of the file  keys3.dtx
 % faster than the key-based method.
 %    \begin{macrocode}
 \cs_new:NNn \keys_manage:nn 2 {
-  \let:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
+  \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
   \keys_manage_aux:Vnn \l_keys_default_path_tlp {#1} {#2}
 }
 \cs_new:NNn \keys_manage_quick:nn 2 {
-  \let:NN \keys_parse:n \KV_parse_space_no_removal_no_sanitize:n
+  \cs_set_eq:NN \keys_parse:n \KV_parse_space_no_removal_no_sanitize:n
   \keys_manage_aux:Vnn \l_keys_default_path_tlp {#1} {#2}
 }
 \cs_new:NNn \keys_manage_aux:nnn 3 {
@@ -1462,8 +1462,8 @@ This work consists of the file  keys3.dtx
 % processing macros are defined, then the appropriate parser is called.
 %    \begin{macrocode}
 \cs_new:NNn \keys_parse_list:n 1 {
-  \let:NN \KV_key_value_elt:nn \keys_value_elt:nn
-  \let:NN \KV_key_no_value_elt:n \keys_no_value_elt:n
+  \cs_set_eq:NN \KV_key_value_elt:nn \keys_value_elt:nn
+  \cs_set_eq:NN \KV_key_no_value_elt:n \keys_no_value_elt:n
   \keys_parse:n {#1}
 }
 %    \end{macrocode}
@@ -1657,7 +1657,7 @@ This work consists of the file  keys3.dtx
           { \l_keys_current_path_tlp /._default_tlp }
       }
     }
-    \let:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp 
+    \cs_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp 
     \keys_use_cmd:n { \l_keys_current_path_tlp }
   }
 }

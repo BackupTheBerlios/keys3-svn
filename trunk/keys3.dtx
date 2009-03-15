@@ -1166,7 +1166,7 @@ This work consists of the file  keys3.dtx
   \keys_parse_list:n {#2}
   \tlp_set:Nn \l_keys_default_path_tlp {#1}
 }
-\exp_def_form:nnn { keys_manage_aux } { nn } { Vn }
+\cs_generate_variant:Nn \keys_manage_aux:nn { Vn }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
@@ -1195,9 +1195,7 @@ This work consists of the file  keys3.dtx
   \keys_parse_list:n {#3}
   \tlp_set:Nn \l_keys_default_path_tlp {#1}
 }
-\cs_new:NNn \keys_manage_aux:Vnn 3 {
-  \exp_args:NV \keys_manage_aux:nnn #1 {#2} {#3}
-}
+\cs_generate_variant:Nn \keys_manage_aux:nnn { Vnn }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}

@@ -877,13 +877,6 @@ This work consists of the file  keys3.dtx
 %   the current <module>. The <prefix> should be |l_| or |g_|.
 % \end{function}
 % 
-% \begin{function}{\keys_set_eq:nn}
-%   \begin{syntax}
-%     "\keys_set_eq:nn" <key1> <key2>
-%   \end{syntax}
-%   Sets <key1> equal to <key2>.
-% \end{function}
-% 
 % \begin{function}{
 %   \keys_set_cmd:nn|
 %   \keys_set_cmd:nx|
@@ -1148,20 +1141,20 @@ This work consists of the file  keys3.dtx
 % setting up the parser.  The expansion trick means a literal path is
 % sent to the later function, and so the default path can be redefined.
 %    \begin{macrocode}
-\cs_new:NNn \keys_manage:n 1 {
+\cs_new:Nn \keys_manage:n {
   \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
   \tlp_clear:N \l_keys_current_module_tlp
   \keys_manage_internal:n {#1}
 }
-\cs_new:NNn \keys_manage_quick:n 1 {
+\cs_new:Nn \keys_manage_quick:n {
   \cs_set_eq:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
   \tlp_clear:N \l_keys_current_module_tlp
   \keys_manage_internal:n {#1}
 }
-\cs_new:NNn \keys_manage_internal:n 1 {
+\cs_new:Nn \keys_manage_internal:n {
   \keys_manage_aux:Vn \l_keys_default_path_tlp {#1}
 }
-\cs_new:NNn \keys_manage_aux:nn 2 {
+\cs_new:Nn \keys_manage_aux:nn {
   \tlp_set_eq:NN \l_keys_default_path_tlp \c_keys_root_tlp
   \keys_parse_list:n {#2}
   \tlp_set:Nn \l_keys_default_path_tlp {#1}
@@ -1181,15 +1174,15 @@ This work consists of the file  keys3.dtx
 % argument.  When setting lots of keys separately, this is a little
 % faster than the key-based method.
 %    \begin{macrocode}
-\cs_new:NNn \keys_manage:nn 2 {
+\cs_new:Nn \keys_manage:nn {
   \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
   \keys_manage_aux:Vnn \l_keys_default_path_tlp {#1} {#2}
 }
-\cs_new:NNn \keys_manage_quick:nn 2 {
+\cs_new:Nn \keys_manage_quick:nn {
   \cs_set_eq:NN \keys_parse:n \KV_parse_space_no_removal_no_sanitize:n
   \keys_manage_aux:Vnn \l_keys_default_path_tlp {#1} {#2}
 }
-\cs_new:NNn \keys_manage_aux:nnn 3 {
+\cs_new:Nn \keys_manage_aux:nnn {
   \tlp_set:Nn \l_keys_default_path_tlp {#2}
   \tlp_clear:N \l_keys_current_module_tlp
   \keys_parse_list:n {#3}
@@ -1208,7 +1201,7 @@ This work consists of the file  keys3.dtx
 % To create a new switch, which will be true (as the existence of the 
 % switch is the flag here).
 %    \begin{macrocode}
-\cs_new:NNn \keys_bool_new:n 1 {
+\cs_new_nopar:Nn \keys_bool_new:n {
   \bool_new:c { \c_keys_cs_prefix_tlp #1 }
   \bool_set_true:c { \c_keys_cs_prefix_tlp #1 }
 }
@@ -1222,7 +1215,7 @@ This work consists of the file  keys3.dtx
 % function. A default is also set, so that the key name alone can be 
 % given.
 %    \begin{macrocode}
-\cs_new:NNn \keys_bool_set:nN 2 {
+\cs_new_nopar:Nn \keys_bool_set:nN {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:n = {
       \cs_if_really_exist:cTF { bool_ #1 _ ##1 :N } {
@@ -1234,7 +1227,7 @@ This work consists of the file  keys3.dtx
     \l_keys_current_path_tlp /.default:n = true
   }
 }
-\cs_new:NNn \keys_bool_set:nnn 3 {
+\cs_new_nopar:Nn \keys_bool_set:nnn {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:x = {
       \exp_not:N \cs_if_really_exist:cTF { bool_ #1 _ ##1 :c } {
@@ -1258,10 +1251,10 @@ This work consists of the file  keys3.dtx
 % way as for the standard switches.  The only thing needed is a 
 % reversal of \texttt{true}/\texttt{false}.
 %    \begin{macrocode}
-\cs_new:NNn \keys_bool_set_inverse:n 1 {
+\cs_new_nopar:Nn \keys_bool_set_inverse:n {
   \tlist_if_eq:nnTF {#1} { true } { false } { true }
 }
-\cs_new:NNn \keys_bool_set_inverse:nN 2 {
+\cs_new_nopar:Nn \keys_bool_set_inverse:nN {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:n = {
       \cs_if_really_exist:cTF { bool_ #1 _ ##1 :N } {
@@ -1273,7 +1266,7 @@ This work consists of the file  keys3.dtx
     \l_keys_current_path_tlp /.default:n = true
   }
 }
-\cs_new:NNn \keys_bool_set_inverse:nnn 3 {
+\cs_new_nopar:Nn \keys_bool_set_inverse:nnn {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:x = {
       \exp_not:N \cs_if_really_exist:cTF { bool_ #1 _ ##1 :c } {
@@ -1299,20 +1292,20 @@ This work consists of the file  keys3.dtx
 % When making multiple choices, the code for each choice is the same.
 % Only the path and counter need to be altered. 
 %    \begin{macrocode}
-\cs_new:NNn \keys_choices_create:Nnn 3 {
+\cs_new:Nn \keys_choices_create:Nnn {
   \tlp_set_eq:NN \l_keys_choice_path_tlp \l_keys_current_path_tlp
   \int_zero:N \l_keys_current_choice_int
   \use:c { keys_choices_create_aux: #1 } {#3}
   \clist_map_function:nN {#2} \keys_choice_create:n
   \keys_manage_internal:n { \l_keys_choice_path_tlp  /.expects_choice: }
 }
-\cs_new:NNn \keys_choices_create_aux:n 1 {
+\cs_new:Nn \keys_choices_create_aux:n {
   \tlp_set:Nn \l_keys_choice_code_tlp { \exp_not:n {#1} }
 }
-\cs_new:NNn \keys_choices_create_aux:x 1 {
+\cs_new:Nn \keys_choices_create_aux:x {
   \tlp_set:Nn \l_keys_choice_code_tlp {#1}
 }
-\cs_new:NNn \keys_choice_create:n 1 {
+\cs_new_nopar:Nn \keys_choice_create:n {
   \int_incr:N \l_keys_current_choice_int
   \keys_parse_list:n {
     \l_keys_choice_path_tlp / #1 /.code:x = {
@@ -1332,12 +1325,12 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_clear_properties:n}
 % To avoid problem on redefinition, all properties are removed.
 %    \begin{macrocode}
-\cs_new:NNn \keys_clear_properties:n 1 {
-  \keys_undefine:n { #1/._cmd:w }      
-  \keys_undefine:n { #1/._default_tlp }  
-  \keys_undefine:n { #1/._forbidden_bool } 
-  \keys_undefine:n { #1/._num_args_tlp }
-  \keys_undefine:n { #1/._required_bool }
+\cs_new_nopar:Nn \keys_clear_properties:n {
+  \keys_undefine:n { #1 /._cmd:w }      
+  \keys_undefine:n { #1 /._default_tlp }  
+  \keys_undefine:n { #1 /._forbidden_bool } 
+  \keys_undefine:n { #1 /._num_args_tlp }
+  \keys_undefine:n { #1 /._required_bool }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1345,7 +1338,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_default_add:}
 % Copies the default value to the current one if needed.
 %    \begin{macrocode}
-\cs_new:NNn \keys_default_add: 0 {
+\cs_new_nopar:Nn \keys_default_add: {
   \bool_if:NT \l_keys_no_value_bool {
     \keys_if_really_exist:nT 
       { \l_keys_current_key_full_tlp /._default_tlp } {
@@ -1365,7 +1358,7 @@ This work consists of the file  keys3.dtx
 % function for the key itself. If that fails, the generic handlers are 
 % used after separating out the key name and key path.
 %    \begin{macrocode}
-\cs_new:NNn \keys_find_code_full: 0 {
+\cs_new_nopar:Nn \keys_find_code_full: {
   \keys_if_cmd_really_exist:nTF { \l_keys_current_key_full_tlp } {
     \keys_use_cmd:n { \l_keys_current_key_full_tlp }
   }{
@@ -1381,7 +1374,7 @@ This work consists of the file  keys3.dtx
     }
   }
 }
-\cs_new:NNn \keys_find_code_name: 0 {
+\cs_new_nopar:Nn \keys_find_code_name: {
   \keys_separate_path:
   \keys_if_cmd_really_exist:nTF
     { \c_keys_properties_path_tlp / \l_keys_current_key_name_tlp } {
@@ -1434,11 +1427,11 @@ This work consists of the file  keys3.dtx
 % The two functions passed to \textsf{l3keyval} to actually act on each
 % key found.
 %    \begin{macrocode}
-\cs_new:NNn \keys_no_value_elt:n 1 {
+\cs_new:Nn \keys_no_value_elt:n {
   \bool_set_true:N \l_keys_no_value_bool
   \keys_process_elt:nn {#1} { }
 }
-\cs_new:NNn \keys_value_elt:nn 2 {
+\cs_new:Nn \keys_value_elt:nn {
   \bool_set_false:N \l_keys_no_value_bool
   \keys_process_elt:nn {#1} {#2}
 }
@@ -1451,7 +1444,7 @@ This work consists of the file  keys3.dtx
 % \textsf{l3keyval}.  There are two possible options, and so at this
 % stage the macro is simply reserved.
 %    \begin{macrocode}
-\cs_new:NNn \keys_parse:n 1 { \ERROR }
+\cs_new:Nn \keys_parse:n { \ERROR }
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1459,7 +1452,7 @@ This work consists of the file  keys3.dtx
 % All of the management macros call this common parser. First, the key
 % processing macros are defined, then the appropriate parser is called.
 %    \begin{macrocode}
-\cs_new:NNn \keys_parse_list:n 1 {
+\cs_new:Nn \keys_parse_list:n {
   \cs_set_eq:NN \KV_key_value_elt:nn \keys_value_elt:nn
   \cs_set_eq:NN \KV_key_no_value_elt:n \keys_no_value_elt:n
   \keys_parse:n {#1}
@@ -1472,17 +1465,17 @@ This work consists of the file  keys3.dtx
 %\begin{macro}[aux]{\keys_path_add_aux:w}
 % The code to check for a path looks for a |/| at the start of the key.
 %    \begin{macrocode}
-\cs_new:NNn \keys_path_add:N 1 {
+\cs_new_nopar:Nn \keys_path_add:N {
   \exp_after:wN \keys_path_add:w #1 \q_stop
 }
-\cs_new:Npn \keys_path_add:w {
+\cs_new_nopar:Npn \keys_path_add:w {
   \exp_after:wN \peek_meaning:NTF \c_keys_root_tlp {
     \use_none_delimit_by_q_stop:w
   }{
     \keys_path_add_aux:w
   }
 }
-\cs_new:Npn \keys_path_add_aux:w #1 \q_stop {
+\cs_new_nopar:Npn \keys_path_add_aux:w #1 \q_stop {
   \tlp_set:Nx \l_keys_current_key_full_tlp {\l_keys_default_path_tlp #1}
 }
 %    \end{macrocode}
@@ -1497,7 +1490,7 @@ This work consists of the file  keys3.dtx
 % need to fill in a default value before checking for required or 
 % forbidden values.
 %    \begin{macrocode}
-\cs_new:NNn \keys_process_elt:nn 2 {
+\cs_new:Nn \keys_process_elt:nn {
   \tlp_set:Nx \l_keys_current_key_full_tlp {#1}
   \toks_set:Nn \l_keys_current_value_toks {#2}
   \keys_path_add:N \l_keys_current_key_full_tlp
@@ -1512,7 +1505,7 @@ This work consists of the file  keys3.dtx
     \keys_process_elt_aux:
   }
 }
-\cs_new:NNn \keys_process_elt_aux: 0 {
+\cs_new:Nn \keys_process_elt_aux: {
   \keys_if_value:nTF { forbidden } {
     \bool_if:NTF \l_keys_no_value_bool {
       \keys_find_code_full:
@@ -1532,12 +1525,12 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_separate_path:w}
 % A simple piece of recursion to find the key name and path.
 %    \begin{macrocode}
-\cs_new:NNn \keys_separate_path: 0 {
+\cs_new_nopar:Nn \keys_separate_path: {
   \tlp_clear:N \l_keys_current_path_tlp
   \exp_after:wN \keys_separate_path:w \l_keys_current_key_full_tlp 
     / \q_stop
 }
-\cs_new:Npn \keys_separate_path:w / #1 / #2 \q_stop {
+\cs_new_nopar:Npn \keys_separate_path:w / #1 / #2 \q_stop {
   \tlist_if_empty:nTF {#2} {
     \tlp_set:Nn \l_keys_current_key_name_tlp {#1}
   }{
@@ -1553,14 +1546,14 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_set:Nnn}
 % Storage of data in outside of keys.
 %    \begin{macrocode}
-\cs_new:NNn \keys_set:NN 2 {
+\cs_new_nopar:Nn \keys_set:NN {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:n = {
       #1 #2 {##1}
     }
   }
 }
-\cs_new:NNn \keys_set:Nnn 3 {
+\cs_new_nopar:Nn \keys_set:Nnn {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:x = {
       \exp_not:N #1 { #2 \l_keys_current_module_tlp #3 } {##1}
@@ -1569,16 +1562,6 @@ This work consists of the file  keys3.dtx
 }
 %    \end{macrocode}
 %\end{macro}
-%\end{macro}
-%
-%\begin{macro}{\keys_set_eq:nn}
-% To alias one key to another.
-%    \begin{macrocode}
-\cs_new:NNn \keys_set_eq:nn 2 {
-  \cs_set_eq:cc { \c_keys_cs_prefix_tlp #1 } 
-    { \c_keys_cs_prefix_tlp #2 }
-}
-%    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\keys_set_cmd:nn}
@@ -1591,20 +1574,20 @@ This work consists of the file  keys3.dtx
 % multiple-argument versions, the number of arguments is stored for
 % use later on.
 %    \begin{macrocode}
-\cs_new:NNn \keys_set_cmd:nn 2 {
+\cs_new:Nn \keys_set_cmd:nn {
   \keys_clear_properties:n {#1}
   \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } 1 {#2}
 }
-\cs_new:NNn \keys_set_cmd:nx 2 {
+\cs_new:Nn \keys_set_cmd:nx {
   \keys_clear_properties:n {#1}
   \cs_set:cNx { \c_keys_cs_prefix_tlp #1 /._cmd:w } 1 {#2}
 }
-\cs_new:NNn \keys_set_cmd:nNn 3 {
+\cs_new:Nn \keys_set_cmd:nNn {
   \keys_clear_properties:n {#1}
   \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
   \keys_store:nn { #1 /._num_args_tlp} {#2}
 }
-\cs_new:NNn \keys_set_cmd:nNx 3 {
+\cs_new:Nn \keys_set_cmd:nNx {
   \keys_clear_properties:n {#1}
   \cs_set:cNx { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
   \keys_store:nn { #1 /._num_args_tlp} {#2}
@@ -1621,10 +1604,10 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_store:nx}
 % Direct storage of data in keys.
 %    \begin{macrocode}
-\cs_new:NNn \keys_store:nn 2 {
+\cs_new:Nn \keys_store:nn {
   \tlp_set:cn { \c_keys_cs_prefix_tlp #1 } {#2}
 }
-\cs_new:NNn \keys_store:nx 2 {
+\cs_new:Nn \keys_store:nx {
   \tlp_set:cx { \c_keys_cs_prefix_tlp #1 } {#2}
 }
 %    \end{macrocode}
@@ -1634,7 +1617,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_toks_set:Nn}
 % Sets a toks to the content of a key.
 %    \begin{macrocode}
-\cs_new:NNn \keys_toks_set:Nn 2 {
+\cs_new_nopar:Nn \keys_toks_set:Nn {
   \exp_args:NNv \toks_set:Nn #1 { \c_keys_cs_prefix_tlp #2 }
 }
 %    \end{macrocode}
@@ -1644,7 +1627,7 @@ This work consists of the file  keys3.dtx
 % A function to look for the |._cmd:w| property of a key, and executes
 % it if found.
 %    \begin{macrocode}
-\cs_new:NNn \keys_try: 0 {
+\cs_new_nopar:Nn \keys_try: {
   \bool_set_false:N \l_keys_success_bool
   \keys_if_cmd_really_exist:nT { \l_keys_current_path_tlp } {
     \bool_set_true:N \l_keys_success_bool
@@ -1665,7 +1648,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_undefine:n}
 % To remove a key.
 %    \begin{macrocode}
-\cs_new:NNn \keys_undefine:n 1 {
+\cs_new_nopar:Nn \keys_undefine:n {
   \cs_set_eq:cN { \c_keys_cs_prefix_tlp #1 } \c_undefined
 }
 %    \end{macrocode}
@@ -1674,7 +1657,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_use:n}
 % Use whatever is stored in a key.
 %    \begin{macrocode}
-\cs_new:NNn \keys_use:n 1 {
+\cs_new_nopar:Nn \keys_use:n {
   \use:c { \c_keys_cs_prefix_tlp #1 }
 }
 %    \end{macrocode}
@@ -1688,18 +1671,18 @@ This work consists of the file  keys3.dtx
 % multiple arguments a check is made in case none were given, and if
 % so a series of empty values is given instead.
 %    \begin{macrocode}
-\cs_new:NNn \keys_use_cmd:n 1 {
+\cs_new_nopar:Nn \keys_use_cmd:n {
   \exp_args:Nno \keys_use_cmd:nn {#1} 
     { \toks_use:N \l_keys_current_value_toks }
 }
-\cs_new:NNn \keys_use_cmd:nn 2 {
+\cs_new_nopar:Nn \keys_use_cmd:nn {
   \keys_if_really_exist:nTF { #1 /._num_args_tlp } {
      \keys_use_cmd_aux:nn {#1} {#2}
   }{
     \keys_use:n {#1/._cmd:w} {#2}
   }
 }
-\cs_new:NNn \keys_use_cmd_aux:nn 2 {
+\cs_new_nopar:Nn \keys_use_cmd_aux:nn {
   \tlist_if_empty:nTF {#2} {
     \cs_set:NNn \keys_use_cmd_aux:w 0 {
       \keys_use:n { #1 /._cmd:w }
@@ -1727,7 +1710,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_err_new:nNnnn}
 % To create new error messages, a utility function is created.
 %    \begin{macrocode}
-\cs_new:NNn \keys_err_new:nNnnn 1 {
+\cs_new_nopar:Npn \keys_err_new:nNnnn #1 {
   \tlp_new:cn { l_keys_err_#1_tlp } {#1}
   \exp_args:NNc \err_interrupt_new:NNNnnn \c_keys_err_tlp
     { l_keys_err_#1_tlp } 
@@ -1784,20 +1767,19 @@ This work consists of the file  keys3.dtx
 % Utilities for using errors: the first function is \texttt{nw} as it
 % may need one or two arguments in addition to the \texttt{n}.
 %    \begin{macrocode}
-\cs_new:NNn \keys_err_use:nw 1 {
+\cs_new_nopar:Npn \keys_err_use:nw #1 {
   \exp_args:NNc \err_interrupt:NNw \c_keys_err_tlp { l_keys_err_#1_tlp }
 }
-\cs_new:NNn \keys_err_use:n 1 {
+\cs_new_nopar:Nn \keys_err_use:n {
   \keys_err_use:nw {#1} \l_keys_current_key_full_tlp
 }
-\cs_new:NNn \keys_err_use:nn 2 {
+\cs_new:Nn \keys_err_use:nn {
   \keys_err_use:nw {#1} \l_keys_current_key_full_tlp {#2}
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %\end{macro}
-%
 %
 %\subsubsection{Property definitions}
 %

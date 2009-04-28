@@ -785,17 +785,17 @@ This work consists of the file  keys3.dtx
 %   (\texttt{full}) or key name only (\texttt{name}).
 % \end{function}
 % 
-% \begin{function}{\keys_if_cmd_really_exist:n / (TF)}
+% \begin{function}{\keys_if_cmd_exist:n / (TF)}
 %   \begin{syntax}
-%     "\keys_if_cmd_really_exist:nTF" <key> <true code> 
+%     "\keys_if_cmd_exist:nTF" <key> <true code> 
 %     ~~~~<false code>
 %   \end{syntax}
 %   Checks for the existence of a |._cmd:w| function for <key>.
 % \end{function}
 % 
-% \begin{function}{\keys_if_really_exist:n / (TF)}
+% \begin{function}{\keys_if_exist:n / (TF)}
 %   \begin{syntax}
-%     "\keys_if_really_exist:nTF" <key> <true code> 
+%     "\keys_if_exist:nTF" <key> <true code> 
 %     ~~~~<false code>
 %   \end{syntax}
 %   Checks for the existence of a <key>.
@@ -1219,7 +1219,7 @@ This work consists of the file  keys3.dtx
 \cs_new_nopar:Nn \keys_bool_set:nN {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:n = {
-      \cs_if_really_exist:cTF { bool_ #1 _ ##1 :N } {
+      \cs_if_exist:cTF { bool_ #1 _ ##1 :N } {
         \use:c { bool_ #1 _ ##1 :N } #2
       }{
         \keys_err_use:nn { boolean_expected } {##1}
@@ -1231,7 +1231,7 @@ This work consists of the file  keys3.dtx
 \cs_new_nopar:Nn \keys_bool_set:nnn {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:x = {
-      \exp_not:N \cs_if_really_exist:cTF { bool_ #1 _ ##1 :c } {
+      \exp_not:N \cs_if_exist:cTF { bool_ #1 _ ##1 :c } {
         \exp_not:N \use:c { bool_ #1 _ ##1 :c } 
           { #2 \l_keys_current_module_tlp #3 _bool }
       }{
@@ -1258,7 +1258,7 @@ This work consists of the file  keys3.dtx
 \cs_new_nopar:Nn \keys_bool_set_inverse:nN {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:n = {
-      \cs_if_really_exist:cTF { bool_ #1 _ ##1 :N } {
+      \cs_if_exist:cTF { bool_ #1 _ ##1 :N } {
         \use:c { bool_ #1 _ \keys_bool_set_inverse:n {##1} :N } #2
       }{
         \keys_err_use:nn { boolean_expected } {##1}
@@ -1270,7 +1270,7 @@ This work consists of the file  keys3.dtx
 \cs_new_nopar:Nn \keys_bool_set_inverse:nnn {
   \keys_parse_list:n {
     \c_keys_properties_path_tlp /.code:x = {
-      \exp_not:N \cs_if_really_exist:cTF { bool_ #1 _ ##1 :c } {
+      \exp_not:N \cs_if_exist:cTF { bool_ #1 _ ##1 :c } {
          \exp_not:N \use:c { 
            bool_ #1 _ \exp_not:N \keys_bool_set_inverse:n {##1} :c 
          } { #2 \l_keys_current_module_tlp #3 _bool }
@@ -1341,7 +1341,7 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_default_add: {
   \bool_if:NT \l_keys_no_value_bool {
-    \keys_if_really_exist:nT 
+    \keys_if_exist:nT 
       { \l_keys_current_key_full_tlp /._default_tlp } {
       \keys_toks_set:Nn \l_keys_current_value_toks
         { \l_keys_current_key_full_tlp /._default_tlp }
@@ -1360,10 +1360,10 @@ This work consists of the file  keys3.dtx
 % used after separating out the key name and key path.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_find_code_full: {
-  \keys_if_cmd_really_exist:nTF { \l_keys_current_key_full_tlp } {
+  \keys_if_cmd_exist:nTF { \l_keys_current_key_full_tlp } {
     \keys_use_cmd:n { \l_keys_current_key_full_tlp }
   }{
-    \keys_if_really_exist:nTF { \l_keys_current_key_full_tlp } {
+    \keys_if_exist:nTF { \l_keys_current_key_full_tlp } {
       \bool_if:NTF \l_keys_no_value_bool {
         \keys_use:n { \l_keys_current_key_full_tlp }
       }{
@@ -1377,12 +1377,12 @@ This work consists of the file  keys3.dtx
 }
 \cs_new_nopar:Nn \keys_find_code_name: {
   \keys_separate_path:
-  \keys_if_cmd_really_exist:nTF
+  \keys_if_cmd_exist:nTF
     { \c_keys_properties_path_tlp / \l_keys_current_key_name_tlp } {
     \keys_use_cmd:n  
       {\c_keys_properties_path_tlp / \l_keys_current_key_name_tlp}
   }{
-    \keys_if_cmd_really_exist:nTF 
+    \keys_if_cmd_exist:nTF 
       { \l_keys_current_path_tlp / unknown } {
       \keys_use_cmd:n { \l_keys_current_path_tlp / unknown }
     }{
@@ -1394,19 +1394,19 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}[TF]{\keys_if_cmd_really_exist:n}
+%\begin{macro}[TF]{\keys_if_cmd_exist:n}
 % A dedicated check for the |._cmd:w| property key.
 %    \begin{macrocode}
-\def_long_test_function_new:npn { keys_if_cmd_really_exist:n } #1 {
+\def_long_test_function_new:npn { keys_if_cmd_exist:n } #1 {
   \if_cs_exist:w \c_keys_cs_prefix_tlp #1 /._cmd:w \cs_end:
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}[TF]{\keys_if_really_exist:n}
+%\begin{macro}[TF]{\keys_if_exist:n}
 % Check if a key exists without adding to the hash table.
 %    \begin{macrocode}
-\def_long_test_function_new:npn { keys_if_really_exist:n } #1 {
+\def_long_test_function_new:npn { keys_if_exist:n } #1 {
   \if_cs_exist:w \c_keys_cs_prefix_tlp #1 \cs_end:
 }
 %    \end{macrocode}
@@ -1630,10 +1630,10 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_try: {
   \bool_set_false:N \l_keys_success_bool
-  \keys_if_cmd_really_exist:nT { \l_keys_current_path_tlp } {
+  \keys_if_cmd_exist:nT { \l_keys_current_path_tlp } {
     \bool_set_true:N \l_keys_success_bool
     \bool_if:NT \l_keys_no_value_bool {
-      \keys_if_really_exist:nT
+      \keys_if_exist:nT
         { \l_keys_current_path_tlp /._default_tlp } {
         \keys_toks_set:Nn \l_keys_current_value_toks
           { \l_keys_current_path_tlp /._default_tlp }
@@ -1677,7 +1677,7 @@ This work consists of the file  keys3.dtx
     { \toks_use:N \l_keys_current_value_toks }
 }
 \cs_new_nopar:Nn \keys_use_cmd:nn {
-  \keys_if_really_exist:nTF { #1 /._num_args_tlp } {
+  \keys_if_exist:nTF { #1 /._num_args_tlp } {
      \keys_use_cmd_aux:nn {#1} {#2}
   }{
     \keys_use:n {#1/._cmd:w} {#2}

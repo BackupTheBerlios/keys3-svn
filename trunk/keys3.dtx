@@ -662,18 +662,6 @@ This work consists of the file  keys3.dtx
 %   A scratch variable.
 % \end{variable}
 % 
-% \begin{variable}{ 
-%  \l_keys_err_unknown_key_tl|
-%  \l_keys_err_value_ignored_tl|
-%  \l_keys_err_value_required_tl|
-%  \l_keys_err_def_x_args_tl|
-%  \l_keys_err_boolean_expected_tl|
-%  \l_keys_err_not_boolean_tl|
-%  \l_keys_err_unknown_choice_tl|
-% }
-%   Identification tls for error messages.
-% \end{variable}
-% 
 %\subsection{Internal functions}
 %
 % Notice that everything should be done using the keys system. Only
@@ -752,25 +740,22 @@ This work consists of the file  keys3.dtx
 %   available, copies the default into \cs{l_keys_current_value_toks}.
 % \end{function}
 % 
-% \begin{function}{\keys_err_new:nNpnn}
+% \begin{function}{\keys_msg_new:nn}
 %   \begin{syntax}
-%     "\keys_err_new:nNpnn" <name> <args> <short> <long> <code>
+%     "\keys_msg_new:nn" <name> <text>
 %   \end{syntax}
-%   Creates error with <name> and taking <args> arguments, with
-%   <short> description followed by <long>, and recovery <code>.
+%   Creates a new message with <name> which produces <text>.
 % \end{function}
 % 
 % \begin{function}{
-%   \keys_err_use:nw|
-%   \keys_err_use:n|
-%   \keys_err_use:nn|
+%   \keys_error:nn|
+%   \keys_error:n|
 % }
 %   \begin{syntax}
-%     "\keys_err_use:n" <name>
-%     "\keys_err_use:nn" <name> <content>
+%     "\keys_error:nn" <name> <arg>
+%     "\keys_error:n" <name> 
 %   \end{syntax}
-%   Issues error <name>, with or without <content>. The \texttt{w} 
-%   variant may take one or two arguments.
+%   Issues error <name>, with or without <argument>.
 % \end{function}
 % 
 % \begin{function}{
@@ -986,7 +971,7 @@ This work consists of the file  keys3.dtx
 %<*package>
 \ProvidesExplPackage
   {\filename}{\filedate}{\fileversion}{\filedescription}
-\RequirePackage{l3keyval,l3messages,l3clist,l3skip}
+\RequirePackage{l3keyval,l3msg,l3clist,l3skip}
 %    \end{macrocode}
 %
 %\subsubsection{Variables and contrasts}
@@ -1222,7 +1207,7 @@ This work consists of the file  keys3.dtx
       \cs_if_exist:cTF { bool_ #1 _ ##1 :N } {
         \use:c { bool_ #1 _ ##1 :N } #2
       }{
-        \keys_err_use:nn { boolean_expected } {##1}
+        \keys_error:nn { Boolean~expected } {##1}
       }
     },
     \l_keys_current_path_tl /.default:n = true
@@ -1235,7 +1220,7 @@ This work consists of the file  keys3.dtx
         \exp_not:N \use:c { bool_ #1 _ ##1 :c } 
           { #2 \l_keys_current_module_tl #3 _bool }
       }{
-        \exp_not:N \keys_err_use:nn { boolean_expected } {##1}
+        \keys_error:nn { Boolean~expected } {##1}
       }
     },
     \l_keys_current_path_tl /.default:n = true
@@ -1261,7 +1246,7 @@ This work consists of the file  keys3.dtx
       \cs_if_exist:cTF { bool_ #1 _ ##1 :N } {
         \use:c { bool_ #1 _ \keys_bool_set_inverse:n {##1} :N } #2
       }{
-        \keys_err_use:nn { boolean_expected } {##1}
+        \keys_error:nn { Boolean~expected } {##1}
       }
     },
     \l_keys_current_path_tl /.default:n = true
@@ -1275,7 +1260,7 @@ This work consists of the file  keys3.dtx
            bool_ #1 _ \exp_not:N \keys_bool_set_inverse:n {##1} :c 
          } { #2 \l_keys_current_module_tl #3 _bool }
       }{
-        \exp_not:N \keys_err_use:nn { boolean_expected } {##1}
+        \keys_error:nn { Boolean~expected } {##1}
       }
     },
     \l_keys_current_path_tl /.default:n = true
@@ -1386,7 +1371,7 @@ This work consists of the file  keys3.dtx
       { \l_keys_current_path_tl / unknown } {
       \keys_use_cmd:n { \l_keys_current_path_tl / unknown }
     }{
-      \keys_err_use:n { unknown_key }
+      \keys_error:n { unknown~key }
     }
   }
 }
@@ -1498,7 +1483,7 @@ This work consists of the file  keys3.dtx
   \keys_default_add:
   \keys_if_value:nTF { required } {
     \bool_if:NTF \l_keys_no_value_bool {
-      \keys_err_use:n { value_required }
+      \keys_error:n { value~required }
     }{
       \keys_process_elt_aux:
     }
@@ -1511,7 +1496,7 @@ This work consists of the file  keys3.dtx
     \bool_if:NTF \l_keys_no_value_bool {
       \keys_find_code_full:
     }{
-      \keys_err_use:nn { value_forbidden } 
+      \keys_error:nn { value~forbidden } 
         { \toks_use:N \l_keys_current_value_toks }
     }
   }{
@@ -1708,79 +1693,55 @@ This work consists of the file  keys3.dtx
 % defined separately. To make life a little easier here, some custom
 % functions are used to keep repetition down.
 % 
-%\begin{macro}{\keys_err_new:nNpnn}
+%\begin{macro}{\keys_msg_new:nn}
 % To create new error messages, a utility function is created.
 %    \begin{macrocode}
-\cs_new_nopar:Npn \keys_err_new:nNpnn #1 {
-  \tl_new:cn { l_keys_err_#1_tl } {#1}
-  \exp_args:NNc \err_interrupt_new:NNpnnn \c_keys_err_tl
-    { l_keys_err_#1_tl } 
+\cs_new_nopar:Npn \keys_msg_new:nn #1 {
+  \msg_new:nnn { keys } {#1}
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_err_unknown_key_tl}
-%\begin{macro}{\l_keys_err_value_ignored_tl}
-%\begin{macro}{\l_keys_err_value_required_tl}
-%\begin{macro}{\l_keys_err_def_x_args_tl}
-%\begin{macro}{\l_keys_err_boolean_expected_tl}
-%\begin{macro}{\l_keys_err_not_boolean_tl}
-%\begin{macro}{\l_keys_err_unknown_choice_tl}
-% Text for package error messages is stored in \texttt{keys3.err}. The 
-% error names do not need \cs{keys} at the start as they have to be in 
-% the file.
+%\begin{macro}{\keys_error:n}
+%\begin{macro}{\keys_error:nn}
+% Utilities for using errors, which always have 
+% \cs{l_keys_current_key_full_tl} as the first argument.
 %    \begin{macrocode}
-\err_file_new:Nn \c_keys_err_tl { keys3.err }
-\keys_err_new:nNpnn { unknown_key } #1
-  { The~key~`#1'~is~unknown~and~is~being~ignored }
-  { \err_help_return_or_X: } { }
-\keys_err_new:nNpnn { value_required } #1
-  { The~key~`#1'~requires~a~value~and~is~being~ignored }
-  { \err_help_return_or_X: } { }
-\keys_err_new:nNpnn { value_forbidden } #1#2
-  { The~key~`#1'~cannot~taken~a~value:~the~given~input~\iow_newline:
-    ~\text_put_sp:~\text_put_sp:`#2'~is~being~ignored }
-  { \err_help_return_or_X: } { }
-\keys_err_new:nNpnn { boolean_expected } #1#2
-  { Key~`#1'~takes~the~Boolean~values~`true'~and~\iow_newline:~
-   \text_put_sp:~\text_put_sp:`false'~only.~The~given~value~`#2'~is~
-   being~ignored }
-  { \err_help_return_or_X: } { }
-\keys_err_new:nNpnn { not_boolean } #1
-  { Key~`#1'~is~not~a~Boolean~key:~you~cannot~create~a~complement }
-  { \err_help_return_or_X: } { }
-\keys_err_new:nNpnn { unknown_choice } #1#2
-  { Choice~`#2'~unknown~for~key~`#1':~\iow_newline:~\text_put_sp:~
-   \text_put_sp:~the~key~is~being~ignored }
-  { \err_help_return_or_X: } { }
-\err_file_close:N \c_keys_err_tl
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_err_use:nw}
-%\begin{macro}{\keys_err_use:n}
-%\begin{macro}{\keys_err_use:nn}
-% Utilities for using errors: the first function is \texttt{nw} as it
-% may need one or two arguments in addition to the \texttt{n}.
-%    \begin{macrocode}
-\cs_new_nopar:Npn \keys_err_use:nw #1 {
-  \exp_args:NNc \err_interrupt:NNw \c_keys_err_tl { l_keys_err_#1_tl }
+\cs_new_protected_nopar:Nn \keys_error:nn {
+  \msg_error:nnnn { keys } {#1} { \l_keys_current_key_full_tl } {#2}
 }
-\cs_new_nopar:Nn \keys_err_use:n {
-  \keys_err_use:nw {#1} \l_keys_current_key_full_tl
-}
-\cs_new:Nn \keys_err_use:nn {
-  \keys_err_use:nw {#1} \l_keys_current_key_full_tl {#2}
+\cs_new_protected_nopar:Nn \keys_error:n {
+  \msg_error:nnnn { keys } {#1} { \l_keys_current_key_full_tl }
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
-%\end{macro}
+%
+%    \begin{macrocode}
+\keys_msg_new:nn 
+  { unknown~key } 
+  {The key `#1' is unknown and is being ignored.}
+\keys_msg_new:nn 
+  { value~required }
+  {The key `#1' requires a value\\%
+  and is being ignored.}
+\keys_msg_new:nn 
+  { value~forbidden }
+  {The key `#1' cannot taken a value:\\%
+   the given input `#2' is being ignored.}
+\keys_msg_new:nn 
+  { Boolean~expected } 
+  {Key `#1' takes the Boolean values\\%
+  `true' and `false'~only.\\%
+   The given value `#2' is being ignored.}
+\keys_msg_new:nn 
+  { not_boolean }
+  {Key `#1' is not a Boolean key: you cannot create a complement.}
+\keys_msg_new:nn 
+  { unknown~choice }
+  {Choice `#2' unknown for key `#1':\\%
+   the key is being ignored.}
+%    \end{macrocode}
 %
 %\subsubsection{Property definitions}
 %
@@ -1808,7 +1769,7 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \keys_manage_quick:n {
   \c_keys_errors_path_tl /unknown/.code:n = {
-    \keys_err_use:n { unknown_key }
+    \keys_error:n { unknown~key }
   }
 }
 %    \end{macrocode}
@@ -2080,7 +2041,7 @@ This work consists of the file  keys3.dtx
           { \l_keys_current_key_full_tl / ##1 }
       },
       unknown/.code:n = {
-        \keys_err_use:nn { unknown_choice } 
+        \keys_error:nn { unknown~choice } 
           { \l_keys_current_key_name_tl }
       }
     }

@@ -123,10 +123,11 @@
 %   All okay
 %   All okay
 % ----------------------------------------------------------------------
-% ! The key `/module name/key' cannot taken a value: the given input 
-%   `Not allowed' is being ignored.
-%  
-% ! The key `/module name/key' requires a value and is being ignored.
+% The key `/module name/key' cannot taken a value:
+% the given input `Not allowed' is being ignored.
+% 
+% The key `/module name/key' requires a value 
+% and is being ignored.
 % ----------------------------------------------------------------------
 \SetModuleKeys{
   key/.code:n = {All okay\\},
@@ -257,8 +258,9 @@
 % Local switch true
 % Global switch true
 % ----------------------------------------------------------------------
-% ! Key `/module name/key one' takes the Boolean values `true' and 
-% `false' only. The given value `rubbish' is being ignored.
+% Key `/module name/key one' takes the Boolean values
+% `true' and `false' only.
+% The given value `rubbish' is being ignored.
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
 \bool_new:N \localbool
@@ -308,8 +310,8 @@
 % Choice `c' is number 3
 % An extra choice
 % ----------------------------------------------------------------------
-% ! Choice `e' unknown for key `/module name/key/e': 
-%  the key is being ignored.
+% Choice `e' unknown for key `/module name/key/e':
+% the key is being ignored.
 % ----------------------------------------------------------------------
 \SetModuleKeys{
   key/.create_choices:nn = {a,b,c}
@@ -382,7 +384,7 @@
 
 % Test seventeen: A completely unknown key should cause an error.
 % ----------------------------------------------------------------------
-% ! The key `/module name/unknown key' is unknown and is being ignored.
+% The key `/module name/unknown key' is unknown and is being ignored
 % ----------------------------------------------------------------------
 \SetModuleKeys{
   unknown key = some value

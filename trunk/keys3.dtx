@@ -249,13 +249,13 @@ This work consists of the file  keys3.dtx
 %
 % A common use of key--value input is to store the values given in a 
 % variable for later use.  \pkg{keys3} provides pre-defined 
-% properties for storing in int, skip, tlp and toks variables. The 
+% properties for storing in int, skip, tl and toks variables. The 
 % method is similar in all cases:
 %\begin{verbatim}
 %  \keys_manage:n{
 %    /module/key~one/.int_set:N = \l_mod_data_int,
 %    /module/key~two/.skip_set:N = \l_mod_data_skip,
-%    /module/key~three/.tlp_set:N = \l_mod_data_tlp,
+%    /module/key~three/.tl_set:N = \l_mod_data_tl,
 %    /module/key~four/.toks_set:N = \l_mod_data_toks
 %  }
 %\end{verbatim}
@@ -271,19 +271,19 @@ This work consists of the file  keys3.dtx
 %\begin{verbatim}
 %  \keys_manage:n{
 %    /keys/current_module:n = module,
-%    /module/key/.tlp_set:n = my_data,
+%    /module/key/.tl_set:n = my_data,
 %  }
 %\end{verbatim}
-% This will use a variable called \cs{l_module_my_data_tlp} to store the
+% This will use a variable called \cs{l_module_my_data_tl} to store the
 % input. Thus the preceding code achieves the same effect as
 %\begin{verbatim}
 %  \keys_manage:n{
-%    /module/key/.tlp_set:N = \l_module_my_data_tlp
+%    /module/key/.tl_set:N = \l_module_my_data_tl
 %  }
 %\end{verbatim}
 % The same method applies to int, skip and toks variables. The 
 % appropriate prefix (\cs{l_} or \cs{g_}) and suffix (|_int|, |_skip|, 
-% |_tlp| or |_toks|) is always added.
+% |_tl| or |_toks|) is always added.
 % 
 %\subsubsection{Multiple choice keys}
 %
@@ -306,12 +306,12 @@ This work consists of the file  keys3.dtx
 % \pkg{keys3} provides the \texttt{.create_choices:nn} property. This
 % applies the same code to a list of choice text. Inside the code,
 % the name of the choice given is available as 
-% \cs{l_keys_current_choice_tlp}. The position of the choice in the 
+% \cs{l_keys_current_choice_tl}. The position of the choice in the 
 % lists is also available, as \cs{l_keys_current_choice_int}. 
 %\begin{verbatim}
 %  \keys_manage:n {
 %    /module/key/.create_choices:nn = {choice~a, choice~b, choice~c} {
-%      You~gave~choice~``\l_keys_current_choice_tlp'',~which~is~in~
+%      You~gave~choice~``\l_keys_current_choice_tl'',~which~is~in~
 %      position~\l_keys_current_choice_int~in~the~list.
 %    }
 %  }
@@ -405,7 +405,7 @@ This work consists of the file  keys3.dtx
 %  \end{syntax}
 %  Creates a sub-key of <key> for each <choice> in the comma-separated
 %  <list>. Each <choice> will have <code> associated with it. The 
-%  current choice text is available as \cs{l_keys_current_choice_tlp},
+%  current choice text is available as \cs{l_keys_current_choice_tl},
 %  and its position in the <list> as \cs{l_keys_current_choice_int}.
 % \end{function}
 % 
@@ -414,7 +414,7 @@ This work consists of the file  keys3.dtx
 %    <key>/.default:n = <content>
 %  \end{syntax}
 %  Creates a default value for <key>, which is used if no value is 
-%  given. The <content> is stored as a tlp, and so must be compatible
+%  given. The <content> is stored as a tl, and so must be compatible
 %  with this variable type.
 % \end{function}
 % 
@@ -491,31 +491,31 @@ This work consists of the file  keys3.dtx
 % \end{function}
 % 
 % \begin{function}{
-%   .tlp_set:N|
-%   .tlp_set_x:N|
-%   .tlp_gset:N|
-%   .tlp_gset_x:N|
+%   .tl_set:N|
+%   .tl_set_x:N|
+%   .tl_gset:N|
+%   .tl_gset_x:N|
 % }
 %  \begin{syntax}
-%    <key>/.tlp_set:N = <tlp>
+%    <key>/.tl_set:N = <tl>
 %  \end{syntax}
-%  Defines <key> to store <value> in the <tlp> named. The \texttt{x}
-%  versions use \cs{tlp_(g)set:Nx} for this process, the standard 
-%  version \cs{tlp_(g)set:Nn}.
+%  Defines <key> to store <value> in the <tl> named. The \texttt{x}
+%  versions use \cs{tl_(g)set:Nx} for this process, the standard 
+%  version \cs{tl_(g)set:Nn}.
 % \end{function}
 % 
 % \begin{function}{
-%   .tlp_set:n|
-%   .tlp_set_x:n|
-%   .tlp_gset:n|
-%   .tlp_gset_x:n|
+%   .tl_set:n|
+%   .tl_set_x:n|
+%   .tl_gset:n|
+%   .tl_gset_x:n|
 % }
 %  \begin{syntax}
-%    <key>/.tlp_set:n = <name>
+%    <key>/.tl_set:n = <name>
 %  \end{syntax}
-%  Defines <key> to store <value> in a tlp with unique name <name>. The
-%  tlp name will be constructed using the current <module> (if any), 
-%  prefixed by |\l_| and ending with |_tlp|.
+%  Defines <key> to store <value> in a tl with unique name <name>. The
+%  tl name will be constructed using the current <module> (if any), 
+%  prefixed by |\l_| and ending with |_tl|.
 % \end{function}
 % 
 % \begin{function}{
@@ -585,63 +585,63 @@ This work consists of the file  keys3.dtx
 %\subsection{Variables and constants}
 %
 % \begin{variable}{
-%   \c_keys_0_empty_tlp|
-%   \c_keys_1_empty_tlp|
-%   \c_keys_2_empty_tlp|
-%   \c_keys_3_empty_tlp|
-%   \c_keys_4_empty_tlp|
-%   \c_keys_5_empty_tlp|
-%   \c_keys_6_empty_tlp|
-%   \c_keys_7_empty_tlp|
-%   \c_keys_8_empty_tlp|
-%   \c_keys_9_empty_tlp|
+%   \c_keys_0_empty_tl|
+%   \c_keys_1_empty_tl|
+%   \c_keys_2_empty_tl|
+%   \c_keys_3_empty_tl|
+%   \c_keys_4_empty_tl|
+%   \c_keys_5_empty_tl|
+%   \c_keys_6_empty_tl|
+%   \c_keys_7_empty_tl|
+%   \c_keys_8_empty_tl|
+%   \c_keys_9_empty_tl|
 % }
-%   A set of tlps containing empty groups.
+%   A set of tls containing empty groups.
 % \end{variable}
 % 
-% \begin{variable}{\c_keys_cs_prefix_tlp}
+% \begin{variable}{\c_keys_cs_prefix_tl}
 %   The prefix added to the fully-qualified key when saving them.
 % \end{variable}
 % 
 % \begin{variable}{
-%   \c_keys_errors_path_tlp|
-%   \c_keys_properties_path_tlp|
-%   \c_keys_utilities_path_tlp|
+%   \c_keys_errors_path_tl|
+%   \c_keys_properties_path_tl|
+%   \c_keys_utilities_path_tl|
 % }
 %   Paths for properties used by \pkg{l3keys} itself.
 % \end{variable}
 % 
-% \begin{variable}{\c_keys_root_tlp}
+% \begin{variable}{\c_keys_root_tl}
 %   The root path for keys.
 % \end{variable}
 % 
-% \begin{variable}{\l_keys_choice_code_tlp}
+% \begin{variable}{\l_keys_choice_code_tl}
 %   The code to execute for each multiple choice when created \emph{en 
 %   masse}.
 % \end{variable}
 % 
 % \begin{variable}{
-%   \l_keys_current_choice_tlp|
+%   \l_keys_current_choice_tl|
 %   \l_keys_current_choice_int|
 % }
 %   Information on multiple choices.
 % \end{variable}
 % 
 % \begin{variable}{
-%   \l_keys_current_key_full_tlp|
-%   \l_keys_current_key_name_tlp|
+%   \l_keys_current_key_full_tl|
+%   \l_keys_current_key_name_tl|
 % }
 %   The current key name is stored both with and without a path.
 % \end{variable}
 % 
-% \begin{variable}{\l_keys_current_module_tlp}
+% \begin{variable}{\l_keys_current_module_tl}
 %   Current module name used when creating csnames.
 % \end{variable}
 % 
 % \begin{variable}{
-%   \l_keys_current_path_tlp|
-%   \l_keys_default_path_tlp|
-%   \l_keys_choice_path_tlp|
+%   \l_keys_current_path_tl|
+%   \l_keys_default_path_tl|
+%   \l_keys_choice_path_tl|
 % }
 %   Various key paths need to be stored.
 % \end{variable}
@@ -658,20 +658,20 @@ This work consists of the file  keys3.dtx
 %   A marker used when trying keys without raising errors.
 % \end{variable}
 % 
-% \begin{variable}{\l_keys_tmpa_tlp}
+% \begin{variable}{\l_keys_tmpa_tl}
 %   A scratch variable.
 % \end{variable}
 % 
 % \begin{variable}{ 
-%  \l_keys_err_unknown_key_tlp|
-%  \l_keys_err_value_ignored_tlp|
-%  \l_keys_err_value_required_tlp|
-%  \l_keys_err_def_x_args_tlp|
-%  \l_keys_err_boolean_expected_tlp|
-%  \l_keys_err_not_boolean_tlp|
-%  \l_keys_err_unknown_choice_tlp|
+%  \l_keys_err_unknown_key_tl|
+%  \l_keys_err_value_ignored_tl|
+%  \l_keys_err_value_required_tl|
+%  \l_keys_err_def_x_args_tl|
+%  \l_keys_err_boolean_expected_tl|
+%  \l_keys_err_not_boolean_tl|
+%  \l_keys_err_unknown_choice_tl|
 % }
-%   Identification tlps for error messages.
+%   Identification tls for error messages.
 % \end{variable}
 % 
 %\subsection{Internal functions}
@@ -679,7 +679,7 @@ This work consists of the file  keys3.dtx
 % Notice that everything should be done using the keys system. Only
 % \cs{keys_manage:n} and so on are intended for external use. In all
 % cases, \m{key} is a fully-qualified key name. Functions created will
-% be prefixed with \cs{c_keys_cs_prefix_tlp}.
+% be prefixed with \cs{c_keys_cs_prefix_tl}.
 % 
 % \begin{function}{\keys_bool_new:n}
 %   \begin{syntax}
@@ -740,7 +740,7 @@ This work consists of the file  keys3.dtx
 %   Takes a comma separated <list> and makes a <choice> as a sub-key of
 %   the current <key> for each. The <choice> will execute <code>, which
 %   is processed according to <expansion> (either \texttt{n} or 
-%   \texttt{x}). The <code> has access to \cs{l_keys_current_choice_tlp}
+%   \texttt{x}). The <code> has access to \cs{l_keys_current_choice_tl}
 %   and \cs{l_keys_current_choice_int}, which indicate the choice given.
 % \end{function}
 % 
@@ -840,10 +840,10 @@ This work consists of the file  keys3.dtx
 %   \keys_path_add:w
 %  }
 %   \begin{syntax}
-%     "\keys_path_add:N" <tlp>
+%     "\keys_path_add:N" <tl>
 %     "\keys_path_add:w" <tlist> "\q_stop"
 %   \end{syntax}
-%   Adds a full path to key name stored in <tlp> or given as <tlist>.
+%   Adds a full path to key name stored in <tl> or given as <tlist>.
 % \end{function}
 % 
 % \begin{function}{\keys_process_elt:nn}
@@ -951,7 +951,7 @@ This work consists of the file  keys3.dtx
 %  The function which is executed for a key with \texttt{.code}.
 % \end{function}
 %
-% \begin{function}{._default_tlp}
+% \begin{function}{._default_tl}
 %  \begin{syntax}
 %  \end{syntax}
 %  Holds the default value for a key.
@@ -963,7 +963,7 @@ This work consists of the file  keys3.dtx
 %  Indicates that a value cannot be given for <key>.
 % \end{function}
 % 
-% \begin{function}{._num_args_tlp}
+% \begin{function}{._num_args_tl}
 %  \begin{syntax}
 %  \end{syntax}
 %  For functions defined with \texttt{.code:Nn} and \texttt{.code:Nx},
@@ -991,28 +991,28 @@ This work consists of the file  keys3.dtx
 %
 %\subsubsection{Variables and contrasts}
 %
-%\begin{macro}{\c_keys_0_empty_tlp}
-%\begin{macro}{\c_keys_1_empty_tlp}
-%\begin{macro}{\c_keys_2_empty_tlp}
-%\begin{macro}{\c_keys_3_empty_tlp}
-%\begin{macro}{\c_keys_4_empty_tlp}
-%\begin{macro}{\c_keys_5_empty_tlp}
-%\begin{macro}{\c_keys_6_empty_tlp}
-%\begin{macro}{\c_keys_7_empty_tlp}
-%\begin{macro}{\c_keys_8_empty_tlp}
-%\begin{macro}{\c_keys_9_empty_tlp}
+%\begin{macro}{\c_keys_0_empty_tl}
+%\begin{macro}{\c_keys_1_empty_tl}
+%\begin{macro}{\c_keys_2_empty_tl}
+%\begin{macro}{\c_keys_3_empty_tl}
+%\begin{macro}{\c_keys_4_empty_tl}
+%\begin{macro}{\c_keys_5_empty_tl}
+%\begin{macro}{\c_keys_6_empty_tl}
+%\begin{macro}{\c_keys_7_empty_tl}
+%\begin{macro}{\c_keys_8_empty_tl}
+%\begin{macro}{\c_keys_9_empty_tl}
 % A set of empty arguments.
 %    \begin{macrocode}
-\tlp_new:cn { c_keys_0_empty_tlp } {}
-\tlp_new:cn { c_keys_1_empty_tlp } { {} }
-\tlp_new:cn { c_keys_2_empty_tlp } { {} {} }
-\tlp_new:cn { c_keys_3_empty_tlp } { {} {} {} }
-\tlp_new:cn { c_keys_4_empty_tlp } { {} {} {} {} }
-\tlp_new:cn { c_keys_5_empty_tlp } { {} {} {} {} {} }
-\tlp_new:cn { c_keys_6_empty_tlp } { {} {} {} {} {} {} }
-\tlp_new:cn { c_keys_7_empty_tlp } { {} {} {} {} {} {} {} }
-\tlp_new:cn { c_keys_8_empty_tlp } { {} {} {} {} {} {} {} {} }
-\tlp_new:cn { c_keys_9_empty_tlp } { {} {} {} {} {} {} {} {} {} }
+\tl_new:cn { c_keys_0_empty_tl } {}
+\tl_new:cn { c_keys_1_empty_tl } { {} }
+\tl_new:cn { c_keys_2_empty_tl } { {} {} }
+\tl_new:cn { c_keys_3_empty_tl } { {} {} {} }
+\tl_new:cn { c_keys_4_empty_tl } { {} {} {} {} }
+\tl_new:cn { c_keys_5_empty_tl } { {} {} {} {} {} }
+\tl_new:cn { c_keys_6_empty_tl } { {} {} {} {} {} {} }
+\tl_new:cn { c_keys_7_empty_tl } { {} {} {} {} {} {} {} }
+\tl_new:cn { c_keys_8_empty_tl } { {} {} {} {} {} {} {} {} }
+\tl_new:cn { c_keys_9_empty_tl } { {} {} {} {} {} {} {} {} {} }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
@@ -1025,79 +1025,79 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\c_keys_cs_prefix_tlp}
+%\begin{macro}{\c_keys_cs_prefix_tl}
 % First, the small number of constants needed are created. A prefix is
 % used to keep all of the actual key macros in one place.
 %    \begin{macrocode}
-\tlp_new:Nn \c_keys_cs_prefix_tlp { keys-root }
+\tl_new:Nn \c_keys_cs_prefix_tl { keys-root }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\c_keys_errors_path_tlp}
-%\begin{macro}{\c_keys_properties_path_tlp}
-%\begin{macro}{\c_keys_utilities_path_tlp}
+%\begin{macro}{\c_keys_errors_path_tl}
+%\begin{macro}{\c_keys_properties_path_tl}
+%\begin{macro}{\c_keys_utilities_path_tl}
 % The locations of all of the keys used by \pkg{keys3} itself.
 %    \begin{macrocode}
-\tlp_new:Nn \c_keys_errors_path_tlp     { /keys/errors }
-\tlp_new:Nn \c_keys_properties_path_tlp { /keys/properties }
-\tlp_new:Nn \c_keys_utilities_path_tlp  { /keys }
+\tl_new:Nn \c_keys_errors_path_tl     { /keys/errors }
+\tl_new:Nn \c_keys_properties_path_tl { /keys/properties }
+\tl_new:Nn \c_keys_utilities_path_tl  { /keys }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\c_keys_root_tlp}
+%\begin{macro}{\c_keys_root_tl}
 % The key root should have a clear name; like all of the key macros,
 % this does not include the prefix.
 %    \begin{macrocode}
-\tlp_new:Nn \c_keys_root_tlp { / }
+\tl_new:Nn \c_keys_root_tl { / }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_choice_code_tlp}
+%\begin{macro}{\l_keys_choice_code_tl}
 % When making choices, the code for each key has to be stored.
 %    \begin{macrocode}
-\tlp_new:N \l_keys_choice_code_tlp
+\tl_new:N \l_keys_choice_code_tl
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_current_choice_tlp}
+%\begin{macro}{\l_keys_current_choice_tl}
 %\begin{macro}{\l_keys_current_choice_int}
 % Multiple choices need some storage.
 %    \begin{macrocode}
-\tlp_new:N \l_keys_current_choice_tlp
+\tl_new:N \l_keys_current_choice_tl
 \int_new:N \l_keys_current_choice_int
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_current_key_full_tlp}
-%\begin{macro}{\l_keys_current_key_name_tlp}
+%\begin{macro}{\l_keys_current_key_full_tl}
+%\begin{macro}{\l_keys_current_key_name_tl}
 % The current key name and the fully-qualified key are stored.
 %    \begin{macrocode}
-\tlp_new:N \l_keys_current_key_full_tlp
-\tlp_new:N \l_keys_current_default_tlp
+\tl_new:N \l_keys_current_key_full_tl
+\tl_new:N \l_keys_current_default_tl
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_current_module_tlp}
+%\begin{macro}{\l_keys_current_module_tl}
 % The module name of the current module is stored here.
 %    \begin{macrocode}
-\tlp_new:N \l_keys_current_module_tlp
+\tl_new:N \l_keys_current_module_tl
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_current_path_tlp}
-%\begin{macro}{\l_keys_default_path_tlp}
-%\begin{macro}{\l_keys_choice_path_tlp}
-% The current and default paths can be stored as tlps. The default path
+%\begin{macro}{\l_keys_current_path_tl}
+%\begin{macro}{\l_keys_default_path_tl}
+%\begin{macro}{\l_keys_choice_path_tl}
+% The current and default paths can be stored as tls. The default path
 % is then initialised as the key root.
 %    \begin{macrocode}
-\tlp_new:N \l_keys_current_path_tlp
-\tlp_new:N \l_keys_default_path_tlp
-\tlp_set_eq:NN \l_keys_default_path_tlp \c_keys_root_tlp
-\tlp_new:N \l_keys_choice_path_tlp
+\tl_new:N \l_keys_current_path_tl
+\tl_new:N \l_keys_default_path_tl
+\tl_set_eq:NN \l_keys_default_path_tl \c_keys_root_tl
+\tl_new:N \l_keys_choice_path_tl
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
@@ -1124,10 +1124,10 @@ This work consists of the file  keys3.dtx
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_tmpa_tlp}
+%\begin{macro}{\l_keys_tmpa_tl}
 % A scratch area.
 %    \begin{macrocode}
-\tlp_new:N \l_keys_tmpa_tlp
+\tl_new:N \l_keys_tmpa_tl
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1144,21 +1144,21 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new:Nn \keys_manage:n {
   \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
-  \tlp_clear:N \l_keys_current_module_tlp
+  \tl_clear:N \l_keys_current_module_tl
   \keys_manage_internal:n {#1}
 }
 \cs_new:Nn \keys_manage_quick:n {
   \cs_set_eq:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
-  \tlp_clear:N \l_keys_current_module_tlp
+  \tl_clear:N \l_keys_current_module_tl
   \keys_manage_internal:n {#1}
 }
 \cs_new:Nn \keys_manage_internal:n {
-  \keys_manage_aux:Vn \l_keys_default_path_tlp {#1}
+  \keys_manage_aux:Vn \l_keys_default_path_tl {#1}
 }
 \cs_new:Nn \keys_manage_aux:nn {
-  \tlp_set_eq:NN \l_keys_default_path_tlp \c_keys_root_tlp
+  \tl_set_eq:NN \l_keys_default_path_tl \c_keys_root_tl
   \keys_parse_list:n {#2}
-  \tlp_set:Nn \l_keys_default_path_tlp {#1}
+  \tl_set:Nn \l_keys_default_path_tl {#1}
 }
 \cs_generate_variant:Nn \keys_manage_aux:nn { Vn }
 %    \end{macrocode}
@@ -1177,17 +1177,17 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new:Nn \keys_manage:nn {
   \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
-  \keys_manage_aux:Vnn \l_keys_default_path_tlp {#1} {#2}
+  \keys_manage_aux:Vnn \l_keys_default_path_tl {#1} {#2}
 }
 \cs_new:Nn \keys_manage_quick:nn {
   \cs_set_eq:NN \keys_parse:n \KV_parse_space_no_removal_no_sanitize:n
-  \keys_manage_aux:Vnn \l_keys_default_path_tlp {#1} {#2}
+  \keys_manage_aux:Vnn \l_keys_default_path_tl {#1} {#2}
 }
 \cs_new:Nn \keys_manage_aux:nnn {
-  \tlp_set:Nn \l_keys_default_path_tlp {#2}
-  \tlp_clear:N \l_keys_current_module_tlp
+  \tl_set:Nn \l_keys_default_path_tl {#2}
+  \tl_clear:N \l_keys_current_module_tl
   \keys_parse_list:n {#3}
-  \tlp_set:Nn \l_keys_default_path_tlp {#1}
+  \tl_set:Nn \l_keys_default_path_tl {#1}
 }
 \cs_generate_variant:Nn \keys_manage_aux:nnn { Vnn }
 %    \end{macrocode}
@@ -1203,8 +1203,8 @@ This work consists of the file  keys3.dtx
 % switch is the flag here).
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_bool_new:n {
-  \bool_new:c { \c_keys_cs_prefix_tlp #1 }
-  \bool_set_true:c { \c_keys_cs_prefix_tlp #1 }
+  \bool_new:c { \c_keys_cs_prefix_tl #1 }
+  \bool_set_true:c { \c_keys_cs_prefix_tl #1 }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1218,27 +1218,27 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_bool_set:nN {
   \keys_parse_list:n {
-    \c_keys_properties_path_tlp /.code:n = {
+    \c_keys_properties_path_tl /.code:n = {
       \cs_if_exist:cTF { bool_ #1 _ ##1 :N } {
         \use:c { bool_ #1 _ ##1 :N } #2
       }{
         \keys_err_use:nn { boolean_expected } {##1}
       }
     },
-    \l_keys_current_path_tlp /.default:n = true
+    \l_keys_current_path_tl /.default:n = true
   }
 }
 \cs_new_nopar:Nn \keys_bool_set:nnn {
   \keys_parse_list:n {
-    \c_keys_properties_path_tlp /.code:x = {
+    \c_keys_properties_path_tl /.code:x = {
       \exp_not:N \cs_if_exist:cTF { bool_ #1 _ ##1 :c } {
         \exp_not:N \use:c { bool_ #1 _ ##1 :c } 
-          { #2 \l_keys_current_module_tlp #3 _bool }
+          { #2 \l_keys_current_module_tl #3 _bool }
       }{
         \exp_not:N \keys_err_use:nn { boolean_expected } {##1}
       }
     },
-    \l_keys_current_path_tlp /.default:n = true
+    \l_keys_current_path_tl /.default:n = true
   }
 }
 %    \end{macrocode}
@@ -1257,28 +1257,28 @@ This work consists of the file  keys3.dtx
 }
 \cs_new_nopar:Nn \keys_bool_set_inverse:nN {
   \keys_parse_list:n {
-    \c_keys_properties_path_tlp /.code:n = {
+    \c_keys_properties_path_tl /.code:n = {
       \cs_if_exist:cTF { bool_ #1 _ ##1 :N } {
         \use:c { bool_ #1 _ \keys_bool_set_inverse:n {##1} :N } #2
       }{
         \keys_err_use:nn { boolean_expected } {##1}
       }
     },
-    \l_keys_current_path_tlp /.default:n = true
+    \l_keys_current_path_tl /.default:n = true
   }
 }
 \cs_new_nopar:Nn \keys_bool_set_inverse:nnn {
   \keys_parse_list:n {
-    \c_keys_properties_path_tlp /.code:x = {
+    \c_keys_properties_path_tl /.code:x = {
       \exp_not:N \cs_if_exist:cTF { bool_ #1 _ ##1 :c } {
          \exp_not:N \use:c { 
            bool_ #1 _ \exp_not:N \keys_bool_set_inverse:n {##1} :c 
-         } { #2 \l_keys_current_module_tlp #3 _bool }
+         } { #2 \l_keys_current_module_tl #3 _bool }
       }{
         \exp_not:N \keys_err_use:nn { boolean_expected } {##1}
       }
     },
-    \l_keys_current_path_tlp /.default:n = true
+    \l_keys_current_path_tl /.default:n = true
   }
 }
 %    \end{macrocode}
@@ -1294,26 +1294,26 @@ This work consists of the file  keys3.dtx
 % Only the path and counter need to be altered. 
 %    \begin{macrocode}
 \cs_new:Nn \keys_choices_create:Nnn {
-  \tlp_set_eq:NN \l_keys_choice_path_tlp \l_keys_current_path_tlp
+  \tl_set_eq:NN \l_keys_choice_path_tl \l_keys_current_path_tl
   \int_zero:N \l_keys_current_choice_int
   \use:c { keys_choices_create_aux: #1 } {#3}
   \clist_map_function:nN {#2} \keys_choice_create:n
-  \keys_manage_internal:n { \l_keys_choice_path_tlp  /.expects_choice: }
+  \keys_manage_internal:n { \l_keys_choice_path_tl  /.expects_choice: }
 }
 \cs_new:Nn \keys_choices_create_aux:n {
-  \tlp_set:Nn \l_keys_choice_code_tlp { \exp_not:n {#1} }
+  \tl_set:Nn \l_keys_choice_code_tl { \exp_not:n {#1} }
 }
 \cs_new:Nn \keys_choices_create_aux:x {
-  \tlp_set:Nn \l_keys_choice_code_tlp {#1}
+  \tl_set:Nn \l_keys_choice_code_tl {#1}
 }
 \cs_new_nopar:Nn \keys_choice_create:n {
   \int_incr:N \l_keys_current_choice_int
   \keys_parse_list:n {
-    \l_keys_choice_path_tlp / #1 /.code:x = {
+    \l_keys_choice_path_tl / #1 /.code:x = {
       \exp_not:n { \int_set:Nn \l_keys_current_choice_int }
         { \int_use:N \l_keys_current_choice_int }
-      \exp_not:n { \tlp_set:Nn \l_keys_current_choice_tlp } {#1}
-      \l_keys_choice_code_tlp
+      \exp_not:n { \tl_set:Nn \l_keys_current_choice_tl } {#1}
+      \l_keys_choice_code_tl
     }
   }
 }
@@ -1328,9 +1328,9 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_clear_properties:n {
   \keys_undefine:n { #1 /._cmd:w }      
-  \keys_undefine:n { #1 /._default_tlp }  
+  \keys_undefine:n { #1 /._default_tl }  
   \keys_undefine:n { #1 /._forbidden_bool } 
-  \keys_undefine:n { #1 /._num_args_tlp }
+  \keys_undefine:n { #1 /._num_args_tl }
   \keys_undefine:n { #1 /._required_bool }
 }
 %    \end{macrocode}
@@ -1342,9 +1342,9 @@ This work consists of the file  keys3.dtx
 \cs_new_nopar:Nn \keys_default_add: {
   \bool_if:NT \l_keys_no_value_bool {
     \keys_if_exist:nT 
-      { \l_keys_current_key_full_tlp /._default_tlp } {
+      { \l_keys_current_key_full_tl /._default_tl } {
       \keys_toks_set:Nn \l_keys_current_value_toks
-        { \l_keys_current_key_full_tlp /._default_tlp }
+        { \l_keys_current_key_full_tl /._default_tl }
       \bool_set_false:N \l_keys_no_value_bool
     }
   }
@@ -1360,14 +1360,14 @@ This work consists of the file  keys3.dtx
 % used after separating out the key name and key path.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_find_code_full: {
-  \keys_if_cmd_exist:nTF { \l_keys_current_key_full_tlp } {
-    \keys_use_cmd:n { \l_keys_current_key_full_tlp }
+  \keys_if_cmd_exist:nTF { \l_keys_current_key_full_tl } {
+    \keys_use_cmd:n { \l_keys_current_key_full_tl }
   }{
-    \keys_if_exist:nTF { \l_keys_current_key_full_tlp } {
+    \keys_if_exist:nTF { \l_keys_current_key_full_tl } {
       \bool_if:NTF \l_keys_no_value_bool {
-        \keys_use:n { \l_keys_current_key_full_tlp }
+        \keys_use:n { \l_keys_current_key_full_tl }
       }{
-        \keys_store:nx { \l_keys_current_key_full_tlp }
+        \keys_store:nx { \l_keys_current_key_full_tl }
           { \toks_use:N \l_keys_current_value_toks }
       }
     }{
@@ -1378,13 +1378,13 @@ This work consists of the file  keys3.dtx
 \cs_new_nopar:Nn \keys_find_code_name: {
   \keys_separate_path:
   \keys_if_cmd_exist:nTF
-    { \c_keys_properties_path_tlp / \l_keys_current_key_name_tlp } {
+    { \c_keys_properties_path_tl / \l_keys_current_key_name_tl } {
     \keys_use_cmd:n  
-      {\c_keys_properties_path_tlp / \l_keys_current_key_name_tlp}
+      {\c_keys_properties_path_tl / \l_keys_current_key_name_tl}
   }{
     \keys_if_cmd_exist:nTF 
-      { \l_keys_current_path_tlp / unknown } {
-      \keys_use_cmd:n { \l_keys_current_path_tlp / unknown }
+      { \l_keys_current_path_tl / unknown } {
+      \keys_use_cmd:n { \l_keys_current_path_tl / unknown }
     }{
       \keys_err_use:n { unknown_key }
     }
@@ -1398,7 +1398,7 @@ This work consists of the file  keys3.dtx
 % A dedicated check for the |._cmd:w| property key.
 %    \begin{macrocode}
 \def_long_test_function_new:npn { keys_if_cmd_exist:n } #1 {
-  \if_cs_exist:w \c_keys_cs_prefix_tlp #1 /._cmd:w \cs_end:
+  \if_cs_exist:w \c_keys_cs_prefix_tl #1 /._cmd:w \cs_end:
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1407,7 +1407,7 @@ This work consists of the file  keys3.dtx
 % Check if a key exists without adding to the hash table.
 %    \begin{macrocode}
 \def_long_test_function_new:npn { keys_if_exist:n } #1 {
-  \if_cs_exist:w \c_keys_cs_prefix_tlp #1 \cs_end:
+  \if_cs_exist:w \c_keys_cs_prefix_tl #1 \cs_end:
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1417,7 +1417,7 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \def_long_test_function_new:npn { keys_if_value:n } #1 {
   \if_cs_exist:w 
-    \c_keys_cs_prefix_tlp \l_keys_current_key_full_tlp /._ #1 _bool 
+    \c_keys_cs_prefix_tl \l_keys_current_key_full_tl /._ #1 _bool 
   \cs_end:
 }
 %    \end{macrocode}
@@ -1470,14 +1470,14 @@ This work consists of the file  keys3.dtx
   \exp_after:wN \keys_path_add:w #1 \q_stop
 }
 \cs_new_nopar:Npn \keys_path_add:w {
-  \exp_after:wN \peek_meaning:NTF \c_keys_root_tlp {
+  \exp_after:wN \peek_meaning:NTF \c_keys_root_tl {
     \use_none_delimit_by_q_stop:w
   }{
     \keys_path_add_aux:w
   }
 }
 \cs_new_nopar:Npn \keys_path_add_aux:w #1 \q_stop {
-  \tlp_set:Nx \l_keys_current_key_full_tlp {\l_keys_default_path_tlp #1}
+  \tl_set:Nx \l_keys_current_key_full_tl {\l_keys_default_path_tl #1}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1492,9 +1492,9 @@ This work consists of the file  keys3.dtx
 % forbidden values.
 %    \begin{macrocode}
 \cs_new:Nn \keys_process_elt:nn {
-  \tlp_set:Nx \l_keys_current_key_full_tlp {#1}
+  \tl_set:Nx \l_keys_current_key_full_tl {#1}
   \toks_set:Nn \l_keys_current_value_toks {#2}
-  \keys_path_add:N \l_keys_current_key_full_tlp
+  \keys_path_add:N \l_keys_current_key_full_tl
   \keys_default_add:
   \keys_if_value:nTF { required } {
     \bool_if:NTF \l_keys_no_value_bool {
@@ -1527,15 +1527,15 @@ This work consists of the file  keys3.dtx
 % A simple piece of recursion to find the key name and path.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_separate_path: {
-  \tlp_clear:N \l_keys_current_path_tlp
-  \exp_after:wN \keys_separate_path:w \l_keys_current_key_full_tlp 
+  \tl_clear:N \l_keys_current_path_tl
+  \exp_after:wN \keys_separate_path:w \l_keys_current_key_full_tl 
     / \q_stop
 }
 \cs_new_nopar:Npn \keys_separate_path:w / #1 / #2 \q_stop {
   \tlist_if_empty:nTF {#2} {
-    \tlp_set:Nn \l_keys_current_key_name_tlp {#1}
+    \tl_set:Nn \l_keys_current_key_name_tl {#1}
   }{
-     \tlp_put_right:Nn \l_keys_current_path_tlp { / #1 }
+     \tl_put_right:Nn \l_keys_current_path_tl { / #1 }
      \keys_separate_path:w /#2 \q_stop
   }
 }
@@ -1549,15 +1549,15 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_set:NN {
   \keys_parse_list:n {
-    \c_keys_properties_path_tlp /.code:n = {
+    \c_keys_properties_path_tl /.code:n = {
       #1 #2 {##1}
     }
   }
 }
 \cs_new_nopar:Nn \keys_set:Nnn {
   \keys_parse_list:n {
-    \c_keys_properties_path_tlp /.code:x = {
-      \exp_not:N #1 { #2 \l_keys_current_module_tlp #3 } {##1}
+    \c_keys_properties_path_tl /.code:x = {
+      \exp_not:N #1 { #2 \l_keys_current_module_tl #3 } {##1}
     }
   }
 }
@@ -1570,28 +1570,28 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\keys_set_cmd:nNn}
 %\begin{macro}{\keys_set_cmd:nNx}
 %\begin{macro}{._cmd:w}
-%\begin{macro}{._num_args_tlp}
+%\begin{macro}{._num_args_tl}
 % Creation of the key |._cmd:w| macros happens here. For the 
 % multiple-argument versions, the number of arguments is stored for
 % use later on.
 %    \begin{macrocode}
 \cs_new:Nn \keys_set_cmd:nn {
   \keys_clear_properties:n {#1}
-  \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } 1 {#2}
+  \cs_set:cNn { \c_keys_cs_prefix_tl #1 /._cmd:w } 1 {#2}
 }
 \cs_new:Nn \keys_set_cmd:nx {
   \keys_clear_properties:n {#1}
-  \cs_set:cNx { \c_keys_cs_prefix_tlp #1 /._cmd:w } 1 {#2}
+  \cs_set:cNx { \c_keys_cs_prefix_tl #1 /._cmd:w } 1 {#2}
 }
 \cs_new:Nn \keys_set_cmd:nNn {
   \keys_clear_properties:n {#1}
-  \cs_set:cNn { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
-  \keys_store:nn { #1 /._num_args_tlp} {#2}
+  \cs_set:cNn { \c_keys_cs_prefix_tl #1 /._cmd:w } #2 {#3}
+  \keys_store:nn { #1 /._num_args_tl} {#2}
 }
 \cs_new:Nn \keys_set_cmd:nNx {
   \keys_clear_properties:n {#1}
-  \cs_set:cNx { \c_keys_cs_prefix_tlp #1 /._cmd:w } #2 {#3}
-  \keys_store:nn { #1 /._num_args_tlp} {#2}
+  \cs_set:cNx { \c_keys_cs_prefix_tl #1 /._cmd:w } #2 {#3}
+  \keys_store:nn { #1 /._num_args_tl} {#2}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1606,10 +1606,10 @@ This work consists of the file  keys3.dtx
 % Direct storage of data in keys.
 %    \begin{macrocode}
 \cs_new:Nn \keys_store:nn {
-  \tlp_set:cn { \c_keys_cs_prefix_tlp #1 } {#2}
+  \tl_set:cn { \c_keys_cs_prefix_tl #1 } {#2}
 }
 \cs_new:Nn \keys_store:nx {
-  \tlp_set:cx { \c_keys_cs_prefix_tlp #1 } {#2}
+  \tl_set:cx { \c_keys_cs_prefix_tl #1 } {#2}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1619,7 +1619,7 @@ This work consists of the file  keys3.dtx
 % Sets a toks to the content of a key.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_toks_set:Nn {
-  \exp_args:NNv \toks_set:Nn #1 { \c_keys_cs_prefix_tlp #2 }
+  \exp_args:NNv \toks_set:Nn #1 { \c_keys_cs_prefix_tl #2 }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1630,17 +1630,17 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_try: {
   \bool_set_false:N \l_keys_success_bool
-  \keys_if_cmd_exist:nT { \l_keys_current_path_tlp } {
+  \keys_if_cmd_exist:nT { \l_keys_current_path_tl } {
     \bool_set_true:N \l_keys_success_bool
     \bool_if:NT \l_keys_no_value_bool {
       \keys_if_exist:nT
-        { \l_keys_current_path_tlp /._default_tlp } {
+        { \l_keys_current_path_tl /._default_tl } {
         \keys_toks_set:Nn \l_keys_current_value_toks
-          { \l_keys_current_path_tlp /._default_tlp }
+          { \l_keys_current_path_tl /._default_tl }
       }
     }
-    \cs_set_eq:NN \l_keys_current_key_full_tlp \l_keys_current_path_tlp 
-    \keys_use_cmd:n { \l_keys_current_path_tlp }
+    \cs_set_eq:NN \l_keys_current_key_full_tl \l_keys_current_path_tl 
+    \keys_use_cmd:n { \l_keys_current_path_tl }
   }
 }
 %    \end{macrocode}
@@ -1650,7 +1650,7 @@ This work consists of the file  keys3.dtx
 % To remove a key.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_undefine:n {
-  \cs_set_eq:cN { \c_keys_cs_prefix_tlp #1 } \c_undefined
+  \cs_set_eq:cN { \c_keys_cs_prefix_tl #1 } \c_undefined
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1659,7 +1659,7 @@ This work consists of the file  keys3.dtx
 % Use whatever is stored in a key.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_use:n {
-  \use:c { \c_keys_cs_prefix_tlp #1 }
+  \use:c { \c_keys_cs_prefix_tl #1 }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1677,7 +1677,7 @@ This work consists of the file  keys3.dtx
     { \toks_use:N \l_keys_current_value_toks }
 }
 \cs_new_nopar:Nn \keys_use_cmd:nn {
-  \keys_if_exist:nTF { #1 /._num_args_tlp } {
+  \keys_if_exist:nTF { #1 /._num_args_tl } {
      \keys_use_cmd_aux:nn {#1} {#2}
   }{
     \keys_use:n {#1/._cmd:w} {#2}
@@ -1690,7 +1690,7 @@ This work consists of the file  keys3.dtx
     }
     \exp_after:wN \exp_after:wN \exp_after:wN \keys_use_cmd_aux:w 
       \cs:w
-        c_keys_ \keys_use:n { #1 /._num_args_tlp } _empty_tlp
+        c_keys_ \keys_use:n { #1 /._num_args_tl } _empty_tl
       \cs_end:
   }{
     \keys_use:n { #1 /._cmd:w } #2
@@ -1712,25 +1712,25 @@ This work consists of the file  keys3.dtx
 % To create new error messages, a utility function is created.
 %    \begin{macrocode}
 \cs_new_nopar:Npn \keys_err_new:nNpnn #1 {
-  \tlp_new:cn { l_keys_err_#1_tlp } {#1}
-  \exp_args:NNc \err_interrupt_new:NNpnnn \c_keys_err_tlp
-    { l_keys_err_#1_tlp } 
+  \tl_new:cn { l_keys_err_#1_tl } {#1}
+  \exp_args:NNc \err_interrupt_new:NNpnnn \c_keys_err_tl
+    { l_keys_err_#1_tl } 
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_err_unknown_key_tlp}
-%\begin{macro}{\l_keys_err_value_ignored_tlp}
-%\begin{macro}{\l_keys_err_value_required_tlp}
-%\begin{macro}{\l_keys_err_def_x_args_tlp}
-%\begin{macro}{\l_keys_err_boolean_expected_tlp}
-%\begin{macro}{\l_keys_err_not_boolean_tlp}
-%\begin{macro}{\l_keys_err_unknown_choice_tlp}
+%\begin{macro}{\l_keys_err_unknown_key_tl}
+%\begin{macro}{\l_keys_err_value_ignored_tl}
+%\begin{macro}{\l_keys_err_value_required_tl}
+%\begin{macro}{\l_keys_err_def_x_args_tl}
+%\begin{macro}{\l_keys_err_boolean_expected_tl}
+%\begin{macro}{\l_keys_err_not_boolean_tl}
+%\begin{macro}{\l_keys_err_unknown_choice_tl}
 % Text for package error messages is stored in \texttt{keys3.err}. The 
 % error names do not need \cs{keys} at the start as they have to be in 
 % the file.
 %    \begin{macrocode}
-\err_file_new:Nn \c_keys_err_tlp { keys3.err }
+\err_file_new:Nn \c_keys_err_tl { keys3.err }
 \keys_err_new:nNpnn { unknown_key } #1
   { The~key~`#1'~is~unknown~and~is~being~ignored }
   { \err_help_return_or_X: } { }
@@ -1753,7 +1753,7 @@ This work consists of the file  keys3.dtx
   { Choice~`#2'~unknown~for~key~`#1':~\iow_newline:~\text_put_sp:~
    \text_put_sp:~the~key~is~being~ignored }
   { \err_help_return_or_X: } { }
-\err_file_close:N \c_keys_err_tlp
+\err_file_close:N \c_keys_err_tl
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
@@ -1769,13 +1769,13 @@ This work consists of the file  keys3.dtx
 % may need one or two arguments in addition to the \texttt{n}.
 %    \begin{macrocode}
 \cs_new_nopar:Npn \keys_err_use:nw #1 {
-  \exp_args:NNc \err_interrupt:NNw \c_keys_err_tlp { l_keys_err_#1_tlp }
+  \exp_args:NNc \err_interrupt:NNw \c_keys_err_tl { l_keys_err_#1_tl }
 }
 \cs_new_nopar:Nn \keys_err_use:n {
-  \keys_err_use:nw {#1} \l_keys_current_key_full_tlp
+  \keys_err_use:nw {#1} \l_keys_current_key_full_tl
 }
 \cs_new:Nn \keys_err_use:nn {
-  \keys_err_use:nw {#1} \l_keys_current_key_full_tlp {#2}
+  \keys_err_use:nw {#1} \l_keys_current_key_full_tl {#2}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1789,11 +1789,11 @@ This work consists of the file  keys3.dtx
 % The \texttt{.code:n} and \texttt{.code:Nn} properties have to be 
 % defined directly.
 %    \begin{macrocode}
-\keys_set_cmd:nn { \c_keys_properties_path_tlp /.code:n } {
-  \keys_set_cmd:nn { \l_keys_current_path_tlp } {#1}
+\keys_set_cmd:nn { \c_keys_properties_path_tl /.code:n } {
+  \keys_set_cmd:nn { \l_keys_current_path_tl } {#1}
 }
-\keys_set_cmd:nNn { \c_keys_properties_path_tlp /.code:Nn } 2 {
-  \keys_set_cmd:nNn { \l_keys_current_path_tlp } #1 {#2}
+\keys_set_cmd:nNn { \c_keys_properties_path_tl /.code:Nn } 2 {
+  \keys_set_cmd:nNn { \l_keys_current_path_tl } #1 {#2}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1807,7 +1807,7 @@ This work consists of the file  keys3.dtx
 % catch any internal errors.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_errors_path_tlp /unknown/.code:n = {
+  \c_keys_errors_path_tl /unknown/.code:n = {
     \keys_err_use:n { unknown_key }
   }
 }
@@ -1818,11 +1818,11 @@ This work consists of the file  keys3.dtx
 % Fully-expanded versions of the basic \texttt{.code} properties.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.code:x/.code:n = {
-    \keys_set_cmd:nx { \l_keys_current_path_tlp } {#1}
+  \c_keys_properties_path_tl /.code:x/.code:n = {
+    \keys_set_cmd:nx { \l_keys_current_path_tl } {#1}
   },
-  \c_keys_properties_path_tlp /.code:Nx/.code:Nn = 2 {
-    \keys_set_cmd:nNx { \l_keys_current_path_tlp } {#1} {#2}
+  \c_keys_properties_path_tl /.code:Nx/.code:Nn = 2 {
+    \keys_set_cmd:nNx { \l_keys_current_path_tl } {#1} {#2}
   }
 }
 %    \end{macrocode}
@@ -1834,8 +1834,8 @@ This work consists of the file  keys3.dtx
 % path. 
 %    \begin{macrocode}
 \keys_manage_quick:n {
-    \c_keys_properties_path_tlp /.cd:/.code:n = {
-    \tlp_set:Nx \l_keys_default_path_tlp { \l_keys_current_path_tlp / }
+    \c_keys_properties_path_tl /.cd:/.code:n = {
+    \tl_set:Nx \l_keys_default_path_tl { \l_keys_current_path_tl / }
   }
 }
 %    \end{macrocode}
@@ -1848,13 +1848,13 @@ This work consists of the file  keys3.dtx
 % Values are required or forbidden by creating the appropriate flags.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.value_required:/.code:n = {
-    \keys_bool_new:n { \l_keys_current_path_tlp /._required_bool }
-    \keys_undefine:n { \l_keys_current_path_tlp /._forbidden_bool }
+  \c_keys_properties_path_tl /.value_required:/.code:n = {
+    \keys_bool_new:n { \l_keys_current_path_tl /._required_bool }
+    \keys_undefine:n { \l_keys_current_path_tl /._forbidden_bool }
   },
-  \c_keys_properties_path_tlp /.value_forbidden:/.code:n = {
-    \keys_bool_new:n { \l_keys_current_path_tlp /._forbidden_bool }
-    \keys_undefine:n { \l_keys_current_path_tlp /._required_bool }
+  \c_keys_properties_path_tl /.value_forbidden:/.code:n = {
+    \keys_bool_new:n { \l_keys_current_path_tl /._forbidden_bool }
+    \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
   }
 }
 %    \end{macrocode}
@@ -1864,38 +1864,38 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{.default:n}
-%\begin{macro}{._default_tlp}
-% The default value for a key is stored in the |._default_tlp|
+%\begin{macro}{._default_tl}
+% The default value for a key is stored in the |._default_tl|
 % private property.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.default:n/.code:n = {
-    \keys_store:nn { \l_keys_current_path_tlp /._default_tlp } {#1}
-    \keys_undefine:n { \l_keys_current_path_tlp /._required_bool }
+  \c_keys_properties_path_tl /.default:n/.code:n = {
+    \keys_store:nn { \l_keys_current_path_tl /._default_tl } {#1}
+    \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
   }
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{.tlp_set:N}
-%\begin{macro}{.tlp_set_x:N}
-%\begin{macro}{.tlp_gset:N}
-%\begin{macro}{.tlp_gset_x:N}
-% Storage of the value in a tlp, as given or expanded, local or global.
+%\begin{macro}{.tl_set:N}
+%\begin{macro}{.tl_set_x:N}
+%\begin{macro}{.tl_gset:N}
+%\begin{macro}{.tl_gset_x:N}
+% Storage of the value in a tl, as given or expanded, local or global.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.tlp_set:N/.code:n = {
-    \keys_set:NN \tlp_set:Nn #1
+  \c_keys_properties_path_tl /.tl_set:N/.code:n = {
+    \keys_set:NN \tl_set:Nn #1
   },
-  \c_keys_properties_path_tlp /.tlp_set_x:N/.code:n = {
-    \keys_set:NN \tlp_set:Nx #1
+  \c_keys_properties_path_tl /.tl_set_x:N/.code:n = {
+    \keys_set:NN \tl_set:Nx #1
   },
-  \c_keys_properties_path_tlp /.tlp_gset:N/.code:n = {
-    \keys_set:NN \tlp_gset:Nn #1
+  \c_keys_properties_path_tl /.tl_gset:N/.code:n = {
+    \keys_set:NN \tl_gset:Nn #1
   },
-  \c_keys_properties_path_tlp /.tlp_gset_x:N/.code:n = {
-    \keys_set:NN \tlp_gset:Nx #1
+  \c_keys_properties_path_tl /.tl_gset_x:N/.code:n = {
+    \keys_set:NN \tl_gset:Nx #1
   }
 }
 %    \end{macrocode}
@@ -1913,22 +1913,22 @@ This work consists of the file  keys3.dtx
 % For int, skip and toks storage, no expansion to worry about.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.int_set:N/.code:n = {
+  \c_keys_properties_path_tl /.int_set:N/.code:n = {
     \keys_set:NN \int_set:Nn #1
   },
-  \c_keys_properties_path_tlp /.int_gset:N/.code:n = {
+  \c_keys_properties_path_tl /.int_gset:N/.code:n = {
     \keys_set:NN \int_gset:Nn #1
   },
-  \c_keys_properties_path_tlp /.skip_set:N/.code:n = {
+  \c_keys_properties_path_tl /.skip_set:N/.code:n = {
     \keys_set:NN \skip_set:Nn #1
   },
-  \c_keys_properties_path_tlp /.skip_gset:N/.code:n = {
+  \c_keys_properties_path_tl /.skip_gset:N/.code:n = {
     \keys_set:NN \skip_gset:Nn #1
   },
-  \c_keys_properties_path_tlp /.toks_set:N/.code:n = {
+  \c_keys_properties_path_tl /.toks_set:N/.code:n = {
     \keys_set:NN \toks_set:Nn #1
   },
-  \c_keys_properties_path_tlp /.toks_gset:N/.code:n = {
+  \c_keys_properties_path_tl /.toks_gset:N/.code:n = {
     \keys_set:NN \toks_gset:Nn #1
   }
 }
@@ -1944,20 +1944,20 @@ This work consists of the file  keys3.dtx
 % by csname. 
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_utilities_path_tlp /current_module:n/.code:n = {
+  \c_keys_utilities_path_tl /current_module:n/.code:n = {
     \tlist_if_empty:nTF {#1} {
-      \tlp_clear:N \l_keys_current_module_tlp
+      \tl_clear:N \l_keys_current_module_tl
     }{
-      \tlp_set:Nn \l_keys_current_module_tlp { #1 _ }
+      \tl_set:Nn \l_keys_current_module_tl { #1 _ }
     }
   }
 }
 %    \end{macrocode}
 %    
-%\begin{macro}{.tlp_set:n}
-%\begin{macro}{.tlp_set_x:n}
-%\begin{macro}{.tlp_gset:n}
-%\begin{macro}{.tlp_gset_x:n}
+%\begin{macro}{.tl_set:n}
+%\begin{macro}{.tl_set_x:n}
+%\begin{macro}{.tl_gset:n}
+%\begin{macro}{.tl_gset_x:n}
 %\begin{macro}{.int_set:n}
 %\begin{macro}{.int_gset:n}
 %\begin{macro}{.skip_set:n}
@@ -1968,34 +1968,34 @@ This work consists of the file  keys3.dtx
 % unique part of the variable name are created.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.tlp_set:n/.code:n = {
-    \keys_set:Nnn \tlp_set:cn { l_ } { #1 _tlp }
+  \c_keys_properties_path_tl /.tl_set:n/.code:n = {
+    \keys_set:Nnn \tl_set:cn { l_ } { #1 _tl }
   },
-  \c_keys_properties_path_tlp /.tlp_set_x:n/.code:n = {
-    \keys_set:Nnn \tlp_set:cx { l_ } { #1 _tlp }
+  \c_keys_properties_path_tl /.tl_set_x:n/.code:n = {
+    \keys_set:Nnn \tl_set:cx { l_ } { #1 _tl }
   },
-  \c_keys_properties_path_tlp /.tlp_gset:n/.code:n = {
-    \keys_set:Nnn \tlp_gset:cn { g_ } { #1 _tlp }
+  \c_keys_properties_path_tl /.tl_gset:n/.code:n = {
+    \keys_set:Nnn \tl_gset:cn { g_ } { #1 _tl }
   },
-  \c_keys_properties_path_tlp /.tlp_gset_x:n/.code:n = {
-    \keys_set:Nnn \tlp_gset:cx { g_ } { #1 _tlp }
+  \c_keys_properties_path_tl /.tl_gset_x:n/.code:n = {
+    \keys_set:Nnn \tl_gset:cx { g_ } { #1 _tl }
   },
-  \c_keys_properties_path_tlp /.int_set:n/.code:n = {
+  \c_keys_properties_path_tl /.int_set:n/.code:n = {
     \keys_set:Nnn \int_set:cn { l_ } { #1 _int }
   },
-  \c_keys_properties_path_tlp /.int_gset:n/.code:n = {
+  \c_keys_properties_path_tl /.int_gset:n/.code:n = {
     \keys_set:Nnn \int_gset:cn { g_ } { #1 _int }
   },
-  \c_keys_properties_path_tlp /.skip_set:n/.code:n = {
+  \c_keys_properties_path_tl /.skip_set:n/.code:n = {
     \keys_set:Nnn \skip_set:cn { l_ } { #1 _skip }
   },
-  \c_keys_properties_path_tlp /.skip_gset:n/.code:n = {
+  \c_keys_properties_path_tl /.skip_gset:n/.code:n = {
     \keys_set:Nnn \skip_gset:cn { g_ } { #1 _skip }
   },
-  \c_keys_properties_path_tlp /.toks_set:n/.code:n = {
+  \c_keys_properties_path_tl /.toks_set:n/.code:n = {
     \keys_set:Nnn \toks_set:cn { l_ } { #1 _toks }
   },
-  \c_keys_properties_path_tlp /.toks_gset:n/.code:n = {
+  \c_keys_properties_path_tl /.toks_gset:n/.code:n = {
     \keys_set:Nnn \toks_gset:cn { g_ } { #1 _toks }
   },
 }
@@ -2019,16 +2019,16 @@ This work consists of the file  keys3.dtx
 % are rather different.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.bool_set:N/.code:n = {
+  \c_keys_properties_path_tl /.bool_set:N/.code:n = {
     \keys_bool_set:nN { set } #1
   },
-  \c_keys_properties_path_tlp /.bool_gset:N/.code:n = {
+  \c_keys_properties_path_tl /.bool_gset:N/.code:n = {
     \keys_bool_set:nN { gset } #1
   },
-  \c_keys_properties_path_tlp /.bool_set:n/.code:n = {
+  \c_keys_properties_path_tl /.bool_set:n/.code:n = {
     \keys_bool_set:nnn { set } { l_ } { #1 }
   },
-  \c_keys_properties_path_tlp /.bool_gset:n/.code:n = {
+  \c_keys_properties_path_tl /.bool_gset:n/.code:n = {
     \keys_bool_set:nnn { gset } { g_ } { #1 }
   },
 }
@@ -2046,16 +2046,16 @@ This work consists of the file  keys3.dtx
 % here.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.bool_set_inverse:N/.code:n = {
+  \c_keys_properties_path_tl /.bool_set_inverse:N/.code:n = {
     \keys_bool_set_inverse:nN { set } #1
   },
-  \c_keys_properties_path_tlp /.bool_gset_inverse:N/.code:n = {
+  \c_keys_properties_path_tl /.bool_gset_inverse:N/.code:n = {
     \keys_bool_set_inverse:nN { gset } #1
   },
-  \c_keys_properties_path_tlp /.bool_set_inverse:n/.code:n = {
+  \c_keys_properties_path_tl /.bool_set_inverse:n/.code:n = {
     \keys_bool_set_inverse:nnn { set } { l_ } { #1 }
   },
-  \c_keys_properties_path_tlp /.bool_gset_inverse:n/.code:n = {
+  \c_keys_properties_path_tl /.bool_gset_inverse:n/.code:n = {
     \keys_bool_set_inverse:nnn { gset } { g_ } { #1 }
   },
 }
@@ -2070,18 +2070,18 @@ This work consists of the file  keys3.dtx
 % code to make a key into a multiple choice is quite simple.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.expects_choice:/.code:n = {
+  \c_keys_properties_path_tl /.expects_choice:/.code:n = {
     \keys_manage_internal:n {
-      \l_keys_current_path_tlp /.cd:,
+      \l_keys_current_path_tl /.cd:,
       .code:n = {
-        \tlp_set:Nn \l_keys_current_choice_tlp {##1}
+        \tl_set:Nn \l_keys_current_choice_tl {##1}
         \int_zero:N \l_keys_current_choice_int
         \exp_args:No \keys_parse_list:n 
-          { \l_keys_current_key_full_tlp / ##1 }
+          { \l_keys_current_key_full_tl / ##1 }
       },
       unknown/.code:n = {
         \keys_err_use:nn { unknown_choice } 
-          { \l_keys_current_key_name_tlp }
+          { \l_keys_current_key_name_tl }
       }
     }
   },
@@ -2093,10 +2093,10 @@ This work consists of the file  keys3.dtx
 % Creating choices as a block.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.create_choices:nn/.code:Nn = 2 {
+  \c_keys_properties_path_tl /.create_choices:nn/.code:Nn = 2 {
     \keys_choices_create:Nnn n {#1} {#2}
   },
-  \c_keys_properties_path_tlp /.create_choices:nx/.code:Nn = 2 {
+  \c_keys_properties_path_tl /.create_choices:nx/.code:Nn = 2 {
     \keys_choices_create:Nnn x {#1} {#2}
   },
 }
@@ -2111,26 +2111,26 @@ This work consists of the file  keys3.dtx
 % Keys calling other keys is actually quite easy.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.use_keys:n/.code:n = {
+  \c_keys_properties_path_tl /.use_keys:n/.code:n = {
     \keys_manage_internal:n {
-      \l_keys_current_path_tlp /.code:n = { \keys_parse_list:n {#1} }
+      \l_keys_current_path_tl /.code:n = { \keys_parse_list:n {#1} }
     }
   },
-  \c_keys_properties_path_tlp /.use_keys:x/.code:n = {
+  \c_keys_properties_path_tl /.use_keys:x/.code:n = {
     \keys_manage_internal:n {
-      \l_keys_current_path_tlp /.code:x = {
+      \l_keys_current_path_tl /.code:x = {
         \exp_not:N \keys_parse_list:n {#1}
       }
     }
   },
-  \c_keys_properties_path_tlp /.use_keys:Nn/.code:Nn = 2 {
+  \c_keys_properties_path_tl /.use_keys:Nn/.code:Nn = 2 {
     \keys_manage_internal:n {
-      \l_keys_current_path_tlp /.code:Nn = #1 { \keys_parse_list:n {#2} }
+      \l_keys_current_path_tl /.code:Nn = #1 { \keys_parse_list:n {#2} }
     }
   },
-  \c_keys_properties_path_tlp /.use_keys:Nx/.code:Nn = 2 {
+  \c_keys_properties_path_tl /.use_keys:Nx/.code:Nn = 2 {
     \keys_manage_internal:n {
-      \l_keys_current_path_tlp /.code:Nx =
+      \l_keys_current_path_tl /.code:Nx =
         #1 { \exp_not:N \keys_parse_list:n {#2} }
     }
   }
@@ -2146,8 +2146,8 @@ This work consists of the file  keys3.dtx
 % For attempting to set keys without assuming they exist.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.try:n/.code:n = { \keys_try: },
-  \c_keys_properties_path_tlp /.retry:n/.code:n = {
+  \c_keys_properties_path_tl /.try:n/.code:n = { \keys_try: },
+  \c_keys_properties_path_tl /.retry:n/.code:n = {
     \bool_if:NF \l_keys_success_bool { \keys_try: }
   }
 }
@@ -2160,13 +2160,13 @@ This work consists of the file  keys3.dtx
 % Finally, two keys for debugging problems.
 %    \begin{macrocode}
 \keys_manage_quick:n {
-  \c_keys_properties_path_tlp /.show_code:/.code:n = {
+  \c_keys_properties_path_tl /.show_code:/.code:n = {
     \cs_show:c { 
-      \c_keys_cs_prefix_tlp \l_keys_current_path_tlp /._cmd:w 
+      \c_keys_cs_prefix_tl \l_keys_current_path_tl /._cmd:w 
     }
   },
-  \c_keys_properties_path_tlp /.show_key:/.code:n = {
-    \cs_show:c { \c_keys_cs_prefix_tlp \l_keys_current_path_tlp }
+  \c_keys_properties_path_tl /.show_key:/.code:n = {
+    \cs_show:c { \c_keys_cs_prefix_tl \l_keys_current_path_tl }
   }
 }
 %</package>

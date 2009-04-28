@@ -154,7 +154,7 @@
   key
 }
 
-% Test seven: Keys can be created to store data tlp variable both 
+% Test seven: Keys can be created to store data tl variable both 
 % locally and globally.
 % ----------------------------------------------------------------------
 %   Some content
@@ -164,7 +164,7 @@
 % ----------------------------------------------------------------------
 \renewcommand*{\temp}{Outside}
 \SetModuleKeys{
-  key one/.tlp_set:N = \temp,
+  key one/.tl_set:N = \temp,
 }
 \begingroup
 \SetModuleKeys{
@@ -174,7 +174,7 @@
 \endgroup
 \temp\\
 \SetModuleKeys{
-  key/.tlp_gset:N = \temp
+  key/.tl_gset:N = \temp
 }
 \begingroup
 \SetModuleKeys{
@@ -193,8 +193,8 @@
 \newcommand*{\tempa}{}
 \newcommand*{\tempb}{}
 \SetModuleKeys{
-  key one/.tlp_set:N   = \tempa,
-  key two/.tlp_set_x:N = \tempb,
+  key one/.tl_set:N   = \tempa,
+  key two/.tl_set_x:N = \tempb,
   key one = \temp,
   key two = \temp,
 }
@@ -234,19 +234,19 @@
 %   Global
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
-\tlp_new:N \l_module_local_tlp 
-\tlp_new:N \g_module_global_tlp
+\tl_new:N \l_module_local_tl 
+\tl_new:N \g_module_global_tl
 \ExplSyntaxOff
 \SetModuleKeys{
   /keys/current_module:n = module,
-  key one/.tlp_set:n = local,
-  key two/.tlp_gset:n = global,
+  key one/.tl_set:n = local,
+  key two/.tl_gset:n = global,
   key one = Local,
   key two = Global
 }
 \ExplSyntaxOn
-\l_module_local_tlp \\
-\g_module_global_tlp
+\l_module_local_tl \\
+\g_module_global_tl
 \ExplSyntaxOff
 
 % Test eleven: Boolean keys are created in the same way as other storage
@@ -313,7 +313,7 @@
 % ----------------------------------------------------------------------
 \SetModuleKeys{
   key/.create_choices:nn = {a,b,c}
-    {Choice `\csname l_keys_current_choice_tlp\endcsname' is number
+    {Choice `\csname l_keys_current_choice_tl\endcsname' is number
      \the\csname l_keys_current_choice_int\endcsname \\},
   key/d/.code:n = {An extra choice \\},
   key = a,
@@ -370,14 +370,14 @@
 % > \keys-root/module name/key one/._cmd:w=\long macro:
 % #1#2->#1 or #2.
 %
-% > \keys-root/module name/key one/._num_args_tlp=macro:
+% > \keys-root/module name/key one/._num_args_tl=macro:
 % ->2.
 % ----------------------------------------------------------------------
 \SetModuleKeys{
   key one/.code:Nn = 2 {#1 or #2},
   key one = ab,
   key one/.show_code:,
-  key one/._num_args_tlp/.show_key:,
+  key one/._num_args_tl/.show_key:,
 }
 
 % Test seventeen: A completely unknown key should cause an error.

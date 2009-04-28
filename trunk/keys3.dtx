@@ -1,5 +1,6 @@
-%\iffalse
+% \iffalse meta-comment
 % !TEX program  = pdflatex
+% !TEX encoding = ISO-8859-1
 %<*internal>
 \iffalse
 %</internal>
@@ -133,7 +134,7 @@ This work consists of the file  keys3.dtx
 %</driver>
 % \fi
 %
-% \title{The \textsf{keys3} package^^A
+% \title{The \pkg{keys3} package^^A
 %   \thanks{This file has version number \fileversion, last
 %     revised \filedate.}\\
 % Key management for \LaTeX3}
@@ -160,16 +161,16 @@ This work consists of the file  keys3.dtx
 %    key two = value two
 %  ]{argument}.
 %\end{verbatim}
-% For the programmer, the original \textsf{keyval} package gives only
+% For the programmer, the original \pkg{keyval} package gives only
 % the most basic interface for this work.  All key macros have to be
-% created one at a time, and as a result the \textsf{kvoptions} and
-% \textsf{xkeyval} packages have been written to extend the ease of
+% created one at a time, and as a result the \pkg{kvoptions} and
+% \pkg{xkeyval} packages have been written to extend the ease of
 % creating keys.  However, the underlying model is rather inflexible.
 %
-% As an alternative, \textsf{pgfkeys} from the \textsf{pgf}/Ti\emph{k}z
+% As an alternative, \pkg{pgfkeys} from the \pkg{pgf}/Ti\emph{k}z
 % bundle uses a ``file-like'' model for keys. In this model, each key
 % has one or more functions attached to define its action.  In
-% \textsf{pgfkeys} terminology, these are key \emph{handlers}. Keys can
+% \pkg{pgfkeys} terminology, these are key \emph{handlers}. Keys can
 % be created and used using a unified interface:
 %\begin{verbatim}
 %  \pgfkeys{
@@ -178,17 +179,17 @@ This work consists of the file  keys3.dtx
 %  }
 %\end{verbatim}
 %
-% The \textsf{keys3} package is aimed at creating a high-level
+% The \pkg{keys3} package is aimed at creating a high-level
 % programmers interface for key--value controls in \LaTeX3. Key
-% creation and control follows the \textsf{pgfkeys} closely, although
+% creation and control follows the \pkg{pgfkeys} closely, although
 % changes have been made to adhere to the new coding ideas of \LaTeX3,
-% and new functions have been added.  The \textsf{keys3} package is
-% \emph{not} a simple translation of \textsf{pgfkeys} to the new syntax.
+% and new functions have been added.  The \pkg{keys3} package is
+% \emph{not} a simple translation of \pkg{pgfkeys} to the new syntax.
 % In package internals have been written from the ground up, to better
 % enforce variable typing and to act in a know manner under failing
 % circumstances.
 %
-% In the \textsf{keys3} model, each key belongs to a module,
+% In the \pkg{keys3} model, each key belongs to a module,
 % which may have one or more subdivisions. Each key then has
 % one or more properties which define how the key acts. The idea
 % of a single function for all key control is retained:
@@ -222,7 +223,7 @@ This work consists of the file  keys3.dtx
 %   ``|=|''. The |_quick| version omits these tests for speed, and is
 %   therefore more suited to creating keys inside code blocks. The
 %   \texttt{internal} variant is used when recycling keys inside
-%   \textsf{keys3}.
+%   \pkg{keys3}.
 % \end{function}
 %
 % \begin{function}{
@@ -238,7 +239,7 @@ This work consists of the file  keys3.dtx
 % \end{function}
 %
 % Setting up and altering keys is carried out using one or more
-% properties (in \textsf{pgfkeys}, these are called handlers). In all
+% properties (in \pkg{pgfkeys}, these are called handlers). In all
 % cases, \m{key} may be a full-qualified key with a path, or a partial
 % key to which the default path will be added. Notice that when a
 % single argument is required, the braces around the argument may be
@@ -247,7 +248,7 @@ This work consists of the file  keys3.dtx
 %\subsubsection{Storing values}
 %
 % A common use of key--value input is to store the values given in a 
-% variable for later use.  \textsf{keys3} provides pre-defined 
+% variable for later use.  \pkg{keys3} provides pre-defined 
 % properties for storing in int, skip, tlp and toks variables. The 
 % method is similar in all cases:
 %\begin{verbatim}
@@ -264,7 +265,7 @@ This work consists of the file  keys3.dtx
 % When using keys to store a value, it is often convenient to give only
 % the unique part of the variable name. This is particularly true when
 % creating a large number of related storage areas. To achieve this,
-% \textsf{keys3} requires that the module prefix to be used is defined 
+% \pkg{keys3} requires that the module prefix to be used is defined 
 % first. The special key \texttt{/keys/current_module:n} can be set with 
 % the name of the current module.
 %\begin{verbatim}
@@ -286,7 +287,7 @@ This work consists of the file  keys3.dtx
 % 
 %\subsubsection{Multiple choice keys}
 %
-% Multiple choice keys are created in \textsf{keys3} using the 
+% Multiple choice keys are created in \pkg{keys3} using the 
 % \texttt{.expects_choice:} property. Each choice is then a sub-key of 
 % the choice key.
 %\begin{verbatim}
@@ -302,7 +303,7 @@ This work consists of the file  keys3.dtx
 % Often it is desirable to create a family of similar choices, which 
 % only require either the text of the choice, or the position of the 
 % choice in a list, to be used.  To create this type of simple choice,
-% \textsf{keys3} provides the \texttt{.create_choices:nn} property. This
+% \pkg{keys3} provides the \texttt{.create_choices:nn} property. This
 % applies the same code to a list of choice text. Inside the code,
 % the name of the choice given is available as 
 % \cs{l_keys_current_choice_tlp}. The position of the choice in the 
@@ -607,7 +608,7 @@ This work consists of the file  keys3.dtx
 %   \c_keys_properties_path_tlp|
 %   \c_keys_utilities_path_tlp|
 % }
-%   Paths for properties used by \textsf{l3keys} itself.
+%   Paths for properties used by \pkg{l3keys} itself.
 % \end{variable}
 % 
 % \begin{variable}{\c_keys_root_tlp}
@@ -816,7 +817,7 @@ This work consists of the file  keys3.dtx
 %     "\keys_no_value_elt:n" <elt>
 %     "\keys_value_elt:nn" <elt> <value>
 %   \end{syntax}
-%   Functions used by \textsf{l3keyval} for each <elt> of the <keyval 
+%   Functions used by \pkg{l3keyval} for each <elt> of the <keyval 
 %   list> being processed.
 % \end{function}
 % 
@@ -979,7 +980,7 @@ This work consists of the file  keys3.dtx
 %\subsection{Implementation}
 %
 % The usual preliminaries.  The key--value parsing itself is handled by
-% \textsf{l3keyval}, which does the very low-level stuff so there is no
+% \pkg{l3keyval}, which does the very low-level stuff so there is no
 % need to worry here.
 %    \begin{macrocode}
 %<*package>
@@ -1035,7 +1036,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{\c_keys_errors_path_tlp}
 %\begin{macro}{\c_keys_properties_path_tlp}
 %\begin{macro}{\c_keys_utilities_path_tlp}
-% The locations of all of the keys used by \textsf{keys3} itself.
+% The locations of all of the keys used by \pkg{keys3} itself.
 %    \begin{macrocode}
 \tlp_new:Nn \c_keys_errors_path_tlp     { /keys/errors }
 \tlp_new:Nn \c_keys_properties_path_tlp { /keys/properties }
@@ -1424,7 +1425,7 @@ This work consists of the file  keys3.dtx
 %
 %\begin{macro}{\keys_no_value_elt:n}
 %\begin{macro}{\keys_value_elt:nn}
-% The two functions passed to \textsf{l3keyval} to actually act on each
+% The two functions passed to \pkg{l3keyval} to actually act on each
 % key found.
 %    \begin{macrocode}
 \cs_new:Nn \keys_no_value_elt:n {
@@ -1441,7 +1442,7 @@ This work consists of the file  keys3.dtx
 %
 %\begin{macro}{\keys_parse:n}
 % The macro used to actually process the key--value input is taken from
-% \textsf{l3keyval}.  There are two possible options, and so at this
+% \pkg{l3keyval}.  There are two possible options, and so at this
 % stage the macro is simply reserved.
 %    \begin{macrocode}
 \cs_new:Nn \keys_parse:n { \ERROR }

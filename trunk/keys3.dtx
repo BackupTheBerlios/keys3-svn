@@ -1382,8 +1382,12 @@ This work consists of the file  keys3.dtx
 %\begin{macro}[TF]{\keys_if_cmd_exist:n}
 % A dedicated check for the |._cmd:w| property key.
 %    \begin{macrocode}
-\def_long_test_function_new:npn { keys_if_cmd_exist:n } #1 {
-  \if_cs_exist:w \c_keys_cs_prefix_tl #1 /._cmd:w \cs_end:
+\prg_new_conditional:Nnn \keys_if_cmd_exist:n {TF,T,F} {
+ \if_cs_exist:w \c_keys_cs_prefix_tl #1 /._cmd:w \cs_end:
+   \prg_return_true: 
+  \else: 
+    \prg_return_false: 
+  \fi:
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1391,8 +1395,12 @@ This work consists of the file  keys3.dtx
 %\begin{macro}[TF]{\keys_if_exist:n}
 % Check if a key exists without adding to the hash table.
 %    \begin{macrocode}
-\def_long_test_function_new:npn { keys_if_exist:n } #1 {
-  \if_cs_exist:w \c_keys_cs_prefix_tl #1 \cs_end:
+\prg_new_conditional:Nnn \keys_if_exist:n {TF,T,F} {
+ \if_cs_exist:w \c_keys_cs_prefix_tl #1 \cs_end:
+   \prg_return_true: 
+  \else: 
+    \prg_return_false: 
+  \fi:
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1400,10 +1408,14 @@ This work consists of the file  keys3.dtx
 %\begin{macro}[TF]{\keys_if_value:n}
 % Used for required and forbidden values.
 %    \begin{macrocode}
-\def_long_test_function_new:npn { keys_if_value:n } #1 {
-  \if_cs_exist:w 
-    \c_keys_cs_prefix_tl \l_keys_current_key_full_tl /._ #1 _bool 
-  \cs_end:
+\prg_new_conditional:Nnn \keys_if_value:n {TF,T,F} {
+ \if_cs_exist:w 
+   \c_keys_cs_prefix_tl \l_keys_current_key_full_tl /._ #1 _bool 
+ \cs_end:
+   \prg_return_true: 
+  \else: 
+    \prg_return_false: 
+  \fi:
 }
 %    \end{macrocode}
 %\end{macro}

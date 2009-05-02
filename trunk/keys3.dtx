@@ -1722,10 +1722,10 @@ This work consists of the file  keys3.dtx
 % \cs{l_keys_current_key_full_tl} as the first argument.
 %    \begin{macrocode}
 \cs_new_protected_nopar:Nn \keys_error:nn {
-  \msg_error:nnnn { keys } {#1} { \l_keys_current_key_full_tl } {#2}
+  \msg_error:nnxx { keys } {#1} { \l_keys_current_key_full_tl } {#2}
 }
 \cs_new_protected_nopar:Nn \keys_error:n {
-  \msg_error:nnnn { keys } {#1} { \l_keys_current_key_full_tl }
+  \msg_error:nnxx { keys } {#1} { \l_keys_current_key_full_tl }
 }
 %    \end{macrocode}
 %\end{macro}

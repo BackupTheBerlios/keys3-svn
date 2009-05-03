@@ -1238,7 +1238,7 @@ This work consists of the file  keys3.dtx
 % reversal of \texttt{true}/\texttt{false}.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_bool_set_inverse:n {
-  \tlist_if_eq:nnTF {#1} { true } { false } { true }
+  \tl_if_eq:nnTF {#1} { true } { false } { true }
 }
 \cs_new_nopar:Nn \keys_bool_set_inverse:nN {
   \keys_parse_list:n {
@@ -1529,7 +1529,7 @@ This work consists of the file  keys3.dtx
     / \q_stop
 }
 \cs_new_nopar:Npn \keys_separate_path:w / #1 / #2 \q_stop {
-  \tlist_if_empty:nTF {#2} {
+  \tl_if_empty:nTF {#2} {
     \tl_set:Nn \l_keys_current_key_name_tl {#1}
   }{
      \tl_put_right:Nn \l_keys_current_path_tl { / #1 }
@@ -1683,7 +1683,7 @@ This work consists of the file  keys3.dtx
   }
 }
 \cs_new_nopar:Nn \keys_use_cmd_aux:nn {
-  \tlist_if_empty:nTF {#2} {
+  \tl_if_empty:nTF {#2} {
     \cs_set:Npn \keys_use_cmd_aux:w {
       \keys_use:n { #1 /._cmd:w }
     }
@@ -1920,7 +1920,7 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \keys_manage_quick:n {
   \c_keys_utilities_path_tl /current_module:n/.code:n = {
-    \tlist_if_empty:nTF {#1} {
+    \tl_if_empty:nTF {#1} {
       \tl_clear:N \l_keys_current_module_tl
     }{
       \tl_set:Nn \l_keys_current_module_tl { #1 _ }

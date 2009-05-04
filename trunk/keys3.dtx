@@ -116,7 +116,7 @@ This work consists of the file  keys3.dtx
 \fi
 %</internal>
 %<*driver|package>
-\RequirePackage{l3names}
+\RequirePackage{expl3}
 \GetIdInfo$Id$
   {Key management for LaTeX3}
 %</driver|package>
@@ -964,14 +964,11 @@ This work consists of the file  keys3.dtx
 % 
 %\subsection{Implementation}
 %
-% The usual preliminaries.  The key--value parsing itself is handled by
-% \pkg{l3keyval}, which does the very low-level stuff so there is no
-% need to worry here.
+% The usual preliminaries.  
 %    \begin{macrocode}
 %<*package>
 \ProvidesExplPackage
   {\filename}{\filedate}{\fileversion}{\filedescription}
-\RequirePackage{l3keyval,l3msg,l3clist,l3skip}
 %    \end{macrocode}
 %
 %\subsubsection{Variables and contrasts}

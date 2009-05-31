@@ -4,7 +4,6 @@ setlocal
 
 set AUXFILES=aux cmds glo gls hd idx ilg ind ist log out toc
 set CLEAN=gz ins pdf sty txt zip
-set NEXT=end
 set SOURCE=keys3 keys3opts2
 
 :loop

@@ -4,6 +4,7 @@ setlocal
 
 set AUXFILES=aux cmds glo gls hd idx ilg ind ist log out toc
 set CLEAN=gz ins pdf sty txt zip
+set NEXT=end
 set SOURCE=keys3 keys3opts2
 
 :loop
@@ -13,7 +14,6 @@ set SOURCE=keys3 keys3opts2
   if /i "%1" == "doc"          goto :doc
   if /i "%1" == "localinstall" goto :localinstall
   if /i "%1" == "tds"          goto :tds
-  if /i "%1" == "test"         goto :test
   if /i "%1" == "unpack"       goto :unpack
 
   goto :help

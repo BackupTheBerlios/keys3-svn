@@ -1268,6 +1268,20 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
+%\begin{macro}{\keys_check_exists:NN}
+%\begin{macro}{\keys_check_exists:cN}
+% A check function to avoid problems later.
+%    \begin{macrocode}
+\cs_new_nopar:Nn \keys_check_exists:NN {
+  \cs_if_exist:NF #1 {
+    #2 #1
+  }
+}
+\cs_generate_variant:Nn \keys_check_exists:NN { cN }
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}{\keys_choices_create:Nnn}
 %\begin{macro}[aux]{\keys_choices_create_aux:n}
 %\begin{macro}[aux]{\keys_choices_create_aux:x}
@@ -1858,15 +1872,19 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \keys_manage_quick:n {
   \c_keys_properties_path_tl /.tl_set:N/.code:n = {
+    \keys_check_exists:NN #1 \tl_new:N
     \keys_set:NN \tl_set:Nn #1
   },
   \c_keys_properties_path_tl /.tl_set_x:N/.code:n = {
+    \keys_check_exists:NN #1 \tl_new:N
     \keys_set:NN \tl_set:Nx #1
   },
   \c_keys_properties_path_tl /.tl_gset:N/.code:n = {
+    \keys_check_exists:NN #1 \tl_new:N
     \keys_set:NN \tl_gset:Nn #1
   },
   \c_keys_properties_path_tl /.tl_gset_x:N/.code:n = {
+    \keys_check_exists:NN #1 \tl_new:N
     \keys_set:NN \tl_gset:Nx #1
   }
 }
@@ -1886,21 +1904,27 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \keys_manage_quick:n {
   \c_keys_properties_path_tl /.int_set:N/.code:n = {
+    \keys_check_exists:NN #1 \int_new:N
     \keys_set:NN \int_set:Nn #1
   },
   \c_keys_properties_path_tl /.int_gset:N/.code:n = {
+    \keys_check_exists:NN #1 \int_new:N
     \keys_set:NN \int_gset:Nn #1
   },
   \c_keys_properties_path_tl /.skip_set:N/.code:n = {
+    \keys_check_exists:NN #1 \skip_new:N
     \keys_set:NN \skip_set:Nn #1
   },
   \c_keys_properties_path_tl /.skip_gset:N/.code:n = {
+    \keys_check_exists:NN #1 \skip_new:N
     \keys_set:NN \skip_gset:Nn #1
   },
   \c_keys_properties_path_tl /.toks_set:N/.code:n = {
+    \keys_check_exists:NN #1 \toks_new:N
     \keys_set:NN \toks_set:Nn #1
   },
   \c_keys_properties_path_tl /.toks_gset:N/.code:n = {
+    \keys_check_exists:NN #1 \toks_new:N
     \keys_set:NN \toks_gset:Nn #1
   }
 }
@@ -1941,33 +1965,43 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \keys_manage_quick:n {
   \c_keys_properties_path_tl /.tl_set:n/.code:n = {
+    \keys_check_exists:cN { l_ #1 _tl } \tl_new:N
     \keys_set:Nnn \tl_set:cn { l_ } { #1 _tl }
   },
   \c_keys_properties_path_tl /.tl_set_x:n/.code:n = {
+    \keys_check_exists:cN { l_ #1 _tl } \tl_new:N
     \keys_set:Nnn \tl_set:cx { l_ } { #1 _tl }
   },
   \c_keys_properties_path_tl /.tl_gset:n/.code:n = {
+    \keys_check_exists:cN { g_ #1 _tl } \tl_new:N
     \keys_set:Nnn \tl_gset:cn { g_ } { #1 _tl }
   },
   \c_keys_properties_path_tl /.tl_gset_x:n/.code:n = {
+    \keys_check_exists:cN { g_ #1 _tl } \tl_new:N
     \keys_set:Nnn \tl_gset:cx { g_ } { #1 _tl }
   },
   \c_keys_properties_path_tl /.int_set:n/.code:n = {
+    \keys_check_exists:cN { l_ #1 _int } \int_new:N
     \keys_set:Nnn \int_set:cn { l_ } { #1 _int }
   },
   \c_keys_properties_path_tl /.int_gset:n/.code:n = {
+    \keys_check_exists:cN { g_ #1 _int } \int_new:N
     \keys_set:Nnn \int_gset:cn { g_ } { #1 _int }
   },
   \c_keys_properties_path_tl /.skip_set:n/.code:n = {
+    \keys_check_exists:cN { l_ #1 _skip } \skip_new:N
     \keys_set:Nnn \skip_set:cn { l_ } { #1 _skip }
   },
   \c_keys_properties_path_tl /.skip_gset:n/.code:n = {
+    \keys_check_exists:cN { g_ #1 _skip } \skip_new:N
     \keys_set:Nnn \skip_gset:cn { g_ } { #1 _skip }
   },
   \c_keys_properties_path_tl /.toks_set:n/.code:n = {
+   \keys_check_exists:cN { g_ #1 _toks } \toks_new:N
     \keys_set:Nnn \toks_set:cn { l_ } { #1 _toks }
   },
   \c_keys_properties_path_tl /.toks_gset:n/.code:n = {
+    \keys_check_exists:cN { g_ #1 _toks } \toks_new:N
     \keys_set:Nnn \toks_gset:cn { g_ } { #1 _toks }
   },
 }

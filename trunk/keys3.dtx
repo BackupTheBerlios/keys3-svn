@@ -707,11 +707,14 @@ This work consists of the file  keys3.dtx
 %   reversed compared to the \cs{keys_bool_set:} functions.
 % \end{function}
 % 
-% \begin{function}{\keys_clear_properties:n}
+% \begin{function}{
+%   \keys_check_exists:NN|
+%   \keys_check_exists:cN
+%}
 %   \begin{syntax}
-%     "\keys_clear_properties:n" <key>
+%     "\keys_check_exists:NN" <var> <new cmd>
 %   \end{syntax}
-%   Clears the internal properties of <key>.
+%   Checks that <var> exists and if not used <new cmd> to create it.
 % \end{function}
 % 
 % \begin{function}{\keys_choice_create:n}
@@ -730,6 +733,14 @@ This work consists of the file  keys3.dtx
 %   is processed according to <expansion> (either \texttt{n} or 
 %   \texttt{x}). The <code> has access to \cs{l_keys_current_choice_tl}
 %   and \cs{l_keys_current_choice_int}, which indicate the choice given.
+% \end{function}
+% 
+% 
+% \begin{function}{\keys_clear_properties:n}
+%   \begin{syntax}
+%     "\keys_clear_properties:n" <key>
+%   \end{syntax}
+%   Clears the internal properties of <key>.
 % \end{function}
 % 
 % \begin{function}{\keys_default_add:}

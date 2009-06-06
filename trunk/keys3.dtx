@@ -141,7 +141,10 @@ This work consists of the file  keys3.dtx
 % \author{Joseph Wright^^A
 %   \thanks{E-mail: joseph.wright@morningstar2.co.uk}}
 % \date{\filedate}
+% 
 % \maketitle
+% 
+% \begin{documentation}
 %
 %\section{Key management}
 %
@@ -188,7 +191,7 @@ This work consists of the file  keys3.dtx
 % In package internals have been written from the ground up, to better
 % enforce variable typing and to act in a know manner under failing
 % circumstances.
-%
+% 
 % In the \pkg{keys3} model, each key belongs to a module,
 % which may have one or more subdivisions. Each key then has
 % one or more properties which define how the key acts. The idea
@@ -201,7 +204,67 @@ This work consists of the file  keys3.dtx
 %  }
 %\end{verbatim}
 % The combination of all \m{module} parts up to the \m{key} is referred
-% to as the \emph{path} of the key.
+% to as the \emph{path} of the key. 
+% 
+% Keys are created by assigning one or more properties to the key, 
+% most commonly a piece of code to execute when the key is used (this 
+% is the \texttt{.code:n} property).
+%\begin{verbatim}
+%  \keys_manage:n{
+%    /module/key/.code:n = <code>
+%  }
+%\end{verbatim}
+% Keys are then used in the normal way, by assigning a value to the 
+% key.
+%\begin{verbatim}
+%  \keys_manage:n{
+%    /module/key = <value>
+%  }
+%\end{verbatim}
+% Here, \meta{value} is passed to the \meta{code} defined |#1|. The
+% \meta{code} can then process it in whatever way is appropriate. 
+% 
+% At a document level, it is likely that \cs{keys_manage:n} would be
+% wrapped up into a user macro or optional argument. For \LaTeXe, a 
+% generic set up macro might be created with:
+%\begin{verbatim}
+%  \newcommand*\SomePackageSetup[1]{%
+%    \@nameuse{keys_manage:n}{%
+%      /package name/.cd:,
+%      #1
+%    }%
+%  }
+%\end{verbatim}
+% or to use key--value input as the optional argument for a macro:
+%\begin{verbatim}
+%  \newcommand*\SomePackageMacro[2][]{%
+%    \begingroup
+%      \@nameuse{keys_manage:n}{
+%        /package name/.cd:,
+%        #1
+%      }%
+%      % Main code for \SomePackageMacro
+%    \endgroup
+%  }
+%\end{verbatim} 
+% The same concepts using \pkg{xparse} for \LaTeX3 use:
+%\begin{verbatim}
+%  \DeclareDocumentCommand \SomePackageSetup { m } {
+%    \keys_manage:n {
+%      /package name/.cd:,
+%      #1
+%    }
+%  }
+%  \DeclareDocumentCommand \SomePackageMacro { o m } {
+%    \group_begin:
+%      \keys_manage:n {
+%        /package name/.cd:,
+%        #1
+%      }
+%      % Main code for \SomePackageMacro
+%    \group_end:
+%  }
+%\end{verbatim} 
 %
 %\subsection{Creating, retrieving and setting keys}
 %
@@ -211,8 +274,7 @@ This work consists of the file  keys3.dtx
 %
 % \begin{function}{
 %   \keys_manage:n|
-%   \keys_manage_quick:n|
-%   \keys_manage_internal:n|
+%   \keys_manage_quick:n
 % }
 %   \begin{syntax}
 %     "\keys_manage:n" <keyval list>
@@ -220,10 +282,8 @@ This work consists of the file  keys3.dtx
 %   The main key management function, which parses over the <keyval
 %   list> and processes each key. The standard version removes leading
 %   and trailing spaces and checks catcodes for ungrouped ``|,|'' and
-%   ``|=|''. The |_quick| version omits these tests for speed, and is
-%   therefore more suited to creating keys inside code blocks. The
-%   \texttt{internal} variant is used when recycling keys inside
-%   \pkg{keys3}.
+%   ``|=|'' tokens. The |_quick| version omits these tests for speed, 
+%   and is therefore more suited to creating keys inside code blocks. 
 % \end{function}
 %
 % \begin{function}{
@@ -249,19 +309,19 @@ This work consists of the file  keys3.dtx
 %
 % A common use of key--value input is to store the values given in a 
 % variable for later use.  \pkg{keys3} provides pre-defined 
-% properties for storing in int, skip, tl and toks variables. The 
-% method is similar in all cases:
+% properties for storing in integer, skip, token list variables and
+% token registers. The method is similar in all cases:
 %\begin{verbatim}
 %  \keys_manage:n{
-%    /module/key~one/.int_set:N = \l_mod_data_int,
-%    /module/key~two/.skip_set:N = \l_mod_data_skip,
-%    /module/key~three/.tl_set:N = \l_mod_data_tl,
+%    /module/key~one/.int_set:N   = \l_mod_data_int,
+%    /module/key~two/.skip_set:N  = \l_mod_data_skip,
+%    /module/key~three/.tl_set:N  = \l_mod_data_tl,
 %    /module/key~four/.toks_set:N = \l_mod_data_toks
 %  }
 %\end{verbatim}
-% Global variants for all of these are.
+% Global variants for all of these are available with \texttt{set}
+% replaced by \texttt{gset}.
 %   
-% 
 % When using keys to store a value, it is often convenient to give only
 % the unique part of the variable name. This is particularly true when
 % creating a large number of related storage areas. To achieve this,
@@ -312,7 +372,7 @@ This work consists of the file  keys3.dtx
 %  \keys_manage:n {
 %    /module/key/.create_choices:nn = {choice~a, choice~b, choice~c} {
 %      You~gave~choice~``\l_keys_current_choice_tl'',~which~is~in~
-%      position~\l_keys_current_choice_int~in~the~list.
+%      position~\l_keys_current_choice_int\~in~the~list.
 %    }
 %  }
 %\end{verbatim}
@@ -331,16 +391,16 @@ This work consists of the file  keys3.dtx
 % \end{function}
 % 
 % \begin{function}{
-%   .bool_set_inverse:n|
-%   .bool_gset_inverse:n|
+%   .bool_set:n|
+%   .bool_gset:n|
 % }
 %  \begin{syntax}
-%    <key>/.bool_set_inverse:n = <name>
+%    <key>/.bool_set:n = <name>
 %  \end{syntax}
 %  Defines <key> to set switch with unique <name> to <value> (which 
-%  must be either \texttt{true} or \texttt{false}), with reversed logic. 
-%  The switch name will be constructed using the current <module> (if 
-%  any), prefixed by |\l_| and ending with |_int|.
+%  must be either \texttt{true} or \texttt{false}). The switch
+%  name will be constructed using the current <module> (if any), 
+%  prefixed by |\l_| and ending with |_int|.
 % \end{function}
 % 
 % \begin{function}{
@@ -355,23 +415,23 @@ This work consists of the file  keys3.dtx
 % \end{function}
 % 
 % \begin{function}{
-%   .bool_set:n|
-%   .bool_gset:n|
+%   .bool_set_inverse:n|
+%   .bool_gset_inverse:n|
 % }
 %  \begin{syntax}
-%    <key>/.bool_set:n = <name>
+%    <key>/.bool_set_inverse:n = <name>
 %  \end{syntax}
 %  Defines <key> to set switch with unique <name> to <value> (which 
-%  must be either \texttt{true} or \texttt{false}). The switch
-%  name will be constructed using the current <module> (if any), 
-%  prefixed by |\l_| and ending with |_int|.
+%  must be either \texttt{true} or \texttt{false}), with reversed logic. 
+%  The switch name will be constructed using the current <module> (if 
+%  any), prefixed by |\l_| and ending with |_int|.
 % \end{function}
 %
 % \begin{function}{.cd:}
 %  \begin{syntax}
 %    <key>/.cd:
 %  \end{syntax}
-%  Changes path to that given by <key>.
+%  Changes path to <key>.
 % \end{function}
 %
 % \begin{function}{
@@ -414,8 +474,8 @@ This work consists of the file  keys3.dtx
 %    <key>/.default:n = <content>
 %  \end{syntax}
 %  Creates a default value for <key>, which is used if no value is 
-%  given. The <content> is stored as a tl, and so must be compatible
-%  with this variable type.
+%  given. The <content> is stored as a token list variable, and so 
+%  must be compatible with this variable type.
 % \end{function}
 % 
 % \begin{function}{.expects_choice:}
@@ -596,7 +656,7 @@ This work consists of the file  keys3.dtx
 %   \c_keys_8_empty_tl|
 %   \c_keys_9_empty_tl|
 % }
-%   A set of tls containing empty groups.
+%   A set of token list variables containing empty groups.
 % \end{variable}
 % 
 % \begin{variable}{\c_keys_cs_prefix_tl}
@@ -805,6 +865,14 @@ This work consists of the file  keys3.dtx
 %   \texttt{required} or \texttt{forbidden}).
 % \end{function}
 % 
+% \begin{function}{\keys_manage_internal:n}
+%   \begin{syntax}
+%     "\keys_manage_internal:n" <keyval list>
+%   \end{syntax}
+%   An internal ``recycling'' version of \cs{keys_manage_quick:n}, which
+%   should not be called from outside.
+% \end{function}
+% 
 % \begin{function}{
 %   \keys_no_value_elt:n|
 %   \keys_value_elt:nn
@@ -972,6 +1040,10 @@ This work consists of the file  keys3.dtx
 %  \end{syntax}
 %  Indicates that <key> must have a value provided.
 % \end{function}
+% 
+% \end{documentation}
+% 
+% \begin{implementation}
 % 
 %\subsection{Implementation}
 %
@@ -2191,4 +2263,4 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
-%\Finale
+% \end{implementation}

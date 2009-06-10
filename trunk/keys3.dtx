@@ -319,8 +319,9 @@ This work consists of the file  keys3.dtx
 %    /module/key~four/.toks_set:N = \l_mod_data_toks
 %  }
 %\end{verbatim}
-% Global variants for all of these are available with \texttt{set}
-% replaced by \texttt{gset}.
+% These assignments are local: in each case, a global variant is
+% available, with \texttt{set} replaced by \texttt{gset}. For example,
+% \texttt{.tl_get:N} globally stores values in a token list variable.
 %   
 % When using keys to store a value, it is often convenient to give only
 % the unique part of the variable name. This is particularly true when

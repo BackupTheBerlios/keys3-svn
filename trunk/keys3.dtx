@@ -322,29 +322,6 @@ This work consists of the file  keys3.dtx
 % These assignments are local: in each case, a global variant is
 % available, with \texttt{set} replaced by \texttt{gset}. For example,
 % \texttt{.tl_get:N} globally stores values in a token list variable.
-%   
-% When using keys to store a value, it is often convenient to give only
-% the unique part of the variable name. This is particularly true when
-% creating a large number of related storage areas. To achieve this,
-% \pkg{keys3} requires that the module prefix to be used is defined 
-% first. The special key \texttt{/keys/current_module:n} can be set with 
-% the name of the current module.
-%\begin{verbatim}
-%  \keys_manage:n{
-%    /keys/current_module:n = module,
-%    /module/key/.tl_set:n = my_data,
-%  }
-%\end{verbatim}
-% This will use a variable called \cs{l_module_my_data_tl} to store the
-% input. Thus the preceding code achieves the same effect as
-%\begin{verbatim}
-%  \keys_manage:n{
-%    /module/key/.tl_set:N = \l_module_my_data_tl
-%  }
-%\end{verbatim}
-% The same method applies to int, skip and toks variables. The 
-% appropriate prefix (\cs{l_} or \cs{g_}) and suffix (|_int|, |_skip|, 
-% |_tl| or |_toks|) is always added.
 % 
 %\subsubsection{Multiple choice keys}
 %
@@ -392,19 +369,6 @@ This work consists of the file  keys3.dtx
 % \end{function}
 % 
 % \begin{function}{
-%   .bool_set:n|
-%   .bool_gset:n|
-% }
-%  \begin{syntax}
-%    <key>/.bool_set:n = <name>
-%  \end{syntax}
-%  Defines <key> to set switch with unique <name> to <value> (which 
-%  must be either \texttt{true} or \texttt{false}). The switch
-%  name will be constructed using the current <module> (if any), 
-%  prefixed by |\l_| and ending with |_int|.
-% \end{function}
-% 
-% \begin{function}{
 %   .bool_set_inverse:N|
 %   .bool_gset_inverse:N|
 % }
@@ -413,19 +377,6 @@ This work consists of the file  keys3.dtx
 %  \end{syntax}
 %  Defines <key> to set <bool> to <value> (which must be either 
 %  \texttt{true} or \texttt{false}), with reversed logic.
-% \end{function}
-% 
-% \begin{function}{
-%   .bool_set_inverse:n|
-%   .bool_gset_inverse:n|
-% }
-%  \begin{syntax}
-%    <key>/.bool_set_inverse:n = <name>
-%  \end{syntax}
-%  Defines <key> to set switch with unique <name> to <value> (which 
-%  must be either \texttt{true} or \texttt{false}), with reversed logic. 
-%  The switch name will be constructed using the current <module> (if 
-%  any), prefixed by |\l_| and ending with |_int|.
 % \end{function}
 %
 % \begin{function}{.cd:}
@@ -497,18 +448,6 @@ This work consists of the file  keys3.dtx
 %  Defines <key> to store <value> in the <int> named.
 % \end{function}
 % 
-% \begin{function}{
-%   .int_set:n|
-%   .int_gset:n|
-% }
-%  \begin{syntax}
-%    <key>/.int_set:n = <name>
-%  \end{syntax}
-%  Defines <key> to store <value> in a int with unique name <name>. The
-%  int name will be constructed using the current <module> (if any), 
-%  prefixed by |\l_| and ending with |_int|.
-% \end{function}
-% 
 % \begin{function}{.retry:n}
 %  \begin{syntax}
 %    <key>/.retry:n = <data>
@@ -540,18 +479,6 @@ This work consists of the file  keys3.dtx
 % \end{function}
 % 
 % \begin{function}{
-%   .skip_set:n|
-%   .skip_gset:n|
-% }
-%  \begin{syntax}
-%    <key>/.skip_set:n = <name>
-%  \end{syntax}
-%  Defines <key> to store <value> in a skip with unique name <name>. The
-%  skip name will be constructed using the current <module> (if any), 
-%  prefixed by |\l_| and ending with |_skip|.
-% \end{function}
-% 
-% \begin{function}{
 %   .tl_set:N|
 %   .tl_set_x:N|
 %   .tl_gset:N|
@@ -566,20 +493,6 @@ This work consists of the file  keys3.dtx
 % \end{function}
 % 
 % \begin{function}{
-%   .tl_set:n|
-%   .tl_set_x:n|
-%   .tl_gset:n|
-%   .tl_gset_x:n|
-% }
-%  \begin{syntax}
-%    <key>/.tl_set:n = <name>
-%  \end{syntax}
-%  Defines <key> to store <value> in a tl with unique name <name>. The
-%  tl name will be constructed using the current <module> (if any), 
-%  prefixed by |\l_| and ending with |_tl|.
-% \end{function}
-% 
-% \begin{function}{
 %   .toks_set:N|
 %   .toks_gset:N|
 % }
@@ -587,18 +500,6 @@ This work consists of the file  keys3.dtx
 %    <key>/.toks_set:N = <toks>
 %  \end{syntax}
 %  Defines <key> to store <value> in the <toks> named.
-% \end{function}
-% 
-% \begin{function}{
-%   .toks_set:n|
-%   .toks_gset:n|
-% }
-%  \begin{syntax}
-%    <key>/.toks_set:n = <name>
-%  \end{syntax}
-%  Defines <key> to store <value> in a toks with unique name <name>. The
-%  rest of the toks name will be constructed using the current <module>
-%  (if any), prefixes by |\l_| and ending with |_toks|.
 % \end{function}
 % 
 % \begin{function}{.try:n}
@@ -693,10 +594,6 @@ This work consists of the file  keys3.dtx
 %   \l_keys_current_key_name_tl|
 % }
 %   The current key name is stored both with and without a path.
-% \end{variable}
-% 
-% \begin{variable}{\l_keys_current_module_tl}
-%   Current module name used when creating csnames.
 % \end{variable}
 % 
 % \begin{variable}{
@@ -930,17 +827,11 @@ This work consists of the file  keys3.dtx
 %   Separates key into <path> and <key name>.
 % \end{function}
 % 
-% \begin{function}{
-%   \keys_set:NN|
-%   \keys_set:Nnn|
-%  }
+% \begin{function}{\keys_set:NN}
 %   \begin{syntax}
 %     "\keys_set:NN" <function> <variable>
-%     "\keys_set:Nnn" <function> <prefix> <name>
 %   \end{syntax}
-%   Uses <function> to store <value> in <variable>. If a <name> is
-%   given, it is used to construct a csname for the variable including
-%   the current <module>. The <prefix> should be |l_| or |g_|.
+%   Uses <function> to store <value> in <variable>.
 % \end{function}
 % 
 % \begin{function}{
@@ -1147,13 +1038,6 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_current_module_tl}
-% The module name of the current module is stored here.
-%    \begin{macrocode}
-\tl_new:N \l_keys_current_module_tl
-%    \end{macrocode}
-%\end{macro}
-%
 %\begin{macro}{\l_keys_current_path_tl}
 %\begin{macro}{\l_keys_default_path_tl}
 %\begin{macro}{\l_keys_choice_path_tl}
@@ -1210,12 +1094,10 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new:Nn \keys_manage:n {
   \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
-  \tl_clear:N \l_keys_current_module_tl
   \keys_manage_internal:n {#1}
 }
 \cs_new:Nn \keys_manage_quick:n {
   \cs_set_eq:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
-  \tl_clear:N \l_keys_current_module_tl
   \keys_manage_internal:n {#1}
 }
 \cs_new:Nn \keys_manage_internal:n {
@@ -1251,7 +1133,6 @@ This work consists of the file  keys3.dtx
 }
 \cs_new:Nn \keys_manage_aux:nnn {
   \tl_set:Nn \l_keys_default_path_tl {#2}
-  \tl_clear:N \l_keys_current_module_tl
   \keys_parse_list:n {#3}
   \tl_set:Nn \l_keys_default_path_tl {#1}
 }
@@ -1276,7 +1157,6 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{\keys_bool_set:nN}
-%\begin{macro}{\keys_bool_set:nnn}
 % Boolean keys are created by using the fact that only \texttt{true} and
 % \texttt{false} give the right result when looking for a setting 
 % function. A default is also set, so that the key name alone can be 
@@ -1294,26 +1174,11 @@ This work consists of the file  keys3.dtx
     \l_keys_current_path_tl /.default:n = true
   }
 }
-\cs_new_nopar:Nn \keys_bool_set:nnn {
-  \keys_parse_list:n {
-    \c_keys_properties_path_tl /.code:x = {
-      \exp_not:N \cs_if_exist:cTF { bool_ #1 _ ##1 :c } {
-        \exp_not:N \use:c { bool_ #1 _ ##1 :c } 
-          { #2 \l_keys_current_module_tl #3 _bool }
-      }{
-        \keys_error:nn { Boolean~expected } {##1}
-      }
-    },
-    \l_keys_current_path_tl /.default:n = true
-  }
-}
 %    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\keys_bool_set_inverse:n}
 %\begin{macro}{\keys_bool_set_inverse:nN}
-%\begin{macro}{\keys_bool_set_inverse:nnn}
 % To set keys with reversed logic, the basics can be done in the same 
 % way as for the standard switches.  The only thing needed is a 
 % reversal of \texttt{true}/\texttt{false}.
@@ -1333,22 +1198,7 @@ This work consists of the file  keys3.dtx
     \l_keys_current_path_tl /.default:n = true
   }
 }
-\cs_new_nopar:Nn \keys_bool_set_inverse:nnn {
-  \keys_parse_list:n {
-    \c_keys_properties_path_tl /.code:x = {
-      \exp_not:N \cs_if_exist:cTF { bool_ #1 _ ##1 :c } {
-         \exp_not:N \use:c { 
-           bool_ #1 _ \exp_not:N \keys_bool_set_inverse:n {##1} :c 
-         } { #2 \l_keys_current_module_tl #3 _bool }
-      }{
-        \keys_error:nn { Boolean~expected } {##1}
-      }
-    },
-    \l_keys_current_path_tl /.default:n = true
-  }
-}
 %    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %\end{macro}
 %
@@ -1636,7 +1486,6 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{\keys_set:NN}
-%\begin{macro}{\keys_set:Nnn}
 % Storage of data in outside of keys.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_set:NN {
@@ -1646,15 +1495,8 @@ This work consists of the file  keys3.dtx
     }
   }
 }
-\cs_new_nopar:Nn \keys_set:Nnn {
-  \keys_parse_list:n {
-    \c_keys_properties_path_tl /.code:x = {
-      \exp_not:N #1 { #2 \l_keys_current_module_tl #3 } {##1}
-    }
-  }
-}
+
 %    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\keys_set_cmd:nn}
@@ -2019,92 +1861,9 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %\end{macro}
-%
-% The prefix for the current module is needed when storing material
-% by csname. 
-%    \begin{macrocode}
-\keys_manage_quick:n {
-  \c_keys_utilities_path_tl /current_module:n/.code:n = {
-    \tl_if_empty:nTF {#1} {
-      \tl_clear:N \l_keys_current_module_tl
-    }{
-      \tl_set:Nn \l_keys_current_module_tl { #1 _ }
-    }
-  }
-}
-%    \end{macrocode}
 %    
-%\begin{macro}{.tl_set:n}
-%\begin{macro}{.tl_set_x:n}
-%\begin{macro}{.tl_gset:n}
-%\begin{macro}{.tl_gset_x:n}
-%\begin{macro}{.int_set:n}
-%\begin{macro}{.int_gset:n}
-%\begin{macro}{.skip_set:n}
-%\begin{macro}{.skip_gset:n}
-%\begin{macro}{.toks_set:n}
-%\begin{macro}{.toks_gset:n}
-% With the module available, storage properties that only need the 
-% unique part of the variable name are created.
-%    \begin{macrocode}
-\keys_manage_quick:n {
-  \c_keys_properties_path_tl /.tl_set:n/.code:n = {
-    \keys_check_exists:cN { l_ #1 _tl } \tl_new:N
-    \keys_set:Nnn \tl_set:cn { l_ } { #1 _tl }
-  },
-  \c_keys_properties_path_tl /.tl_set_x:n/.code:n = {
-    \keys_check_exists:cN { l_ #1 _tl } \tl_new:N
-    \keys_set:Nnn \tl_set:cx { l_ } { #1 _tl }
-  },
-  \c_keys_properties_path_tl /.tl_gset:n/.code:n = {
-    \keys_check_exists:cN { g_ #1 _tl } \tl_new:N
-    \keys_set:Nnn \tl_gset:cn { g_ } { #1 _tl }
-  },
-  \c_keys_properties_path_tl /.tl_gset_x:n/.code:n = {
-    \keys_check_exists:cN { g_ #1 _tl } \tl_new:N
-    \keys_set:Nnn \tl_gset:cx { g_ } { #1 _tl }
-  },
-  \c_keys_properties_path_tl /.int_set:n/.code:n = {
-    \keys_check_exists:cN { l_ #1 _int } \int_new:N
-    \keys_set:Nnn \int_set:cn { l_ } { #1 _int }
-  },
-  \c_keys_properties_path_tl /.int_gset:n/.code:n = {
-    \keys_check_exists:cN { g_ #1 _int } \int_new:N
-    \keys_set:Nnn \int_gset:cn { g_ } { #1 _int }
-  },
-  \c_keys_properties_path_tl /.skip_set:n/.code:n = {
-    \keys_check_exists:cN { l_ #1 _skip } \skip_new:N
-    \keys_set:Nnn \skip_set:cn { l_ } { #1 _skip }
-  },
-  \c_keys_properties_path_tl /.skip_gset:n/.code:n = {
-    \keys_check_exists:cN { g_ #1 _skip } \skip_new:N
-    \keys_set:Nnn \skip_gset:cn { g_ } { #1 _skip }
-  },
-  \c_keys_properties_path_tl /.toks_set:n/.code:n = {
-   \keys_check_exists:cN { g_ #1 _toks } \toks_new:N
-    \keys_set:Nnn \toks_set:cn { l_ } { #1 _toks }
-  },
-  \c_keys_properties_path_tl /.toks_gset:n/.code:n = {
-    \keys_check_exists:cN { g_ #1 _toks } \toks_new:N
-    \keys_set:Nnn \toks_gset:cn { g_ } { #1 _toks }
-  },
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%
 %\begin{macro}{.bool_set:N}
 %\begin{macro}{.bool_gset:N}
-%\begin{macro}{.bool_set:n}
-%\begin{macro}{.bool_gset:n}
 % The properties for switches look similar, although internally things
 % are rather different.
 %    \begin{macrocode}
@@ -2115,23 +1874,12 @@ This work consists of the file  keys3.dtx
   \c_keys_properties_path_tl /.bool_gset:N/.code:n = {
     \keys_bool_set:nN { gset } #1
   },
-  \c_keys_properties_path_tl /.bool_set:n/.code:n = {
-    \keys_bool_set:nnn { set } { l_ } { #1 }
-  },
-  \c_keys_properties_path_tl /.bool_gset:n/.code:n = {
-    \keys_bool_set:nnn { gset } { g_ } { #1 }
-  },
 }
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
+%    \end{macrocode}%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{.bool_set_inverse:N}
 %\begin{macro}{.bool_gset_inverse:N}
-%\begin{macro}{.bool_set_inverse:n}
-%\begin{macro}{.bool_gset_inverse:n}
 % The inverse versions of the switches are handled in the same way
 % here.
 %    \begin{macrocode}
@@ -2142,16 +1890,8 @@ This work consists of the file  keys3.dtx
   \c_keys_properties_path_tl /.bool_gset_inverse:N/.code:n = {
     \keys_bool_set_inverse:nN { gset } #1
   },
-  \c_keys_properties_path_tl /.bool_set_inverse:n/.code:n = {
-    \keys_bool_set_inverse:nnn { set } { l_ } { #1 }
-  },
-  \c_keys_properties_path_tl /.bool_gset_inverse:n/.code:n = {
-    \keys_bool_set_inverse:nnn { gset } { g_ } { #1 }
-  },
 }
 %    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %\end{macro}
 %\end{macro}
 %

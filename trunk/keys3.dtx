@@ -308,20 +308,18 @@ This work consists of the file  keys3.dtx
 %\subsubsection{Storing values}
 %
 % A common use of key--value input is to store the values given in a 
-% variable for later use.  \pkg{keys3} provides pre-defined 
-% properties for storing in integer, skip, token list variables and
-% token registers. The method is similar in all cases:
+% variable for later use.  All storage variable can be accessed using
+% the same property:
 %\begin{verbatim}
 %  \keys_manage:n{
-%    /module/key~one/.int_set:N   = \l_mod_data_int,
-%    /module/key~two/.skip_set:N  = \l_mod_data_skip,
-%    /module/key~three/.tl_set:N  = \l_mod_data_tl,
-%    /module/key~four/.toks_set:N = \l_mod_data_toks
+%    /module/key~one/.set:N   = \l_mod_data_int,
+%    /module/key~two/.set:N   = \l_mod_data_skip,
+%    /module/key~three/.set:N = \l_mod_data_tl,
+%    /module/key~four/.set:N  = \l_mod_data_toks
 %  }
 %\end{verbatim}
-% These assignments are local: in each case, a global variant is
-% available, with \texttt{set} replaced by \texttt{gset}. For example,
-% \texttt{.tl_get:N} globally stores values in a token list variable.
+% The type of variable to store is detected from the variable name, as
+% is the scope for setting: global variables are always set globally. 
 % 
 %\subsubsection{Multiple choice keys}
 %
@@ -438,22 +436,24 @@ This work consists of the file  keys3.dtx
 %  <key>. In this way, <key> accepts one of a limited range of choices.
 % \end{function}
 % 
-% \begin{function}{
-%   .int_set:N|
-%   .int_gset:N|
-% }
-%  \begin{syntax}
-%    <key>/.int_set:N = <int>
-%  \end{syntax}
-%  Defines <key> to store <value> in the <int> named.
-% \end{function}
-% 
 % \begin{function}{.retry:n}
 %  \begin{syntax}
 %    <key>/.retry:n = <data>
 %  \end{syntax}
 %  Executes <key> if it exists and if the previous \texttt{.try:n} 
 %  failed. The <data> is passed to <key>, if successful.
+% \end{function}
+% 
+% \begin{function}{
+%   .set:N|
+%   .set_x:N
+%}
+%  \begin{syntax}
+%    <key>/.set:N = <variable>
+%  \end{syntax}
+%  Defines <key> to store the value given in <variable>. The type and 
+%  scope (local or global) of <variable> are determined from the 
+%  name. The \texttt{x} version performs an expanded assignment.
 % \end{function}
 % 
 % \begin{function}{
@@ -466,40 +466,6 @@ This work consists of the file  keys3.dtx
 %  \end{syntax}
 %  Shows the function for the current key or the code associated with
 %  the current key.
-% \end{function}
-% 
-% \begin{function}{
-%   .skip_set:N|
-%   .skip_gset:N|
-% }
-%  \begin{syntax}
-%    <key>/.skip_set:N = <skip>
-%  \end{syntax}
-%  Defines <key> to store <value> in the <skip> named.
-% \end{function}
-% 
-% \begin{function}{
-%   .tl_set:N|
-%   .tl_set_x:N|
-%   .tl_gset:N|
-%   .tl_gset_x:N|
-% }
-%  \begin{syntax}
-%    <key>/.tl_set:N = <tl>
-%  \end{syntax}
-%  Defines <key> to store <value> in the <tl> named. The \texttt{x}
-%  versions use \cs{tl_(g)set:Nx} for this process, the standard 
-%  version \cs{tl_(g)set:Nn}.
-% \end{function}
-% 
-% \begin{function}{
-%   .toks_set:N|
-%   .toks_gset:N|
-% }
-%  \begin{syntax}
-%    <key>/.toks_set:N = <toks>
-%  \end{syntax}
-%  Defines <key> to store <value> in the <toks> named.
 % \end{function}
 % 
 % \begin{function}{.try:n}
@@ -652,16 +618,6 @@ This work consists of the file  keys3.dtx
 %   \end{syntax}
 %   Uses <function> (either \texttt{set} or \texttt{gset}) to use 
 %   <value> in setting <boolean>. 
-% \end{function}
-% 
-% \begin{function}{
-%   \keys_check_exists:NN|
-%   \keys_check_exists:cN
-%}
-%   \begin{syntax}
-%     "\keys_check_exists:NN" <var> <new cmd>
-%   \end{syntax}
-%   Checks that <var> exists and if not used <new cmd> to create it.
 % \end{function}
 % 
 % \begin{function}{\keys_choice_create:n}
@@ -832,11 +788,19 @@ This work consists of the file  keys3.dtx
 %   Separates key into <path> and <key name>.
 % \end{function}
 % 
-% \begin{function}{\keys_set:NN}
+% \begin{function}{
+%   \keys_set_variable:N|
+%   \keys_set_variable_x:N|
+%   \keys_set_variable:NN
+%}
 %   \begin{syntax}
-%     "\keys_set:NN" <function> <variable>
+%     "\keys_set_variable:N" <variable>
+%     "\keys_set_variable:NN" <variable> <expansion>
 %   \end{syntax}
-%   Uses <function> to store <value> in <variable>.
+%   Detects the type and scope of <variable> and stores user data in
+%   the variable. The <expansion> should be a suitable argument
+%   specifier for a \texttt{set} function: normally \texttt{n} or
+%   \texttt{x}.
 % \end{function}
 % 
 % \begin{function}{
@@ -1207,20 +1171,6 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\keys_check_exists:NN}
-%\begin{macro}{\keys_check_exists:cN}
-% A check function to avoid problems later.
-%    \begin{macrocode}
-\cs_new_nopar:Nn \keys_check_exists:NN {
-  \cs_if_exist:NF #1 {
-    #2 #1
-  }
-}
-\cs_generate_variant:Nn \keys_check_exists:NN { cN }
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%
 %\begin{macro}{\keys_choices_create:Nnn}
 %\begin{macro}[aux]{\keys_choices_create_aux:n}
 %\begin{macro}[aux]{\keys_choices_create_aux:x}
@@ -1530,18 +1480,42 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\keys_set:NN}
-% Storage of data in outside of keys.
+%\begin{macro}{\keys_set_variable:N}
+%\begin{macro}{\keys_set_variable_x:N}
+%\begin{macro}{\keys_set_variable:NN}
+% To set a variable, the variable name is interrogated to recover the
+% type and scope. This is then used to construct the setting function.
+% There is a check first to ensure that the variable exists.
 %    \begin{macrocode}
-\cs_new_nopar:Nn \keys_set:NN {
+\cs_new_nopar:Nn \keys_set_variable:N {
+  \keys_set_variable:NN #1 n
+}
+\cs_new_nopar:Nn \keys_set_variable_x:N {
+  \keys_set_variable:NN #1 x
+}
+\cs_new_nopar:Nn \keys_set_variable:NN {
+  \cs_if_exist:NF #1 {
+    \use:c {
+      \keys_get_variable_type:N #1
+      _new:N
+    } #1
+  }
   \keys_parse_list:n {
-    \c_keys_properties_path_tl /.code:n = {
-      #1 #2 {##1}
+    \c_keys_properties_path_tl /.code:x = {
+      \exp_not:c {
+        \keys_get_variable_type:N #1
+        _
+        \keys_get_variable_scope:N #1
+        set:N 
+        #2
+      }
+      \exp_not:N #1 {##1}
     }
   }
 }
-
 %    \end{macrocode}
+%\end{macro}
+%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\keys_set_cmd:nn}
@@ -1836,83 +1810,18 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{.set:N}
+%\begin{macro}{.set_x:N}
+% Setting variables is easy.
 %    \begin{macrocode}
 \keys_manage_quick:n {
   \c_keys_properties_path_tl /.set:N/.code:n = {
+    \keys_set_variable:N #1
+  },
+  \c_keys_properties_path_tl /.set_x:N/.code:n = {
+    \keys_set_variable_x:N #1
   },
 }
 %    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{.tl_set:N}
-%\begin{macro}{.tl_set_x:N}
-%\begin{macro}{.tl_gset:N}
-%\begin{macro}{.tl_gset_x:N}
-% Storage of the value in a tl, as given or expanded, local or global.
-%    \begin{macrocode}
-\keys_manage_quick:n {
-  \c_keys_properties_path_tl /.tl_set:N/.code:n = {
-    \keys_check_exists:NN #1 \tl_new:N
-    \keys_set:NN \tl_set:Nn #1
-  },
-  \c_keys_properties_path_tl /.tl_set_x:N/.code:n = {
-    \keys_check_exists:NN #1 \tl_new:N
-    \keys_set:NN \tl_set:Nx #1
-  },
-  \c_keys_properties_path_tl /.tl_gset:N/.code:n = {
-    \keys_check_exists:NN #1 \tl_new:N
-    \keys_set:NN \tl_gset:Nn #1
-  },
-  \c_keys_properties_path_tl /.tl_gset_x:N/.code:n = {
-    \keys_check_exists:NN #1 \tl_new:N
-    \keys_set:NN \tl_gset:Nx #1
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{.int_set:N}
-%\begin{macro}{.int_gset:N}
-%\begin{macro}{.skip_set:N}
-%\begin{macro}{.skip_gset:N}
-%\begin{macro}{.toks_set:N}
-%\begin{macro}{.toks_gset:N}
-% For int, skip and toks storage, no expansion to worry about.
-%    \begin{macrocode}
-\keys_manage_quick:n {
-  \c_keys_properties_path_tl /.int_set:N/.code:n = {
-    \keys_check_exists:NN #1 \int_new:N
-    \keys_set:NN \int_set:Nn #1
-  },
-  \c_keys_properties_path_tl /.int_gset:N/.code:n = {
-    \keys_check_exists:NN #1 \int_new:N
-    \keys_set:NN \int_gset:Nn #1
-  },
-  \c_keys_properties_path_tl /.skip_set:N/.code:n = {
-    \keys_check_exists:NN #1 \skip_new:N
-    \keys_set:NN \skip_set:Nn #1
-  },
-  \c_keys_properties_path_tl /.skip_gset:N/.code:n = {
-    \keys_check_exists:NN #1 \skip_new:N
-    \keys_set:NN \skip_gset:Nn #1
-  },
-  \c_keys_properties_path_tl /.toks_set:N/.code:n = {
-    \keys_check_exists:NN #1 \toks_new:N
-    \keys_set:NN \toks_set:Nn #1
-  },
-  \c_keys_properties_path_tl /.toks_gset:N/.code:n = {
-    \keys_check_exists:NN #1 \toks_new:N
-    \keys_set:NN \toks_gset:Nn #1
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
 %\end{macro}
 %\end{macro}
 %    

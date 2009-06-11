@@ -16,27 +16,25 @@ See http://www.latex-project.org/lppl.txt
 The keys3 package is an experimental implementation of key
 management for LaTeX3.  The entire package is written in
 expl3 code rather than in traditional TeX/LaTeX.  The key
-module used by keys3 is based on that introduced by the
+model used by keys3 is based on that introduced by the
 pgfkeys package from the pgf/TiKZ bundle. Keys are thus
 addressed in a path-like manner, and are controlled by key
 properties:
 
   /module/key/.code:n = <code>,
-  /module/key/.value_required:,
-  /module/key = <value>
+  /module/key/.value_required:
 
 The keys3 package is intended as a method for testing how key
 management might be implemented in LaTeX3.  Both the methods
 used inside the package and the interface provided are intended
 to be discussed.  Feedback is welcomed either by e-mail
-(joseph.wright@morningstar2.co.uk) or at the package website
-(http://keys3.berlios.de).
+(joseph.wright@morningstar2.co.uk) or to the LaTeX-L mailing
+list.
 
-The experimental nature of keys3 and the underlying expl3
-system means that it should not be used in production
-documents.  However, programmers testing expl3, or keen to work
-on improved key management systems, are encouraged to try the
-package and provide feedback.
+The experimental nature of keys3 means that it should not be 
+used in production documents.  However, programmers testing 
+expl3, or keen to work on improved key management systems, 
+are encouraged to try the package and provide feedback.
 
 keys3 is *not* an official LaTeX3 team package.  Whether any of
 the ideas explored here will be taken up by the team is

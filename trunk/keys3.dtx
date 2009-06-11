@@ -1574,7 +1574,7 @@ This work consists of the file  keys3.dtx
 \cs_new:Nn \keys_store:nn {
   \tl_set:cn { \c_keys_cs_prefix_tl #1 } {#2}
 }
-\cs_new:Nn \keys_store:nn {
+\cs_new:Nn \keys_store:nV {
   \tl_set:cV { \c_keys_cs_prefix_tl #1 } #2
 }
 \cs_new:Nn \keys_store:nx {
@@ -1820,7 +1820,7 @@ This work consists of the file  keys3.dtx
     \keys_store:nn { \l_keys_current_path_tl /._default_tl } {#1}
     \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
   },
-  \c_keys_properties_path_tl /.default:n/.code:n = {
+  \c_keys_properties_path_tl /.default:V/.code:n = {
     \keys_store:nV { \l_keys_current_path_tl /._default_tl } #1
     \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
   }  

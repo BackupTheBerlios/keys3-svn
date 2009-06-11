@@ -634,35 +634,24 @@ This work consists of the file  keys3.dtx
 %   Creates a switch <key>, which will be set to \texttt{true}.
 % \end{function}
 % 
-% \begin{function}{
-%   \keys_bool_set:nN|
-%   \keys_bool_set:nnn|
-%  }
+% \begin{function}{\keys_bool_set:nN}
 %   \begin{syntax}
 %     "\keys_bool_set:nN" <function> <boolean>
-%     "\keys_bool_set:nnn" <function> <prefix> <name>
 %   \end{syntax}
 %   Uses <function> (either \texttt{set} or \texttt{gset}) to use 
-%   <value> in setting <boolean>. If a <name> is given, it is used to 
-%   construct a csname for the switch including the current <module>. 
-%   The <prefix> should be |l_| or |g_|.
+%   <value> in setting <boolean>. 
 % \end{function}
 % 
 % \begin{function}{
 %   \keys_bool_set_inverse:n|
 %   \keys_bool_set_inverse:nN|
-%   \keys_bool_set_inverse:nnn|
 %  }
 %   \begin{syntax}
 %     "\keys_bool_set:n" <switch>
 %     "\keys_bool_set:nN" <function> <boolean>
-%     "\keys_bool_set:nnn" <function> <prefix> <name>
 %   \end{syntax}
 %   Uses <function> (either \texttt{set} or \texttt{gset}) to use 
-%   <value> in setting <boolean>. If a <name> is given, it is used to 
-%   construct a csname for the switch including the current <module>. 
-%   The <prefix> should be |l_| or |g_|. The logic of the setting is
-%   reversed compared to the \cs{keys_bool_set:} functions.
+%   <value> in setting <boolean>. 
 % \end{function}
 % 
 % \begin{function}{
@@ -693,7 +682,6 @@ This work consists of the file  keys3.dtx
 %   and \cs{l_keys_current_choice_int}, which indicate the choice given.
 % \end{function}
 % 
-% 
 % \begin{function}{\keys_clear_properties:n}
 %   \begin{syntax}
 %     "\keys_clear_properties:n" <key>
@@ -707,6 +695,23 @@ This work consists of the file  keys3.dtx
 %   \end{syntax}
 %   If no value was given for the current key, and a default value is
 %   available, copies the default into \cs{l_keys_current_value_toks}.
+% \end{function}
+% 
+% \begin{function}{\keys_choice_create:n}
+%   \begin{syntax}
+%     "\keys_choice_create:n" <choice>
+%   \end{syntax}
+%   Creates <choice> as a sub-key of <key>.
+% \end{function}
+% 
+% \begin{function}{
+%    \keys_get_variable_scope:N / (EXP) |
+%    \keys_get_variable_type:N  / (EXP)
+%}
+%   \begin{syntax}
+%     "\keys_get_variable_scope:N" <var>
+%   \end{syntax}
+%   Returns the scope (\texttt{g} or blank) or the type of <var>.
 % \end{function}
 % 
 % \begin{function}{\keys_msg_new:nn}
@@ -1324,6 +1329,46 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
+%\begin{macro}{\keys_get_variable_scope:N}
+%\begin{macro}[aux]{\keys_get_variable_scope_aux:N}
+%\begin{macro}{\keys_get_variable_type:N}
+%\begin{macro}[aux]{\keys_get_variable_type:w}
+% Getting the scope means only returning anything if the variable is
+% global. The two-part procedure makes this work nicely. On the other
+% hand, finding the type needs a loop.
+%    \begin{macrocode}
+\cs_new_nopar:Nn \keys_get_variable_scope:N {
+  \tl_if_eq:xxT { \token_to_str:N g } 
+    { \keys_get_variable_scope_aux:N  #1 } 
+    { g }
+}
+\cs_new_nopar:Nn \keys_get_variable_scope_aux:N {
+  \exp_last_unbraced:NNo \use_i:nn \use_i_delimit_by_q_stop:nw 
+    \token_to_str:N #1 \q_stop
+}
+\group_begin:
+  \char_set_lccode:nn {`\&} {`\_}
+  \char_make_other:N \&
+\tl_to_lowercase:n {
+  \group_end:
+  \cs_new_nopar:Nn \keys_get_variable_type:N {
+    \exp_after:wN \keys_get_variable_type_aux:w 
+      \token_to_str:N #1 & \q_nil \q_stop
+  }
+  \cs_new_nopar:Npn \keys_get_variable_type_aux:w #1 & #2 \q_stop {
+    \quark_if_nil:nTF {#2} {
+      #1
+    }{
+      \keys_get_variable_type_aux:w #2 \q_stop
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}[TF]{\keys_if_cmd_exist:n}
 % A dedicated check for the |._cmd:w| property key.
 %    \begin{macrocode}
@@ -1788,6 +1833,15 @@ This work consists of the file  keys3.dtx
 }
 %    \end{macrocode}
 %\end{macro}
+%\end{macro}
+%
+%\begin{macro}{.set:N}
+%    \begin{macrocode}
+\keys_manage_quick:n {
+  \c_keys_properties_path_tl /.set:N/.code:n = {
+  },
+}
+%    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{.tl_set:N}

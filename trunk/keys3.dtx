@@ -194,13 +194,17 @@ This work consists of the file  keys3.dtx
 % 
 % In the \pkg{keys3} model, each key belongs to a module,
 % which may have one or more subdivisions. Each key then has
-% one or more properties which define how the key acts. The idea
-% of a single function for all key control is retained:
+% one or more properties which define how the key acts. In contrast
+% to \pkg{pgfkeys}, \pkg{keys3} divides up the tasks of
+% defining and setting keys between two separate functions (in the
+% same way as \pkg{keyval} does).
 %\begin{verbatim}
-%  \keys_manage:n{
+%  \keys_define:n{
 %    /module/key/.property     = code,
 %    /module/sub/key/.property = more code,
-%    /module/key               = value
+%  }
+%  \keys_set:n {
+%    /module/key = value
 %  }
 %\end{verbatim}
 % The combination of all \m{module} parts up to the \m{key} is referred
@@ -210,26 +214,26 @@ This work consists of the file  keys3.dtx
 % most commonly a piece of code to execute when the key is used (this 
 % is the \texttt{.code:n} property).
 %\begin{verbatim}
-%  \keys_manage:n{
+%  \keys_define:n{
 %    /module/key/.code:n = <code>
 %  }
 %\end{verbatim}
 % Keys are then used in the normal way, by assigning a value to the 
 % key.
 %\begin{verbatim}
-%  \keys_manage:n{
+%  \keys_set:n{
 %    /module/key = <value>
 %  }
 %\end{verbatim}
 % Here, \meta{value} is passed to the \meta{code} defined |#1|. The
 % \meta{code} can then process it in whatever way is appropriate. 
 % 
-% At a document level, it is likely that \cs{keys_manage:n} would be
+% At a document level, it is likely that \cs{keys_set:n} would be
 % wrapped up into a user macro or optional argument. For \LaTeXe, a 
 % generic set up macro might be created with:
 %\begin{verbatim}
 %  \newcommand*\SomePackageSetup[1]{%
-%    \@nameuse{keys_manage:n}{%
+%    \@nameuse{keys_set:n}{%
 %      /package name/.cd:,
 %      #1
 %    }%
@@ -239,7 +243,7 @@ This work consists of the file  keys3.dtx
 %\begin{verbatim}
 %  \newcommand*\SomePackageMacro[2][]{%
 %    \begingroup
-%      \@nameuse{keys_manage:n}{
+%      \@nameuse{keys_set:n}{
 %        /package name/.cd:,
 %        #1
 %      }%
@@ -250,14 +254,14 @@ This work consists of the file  keys3.dtx
 % The same concepts using \pkg{xparse} for \LaTeX3 use:
 %\begin{verbatim}
 %  \DeclareDocumentCommand \SomePackageSetup { m } {
-%    \keys_manage:n {
+%    \keys_set:n {
 %      /package name/.cd:,
 %      #1
 %    }
 %  }
 %  \DeclareDocumentCommand \SomePackageMacro { o m } {
 %    \group_begin:
-%      \keys_manage:n {
+%      \keys_set:n {
 %        /package name/.cd:,
 %        #1
 %      }
@@ -268,34 +272,22 @@ This work consists of the file  keys3.dtx
 %
 %\subsection{Creating, retrieving and setting keys}
 %
-% The main interface for key management is the the \cs{keys_manage:n}
-% macro.  This can be used to create, retrieve and set keys, and is
-% therefore the preferred interface for the package.
-%
-% \begin{function}{
-%   \keys_manage:n|
-%   \keys_manage_quick:n
-% }
+% \begin{function}{\keys_define:n}
 %   \begin{syntax}
-%     "\keys_manage:n" <keyval list>
+%     "\keys_define:n" <keyval list>
 %   \end{syntax}
-%   The main key management function, which parses over the <keyval
-%   list> and processes each key. The standard version removes leading
-%   and trailing spaces and checks catcodes for ungrouped ``|,|'' and
-%   ``|=|'' tokens. The |_quick| version omits these tests for speed, 
-%   and is therefore more suited to creating keys inside code blocks. 
+%   Parses the <keyval list> and defines the keys listed there.
+%   This function is designed for use in code, and therefore does
+%   not check category codes or ignore spaces.
 % \end{function}
 %
-% \begin{function}{
-%   \keys_manage:nn|
-%   \keys_manage_quick:nn|
-% }
+% \begin{function}{\keys_set:n}
 %   \begin{syntax}
-%     "\keys_manage:nn" <path> <keyval list>
+%     "\keys_set:n" <keyval list>
 %   \end{syntax}
-%   Versions of the above which include a <path> as an argument. These
-%   are faster versions of the |:n| macros when setting lots of keys
-%   separately and with known paths.
+%   Parses the <keyval list> and sets the keys found in it. In
+%   contrast to \cs{keys_define:n}, this function does check category
+%   codes and ignore spaces, and is therefore suitable for user input.
 % \end{function}
 %
 % Setting up and altering keys is carried out using one or more
@@ -311,7 +303,7 @@ This work consists of the file  keys3.dtx
 % variable for later use.  All storage variable can be accessed using
 % the same property:
 %\begin{verbatim}
-%  \keys_manage:n{
+%  \keys_define:n {
 %    /module/key~one/.set:N   = \l_mod_data_int,
 %    /module/key~two/.set:N   = \l_mod_data_skip,
 %    /module/key~three/.set:N = \l_mod_data_tl,
@@ -327,7 +319,7 @@ This work consists of the file  keys3.dtx
 % \texttt{.expects_choice:} property. Each choice is then a sub-key of 
 % the choice key.
 %\begin{verbatim}
-%  \keys_manage:n{
+%  \keys_define:n {
 %    /module/key/.expects_choice:,
 %    /module/key/choice~a/.code:n = Some code,
 %    /module/key/choice~b/.code:n = Some other code,
@@ -345,7 +337,7 @@ This work consists of the file  keys3.dtx
 % \cs{l_keys_current_choice_tl}. The position of the choice in the 
 % lists is also available, as \cs{l_keys_current_choice_int}. 
 %\begin{verbatim}
-%  \keys_manage:n {
+%  \keys_define:n {
 %    /module/key/.create_choices:nn = {choice~a, choice~b, choice~c} {
 %      You~gave~choice~``\l_keys_current_choice_tl'',~which~is~in~
 %      position~\l_keys_current_choice_int\~in~the~list.
@@ -598,7 +590,7 @@ This work consists of the file  keys3.dtx
 %\subsection{Internal functions}
 %
 % Notice that everything should be done using the keys system. Only
-% \cs{keys_manage:n} and so on are intended for external use. In all
+% \cs{keys_define:n} and so on are intended for external use. In all
 % cases, \m{key} is a fully-qualified key name. Functions created will
 % be prefixed with \cs{c_keys_cs_prefix_tl}.
 % 
@@ -709,7 +701,7 @@ This work consists of the file  keys3.dtx
 %   (\texttt{full}) or key name only (\texttt{name}).
 % \end{function}
 % 
-% \begin{function}{\keys_if_cmd_exist:n / (TF)}
+% \begin{function}{\keys_if_cmd_exist:n / (TF) (EXP) }
 %   \begin{syntax}
 %     "\keys_if_cmd_exist:nTF" <key> <true code> 
 %     ~~~~<false code>
@@ -717,7 +709,7 @@ This work consists of the file  keys3.dtx
 %   Checks for the existence of a |._cmd:w| function for <key>.
 % \end{function}
 % 
-% \begin{function}{\keys_if_exist:n / (TF)}
+% \begin{function}{\keys_if_exist:n / (TF) (EXP) }
 %   \begin{syntax}
 %     "\keys_if_exist:nTF" <key> <true code> 
 %     ~~~~<false code>
@@ -725,7 +717,7 @@ This work consists of the file  keys3.dtx
 %   Checks for the existence of a <key>.
 % \end{function}
 % 
-% \begin{function}{\keys_if_value:n / (TF)}
+% \begin{function}{\keys_if_value:n / (TF) (EXP) }
 %   \begin{syntax}
 %     "\keys_if_value:nTF" <property> <true code> <false code>
 %   \end{syntax}
@@ -733,12 +725,11 @@ This work consists of the file  keys3.dtx
 %   \texttt{required} or \texttt{forbidden}).
 % \end{function}
 % 
-% \begin{function}{\keys_manage_internal:n}
+% \begin{function}{\keys_define_internal:n}
 %   \begin{syntax}
-%     "\keys_manage_internal:n" <keyval list>
+%     "\keys_define_internal:n" <keyval list>
 %   \end{syntax}
-%   An internal ``recycling'' version of \cs{keys_manage_quick:n}, which
-%   should not be called from outside.
+%   An internal ``recycling'' version of \cs{keys_define:n}.
 % \end{function}
 % 
 % \begin{function}{
@@ -1062,62 +1053,41 @@ This work consists of the file  keys3.dtx
 %
 %\subsubsection{Functions}
 %
-%\begin{macro}{\keys_manage:n}
-%\begin{macro}{\keys_manage_quick:n}
-%\begin{macro}{\keys_manage_internal:n}
-%\begin{macro}[aux]{\keys_manage_aux:nn}
-%\begin{macro}[aux]{\keys_manage_aux:Vn}
+%\begin{macro}{\keys_define:n}
+%    \begin{macrocode}
+\cs_new:Nn \keys_define:n {
+  \cs_set_eq:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
+  \keys_define_internal:n {#1}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_set:n}
+%    \begin{macrocode}
+\cs_new:Nn \keys_set:n {
+  \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
+  \keys_define_internal:n {#1}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_define_internal:n}
+%\begin{macro}[aux]{\keys_define_aux:nn}
+%\begin{macro}[aux]{\keys_define_aux:Vn}
 % The main key management macros both call the auxiliary function after
 % setting up the parser.  The expansion trick means a literal path is
 % sent to the later function, and so the default path can be redefined.
 %    \begin{macrocode}
-\cs_new:Nn \keys_manage:n {
-  \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
-  \keys_manage_internal:n {#1}
+\cs_new:Nn \keys_define_internal:n {
+  \keys_define_aux:Vn \l_keys_default_path_tl {#1}
 }
-\cs_new:Nn \keys_manage_quick:n {
-  \cs_set_eq:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
-  \keys_manage_internal:n {#1}
-}
-\cs_new:Nn \keys_manage_internal:n {
-  \keys_manage_aux:Vn \l_keys_default_path_tl {#1}
-}
-\cs_new:Nn \keys_manage_aux:nn {
+\cs_new:Nn \keys_define_aux:nn {
   \tl_set_eq:NN \l_keys_default_path_tl \c_keys_root_tl
   \keys_parse_list:n {#2}
   \tl_set:Nn \l_keys_default_path_tl {#1}
 }
-\cs_generate_variant:Nn \keys_manage_aux:nn { Vn }
+\cs_generate_variant:Nn \keys_define_aux:nn { Vn }
 %    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\begin{macro}{\keys_manage:nn}
-%\begin{macro}{\keys_manage_quick:nn}
-%\begin{macro}[aux]{\keys_manage_aux:nnn}
-%\begin{macro}[aux]{\keys_manage_aux:Vnn}
-% This version uses the same tricks but includes the path as a second
-% argument.  When setting lots of keys separately, this is a little
-% faster than the key-based method.
-%    \begin{macrocode}
-\cs_new:Nn \keys_manage:nn {
-  \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
-  \keys_manage_aux:Vnn \l_keys_default_path_tl {#1} {#2}
-}
-\cs_new:Nn \keys_manage_quick:nn {
-  \cs_set_eq:NN \keys_parse:n \KV_parse_space_no_removal_no_sanitize:n
-  \keys_manage_aux:Vnn \l_keys_default_path_tl {#1} {#2}
-}
-\cs_new:Nn \keys_manage_aux:nnn {
-  \tl_set:Nn \l_keys_default_path_tl {#2}
-  \keys_parse_list:n {#3}
-  \tl_set:Nn \l_keys_default_path_tl {#1}
-}
-\cs_generate_variant:Nn \keys_manage_aux:nnn { Vnn }
-%    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %\end{macro}
 %\end{macro}
@@ -1193,7 +1163,7 @@ This work consists of the file  keys3.dtx
   \int_zero:N \l_keys_current_choice_int
   \use:c { keys_choices_create_aux: #1 } {#3}
   \clist_map_function:nN {#2} \keys_choice_create:n
-  \keys_manage_internal:n { \l_keys_choice_path_tl  /.expects_choice: }
+  \keys_define_internal:n { \l_keys_choice_path_tl  /.expects_choice: }
 }
 \cs_new:Nn \keys_choices_create_aux:n {
   \tl_set:Nn \l_keys_choice_code_tl { \exp_not:n {#1} }
@@ -1744,15 +1714,11 @@ This work consists of the file  keys3.dtx
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
-%
-% The remaining definitions can all be carried out using the package
-% itself. As category codes and spaces are not an issue here, the
-% |_quick| version of \cs{keys_manage} is used.
 % 
 % First, an error is created for unknown keys: this is done early to
 % catch any internal errors.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_errors_path_tl /unknown/.code:n = {
     \keys_error:n { unknown~key }
   }
@@ -1763,7 +1729,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{.code:Nx}
 % Fully-expanded versions of the basic \texttt{.code} properties.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.code:x/.code:n = {
     \keys_set_cmd:nx { \l_keys_current_path_tl } {#1}
   },
@@ -1779,7 +1745,7 @@ This work consists of the file  keys3.dtx
 % The change-directory property simply alters the value of the default
 % path. 
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
     \c_keys_properties_path_tl /.cd:/.code:n = {
     \tl_set:Nx \l_keys_default_path_tl { \l_keys_current_path_tl / }
   }
@@ -1793,7 +1759,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{._forbidden_bool}
 % Values are required or forbidden by creating the appropriate flags.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.value_required:/.code:n = {
     \keys_bool_new:n { \l_keys_current_path_tl /._required_bool }
     \keys_undefine:n { \l_keys_current_path_tl /._forbidden_bool }
@@ -1815,7 +1781,7 @@ This work consists of the file  keys3.dtx
 % The default value for a key is stored in the |._default_tl|
 % private property.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.default:n/.code:n = {
     \keys_store:nn { \l_keys_current_path_tl /._default_tl } {#1}
     \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
@@ -1834,7 +1800,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{.set_x:N}
 % Setting variables is easy.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.set:N/.code:n = {
     \keys_set_variable:N #1
   },
@@ -1851,7 +1817,7 @@ This work consists of the file  keys3.dtx
 % The properties for switches look similar, although internally things
 % are rather different.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.bool_set:N/.code:n = {
     \keys_bool_set:nN { set } #1
   },
@@ -1867,7 +1833,7 @@ This work consists of the file  keys3.dtx
 % The inverse versions of the switches are handled in the same way
 % here.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.bool_set_inverse:N/.code:n = {
     \keys_bool_set_inverse:nN { set } #1
   },
@@ -1883,9 +1849,9 @@ This work consists of the file  keys3.dtx
 % Multiple choice keys are created by searching sub-keys. So the
 % code to make a key into a multiple choice is quite simple.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.expects_choice:/.code:n = {
-    \keys_manage_internal:n {
+    \keys_define_internal:n {
       \l_keys_current_path_tl /.cd:,
       .code:n = {
         \tl_set:Nn \l_keys_current_choice_tl {##1}
@@ -1906,7 +1872,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{.create_choices:nx}
 % Creating choices as a block.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.create_choices:nn/.code:Nn = 2 {
     \keys_choices_create:Nnn n {#1} {#2}
   },
@@ -1924,26 +1890,26 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{.use_keys:Nx}
 % Keys calling other keys is actually quite easy.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.use_keys:n/.code:n = {
-    \keys_manage_internal:n {
+    \keys_define_internal:n {
       \l_keys_current_path_tl /.code:n = { \keys_parse_list:n {#1} }
     }
   },
   \c_keys_properties_path_tl /.use_keys:x/.code:n = {
-    \keys_manage_internal:n {
+    \keys_define_internal:n {
       \l_keys_current_path_tl /.code:x = {
         \exp_not:N \keys_parse_list:n {#1}
       }
     }
   },
   \c_keys_properties_path_tl /.use_keys:Nn/.code:Nn = 2 {
-    \keys_manage_internal:n {
+    \keys_define_internal:n {
       \l_keys_current_path_tl /.code:Nn = #1 { \keys_parse_list:n {#2} }
     }
   },
   \c_keys_properties_path_tl /.use_keys:Nx/.code:Nn = 2 {
-    \keys_manage_internal:n {
+    \keys_define_internal:n {
       \l_keys_current_path_tl /.code:Nx =
         #1 { \exp_not:N \keys_parse_list:n {#2} }
     }
@@ -1959,7 +1925,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{.retry:n}
 % For attempting to set keys without assuming they exist.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.try:n/.code:n = { \keys_try: },
   \c_keys_properties_path_tl /.retry:n/.code:n = {
     \bool_if:NF \l_keys_success_bool { \keys_try: }
@@ -1973,7 +1939,7 @@ This work consists of the file  keys3.dtx
 %\begin{macro}{.show_key:}
 % Finally, two keys for debugging problems.
 %    \begin{macrocode}
-\keys_manage_quick:n {
+\keys_define:n {
   \c_keys_properties_path_tl /.show_code:/.code:n = {
     \cs_show:c { 
       \c_keys_cs_prefix_tl \l_keys_current_path_tl /._cmd:w 

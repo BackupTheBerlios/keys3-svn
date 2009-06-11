@@ -15,14 +15,15 @@
 % used here.
 \ExplSyntaxOn
 
-\DeclareDocumentCommand{\SetModuleKeys}{m}{
-  \keys_manage:n{
+\DeclareDocumentCommand \SetModuleKeys { m } {
+  \keys_set:n {
     module~name/.cd:,
-    #1}
+    #1
+  }
 }
 
-\DeclareDocumentCommand{\SetKeys}{m}{
-  \keys_manage:n{#1}
+\DeclareDocumentCommand \SetKeys { m } {
+  \keys_set:n {#1}
 }
 
 \ExplSyntaxOff

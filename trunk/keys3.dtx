@@ -21,9 +21,9 @@ pgfkeys package from the pgf/TiKZ bundle. Keys are thus
 addressed in a path-like manner, and are controlled by key
 properties:
 
-/module/key/.code:n = <code>,
-/module/key/.value_required:,
-/module/key = <value>
+  /module/key/.code:n = <code>,
+  /module/key/.value_required:,
+  /module/key = <value>
 
 The keys3 package is intended as a method for testing how key
 management might be implemented in LaTeX3.  Both the methods
@@ -419,13 +419,22 @@ This work consists of the file  keys3.dtx
 %  and its position in the <list> as \cs{l_keys_current_choice_int}.
 % \end{function}
 % 
-% \begin{function}{.default:n}
+% \begin{function}{
+%   .default:n|
+%   .default:V|
+%  }
 %  \begin{syntax}
 %    <key>/.default:n = <content>
 %  \end{syntax}
 %  Creates a default value for <key>, which is used if no value is 
 %  given. The <content> is stored as a token list variable, and so 
 %  must be compatible with this variable type.
+%  \begin{texnote}
+%    The \texttt{V} variant is much like the standard method for
+%    setting a default value in \textsf{template}, while the
+%    \texttt{n} variant is similar to using \cs{DelayEvalution} in
+%    \textsf{template}.
+%  \end{texnote}
 % \end{function}
 % 
 % \begin{function}{.expects_choice:}
@@ -819,6 +828,7 @@ This work consists of the file  keys3.dtx
 % 
 % \begin{function}{
 %   \keys_store:nn|
+%   \keys_store:nV|
 %   \keys_store:nx
 %  }
 %   \begin{syntax}
@@ -1557,16 +1567,21 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{\keys_store:nn}
+%\begin{macro}{\keys_store:nV}
 %\begin{macro}{\keys_store:nx}
 % Direct storage of data in keys.
 %    \begin{macrocode}
 \cs_new:Nn \keys_store:nn {
   \tl_set:cn { \c_keys_cs_prefix_tl #1 } {#2}
 }
+\cs_new:Nn \keys_store:nn {
+  \tl_set:cV { \c_keys_cs_prefix_tl #1 } #2
+}
 \cs_new:Nn \keys_store:nx {
   \tl_set:cx { \c_keys_cs_prefix_tl #1 } {#2}
 }
 %    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %
@@ -1795,6 +1810,7 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{.default:n}
+%\begin{macro}{.default:V}
 %\begin{macro}{._default_tl}
 % The default value for a key is stored in the |._default_tl|
 % private property.
@@ -1803,9 +1819,14 @@ This work consists of the file  keys3.dtx
   \c_keys_properties_path_tl /.default:n/.code:n = {
     \keys_store:nn { \l_keys_current_path_tl /._default_tl } {#1}
     \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
-  }
+  },
+  \c_keys_properties_path_tl /.default:n/.code:n = {
+    \keys_store:nV { \l_keys_current_path_tl /._default_tl } #1
+    \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
+  }  
 }
 %    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %

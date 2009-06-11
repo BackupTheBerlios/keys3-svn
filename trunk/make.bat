@@ -9,12 +9,12 @@ set SOURCE=keys3 keys3opts2
 
 :loop
 
-  if /i "%1" == "clean"        goto :clean
-  if /i "%1" == "ctan"         goto :ctan
-  if /i "%1" == "doc"          goto :doc
-  if /i "%1" == "localinstall" goto :localinstall
-  if /i "%1" == "tds"          goto :tds
-  if /i "%1" == "unpack"       goto :unpack
+  if /i "%~1" == "clean"        goto :clean
+  if /i "%~1" == "ctan"         goto :ctan
+  if /i "%~1" == "doc"          goto :doc
+  if /i "%~1" == "localinstall" goto :localinstall
+  if /i "%~1" == "tds"          goto :tds
+  if /i "%~1" == "unpack"       goto :unpack
 
   goto :help
 
@@ -196,6 +196,6 @@ set SOURCE=keys3 keys3opts2
 :end
 
   shift
-  if not "%1" == "" goto :loop
+  if not "%~1" == "" goto :loop
   
   endlocal

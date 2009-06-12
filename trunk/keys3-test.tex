@@ -10,27 +10,15 @@
 \usepackage{keys3,xparse}
 \usepackage[parfill]{parskip}
 
-% The document commands for creating keys is very simple. A generic
-% one is created to set any modules keys, and one specific to the module 
-% used here.
+% The document commands for using keys is very simple.
+
 \ExplSyntaxOn
-
 \DeclareDocumentCommand \SetModuleKeys { m } {
-  \keys_set:n {
-    module~name/.cd:,
-    #1
-  }
+  \keys_set:nn { module } {#1}
 }
-
-\DeclareDocumentCommand \SetKeys { m } {
-  \keys_set:n {#1}
-}
-
 \ExplSyntaxOff
 
 \begin{document}
-
-\ExplSyntaxNamesOn
 
 % Each test starts with a short piece of text explaining the property
 % being used. Under this, the expected output is given, followed
@@ -45,8 +33,17 @@
 %   You said: ` Hello World '
 %   You said: `'
 % ----------------------------------------------------------------------
+\ExplSyntaxOn
+\keys_show:nn { module } {unknown}
+\keys_set:nn { module } {
+  clive = india
+}
+\keys_define:nn { module } {
+  key .code:n = {You~said:~`#1'\\}
+}
+\ExplSyntaxOff
+
 \SetModuleKeys{
-  key/.code:n = {You said: `#1'\\},
   key = Hello World ,
   key = { Hello World },
   key 
@@ -57,108 +54,121 @@
 % ----------------------------------------------------------------------
 %   You said: `A', `B', `C', D'.
 %   You said: `AAA', `BBB', `CCC', ` DDD'.
-%   You said: `', `', `', `'.
 % ----------------------------------------------------------------------
+\ExplSyntaxOn
+\keys_define:nn { module } {
+  key .code:Nn = 4 {You said:~`#1',~`#2',~`#3',~`#4'.\\},
+}
+\ExplSyntaxOff
+
 \SetModuleKeys{
-  key/.code:Nn = 4 {You said: `#1', `#2', `#3', `#4'.\\},
   key = ABCD,
-  key = {AAA}{BBB} {CCC} { DDD},
-  key =,
+  key = {AAA}{BBB} {CCC} { DDD}
 }
 
-% Test three: The ability to change the key path is available with the
-% .cd: property. The following moves from the key root to two separate
-% paths, creating keys with the same names.
-% ----------------------------------------------------------------------
-%   A key in path one
-%   A key in path two
-%   A key in path two
-%   A key in path one
-% ----------------------------------------------------------------------
-\SetKeys{
-  /path one/.cd:,
-  key/.code:n = A key in path one\\,
-  /path two/.cd:,
-  key/.code:n = A key in path two\\,
-  /path one/key,
-  /path two/key,
-  key,
-  /path one/.cd:,
-  key
-}
-
-% Test four: Variants of .code:n and .code:Nn exist which carry out a
+% Test three: Variants of .code:n and .code:Nn exist which carry out a
 % full expansion on code definition. First the :x variant is tested.
 % ----------------------------------------------------------------------
 %   Temp holds: ABC
 %   Temp hold: 123
 % ----------------------------------------------------------------------
 \newcommand*{\temp}{123}
-\SetModuleKeys{
-  key one/.code:n = Temp holds: \temp\\,
-  key two/.code:x = Temp holds: \temp,
+
+\ExplSyntaxOn
+\keys_define:nn { module } {
+  key-one .code:n = Temp~holds:~\temp\\,
+  key-two .code:x = Temp~holds:~\temp,
 }
+\ExplSyntaxOff
+
 \renewcommand*{\temp}{ABC}
+
 \SetModuleKeys{
-  key one,
-  key two
+  key-one,
+  key-two
 }
+
 % Now the :Nx version
 % ----------------------------------------------------------------------
 %   Arguments: A, B. Temp holds: ABC
 %   Arguments: 1, 2. Temp hold: 123
 % ----------------------------------------------------------------------
 \renewcommand*{\temp}{123}
-\SetModuleKeys{
-  key one/.code:Nn = 2 {Arguments: #1, #2. Temp holds: \temp\\},
-  key two/.code:Nx = 2 {Arguments: #1, #2. Temp holds: \temp},
+
+\ExplSyntaxOn
+\keys_define:nn { module } {
+  key-one .code:Nn = 2 {Arguments:~#1,~#2.~Temp~holds:~\temp\\},
+  key-two .code:Nx = 2 {Arguments:~#1,~#2.~Temp~holds:~\temp},
 }
+\ExplSyntaxOff
 
 \renewcommand*{\temp}{ABC}
 \SetModuleKeys{
-  key one = {A} {B},
-  key two = {1} {2}
+  key-one = {A} {B},
+  key-two = {1} {2}
 }
 
-% Test five: Values can be required and forbidden with the 
+% Test four: Values can be required and forbidden with the 
 % .value_required: and .value_forbidden: properties.
 % ----------------------------------------------------------------------
 %   All okay
 %   All okay
 % ----------------------------------------------------------------------
-% The key `/module name/key' cannot taken a value:
+% The key `module/key-one' cannot taken a value:
 % the given input `Not allowed' is being ignored.
 % 
-% The key `/module name/key' requires a value 
+% The key `module/key-two' requires a value 
 % and is being ignored.
 % ----------------------------------------------------------------------
+\ExplSyntaxOn
+\keys_define:nn { module } {
+  key-one .code:n = All okay\\,
+  key-one .value_forbidden:,
+  key-two .code:n = #1,
+  key-two .value_required:
+}
+\ExplSyntaxOff
+
 \SetModuleKeys{
-  key/.code:n = {All okay\\},
-  key/.value_forbidden:,
-  key,
-  key = Not allowed,
-  key/.code:n = #1,
-  key/.value_required:,
-  key = {All okay},
-  key
+  key-one,
+  key-one = Not allowed,
+  key-two = All okay,
+  key-two
 }
 
-% Test six: Keys can be given a default value, to be used if nothing is
-% specified by the user.
+% Test five: Keys can be given a default value, to be used if nothing is
+% specified by the user. This can be done by name or by value.
 % ----------------------------------------------------------------------
 %   Default
 %   Real
-%   Default
+%   Stuff
+%   Real
+%   Literal
+%   Real
 % ----------------------------------------------------------------------
+\ExplSyntaxOn
+\renewcommand*{\temp}{Stuff}
+\keys_define:nn { module } {
+  key-one .code:n      =  #1\\,
+  key-one .default:n   = \temp,
+  key-two .code:n      =  #1\\,
+  key-two .default:V   = \temp,
+  key-three .code:n    =  #1\\,
+  key-three .default:n = Literal,
+}
+\ExplSyntaxOff
+\renewcommand*{\temp}{Default}
+
 \SetModuleKeys{
-  key/.code:n = {#1\\},
-  key/.default:n = Default,
-  key,
-  key = Real,
-  key
+  key-one,
+  key-one = Real,
+  key-two,
+  key-two = Real,
+  key-three,
+  key-three = Real
 }
 
-% Test seven: Keys can be created to store data both locally and 
+% Test six: Keys can be created to store data both locally and 
 % globally. This is illustrated using token list variables.
 % ----------------------------------------------------------------------
 %   Some content
@@ -166,48 +176,56 @@
 %   Some content
 %   Some content
 % ----------------------------------------------------------------------
+\ExplSyntaxOn
 \tl_new:Nn \l_temp_tl {Outside}
 \tl_new:Nn \g_temp_tl {Outside}
-\SetModuleKeys{
-  key/.set:N = \l_temp_tl,
+\keys_define:nn { module } {
+  key-one .set:N = \l_temp_tl,
+  key-two .set:N = \g_temp_tl,
 }
-\begingroup
-\SetModuleKeys{
-  key = Some content
-}
-\l_temp_tl\\
-\endgroup
-\l_temp_tl\\
-\SetModuleKeys{
-  key/.set:N = \g_temp_tl
-}
-\begingroup
-\SetModuleKeys{
-  key = Some content
-}
-\g_temp_tl\\
-\endgroup
-\g_temp_tl\\
 
-% Test eight: An expanded version of .set:N is available.
+\begingroup
+\SetModuleKeys{
+  key-one = Some~content
+}
+\l_temp_tl\\
+\endgroup
+\l_temp_tl\\
+
+\begingroup
+\SetModuleKeys{
+  key-two = Some~content
+}
+\g_temp_tl\\
+\endgroup
+\g_temp_tl\\
+\ExplSyntaxOff
+
+% Test seven: An expanded version of .set:N is available.
 % ----------------------------------------------------------------------
 %   Unexpanded
 %   Expanded
 % ----------------------------------------------------------------------
+\ExplSyntaxOn
 \tl_set:Nn \l_temp_tl {Expanded}
 \tl_new:N \l_tempa_tl 
 \tl_new:N \l_tempb_tl 
+\keys_define:nn { module } {
+  key-one .set:N   = \l_tempa_tl,
+  key-two .set_x:N = \l_tempb_tl,
+}
+
 \SetModuleKeys{
-  key one/.set:N   = \l_tempa_tl,
-  key two/.set_x:N = \l_tempb_tl,
-  key one = \l_temp_tl,
-  key two = \l_temp_tl,
+  key-one = \l_temp_tl,
+  key-two = \l_temp_tl,
 }
 \tl_set:Nn \l_temp_tl {Unxpanded}
 \l_tempa_tl\\
 \l_tempb_tl\\
 
-% Test nine: Choices can be created either from a list of options or
+\ExplSyntaxOff
+
+% Test eight: Choices can be created either from a list of options or
 % one by one. Both are tested here by creating a list then adding to it
 % with an extra key. Unknown choices lead to an error message.
 % ----------------------------------------------------------------------
@@ -216,14 +234,19 @@
 % Choice `c' is number 3
 % An extra choice
 % ----------------------------------------------------------------------
-% Choice `e' unknown for key `/module name/key/e':
+% Choice `e' unknown for key `module/key':
 % the key is being ignored.
 % ----------------------------------------------------------------------
+\ExplSyntaxOn
+\keys_define:nn { module } {
+  key .generate_choices:nn = {a,b,c} {
+    Choice~`\l_keys_choice_tl'~is~number~\int_use:N \l_keys_choice_int\\
+  },
+  key/d .code:n = An~extra~choice \\
+}
+\ExplSyntaxOff
+
 \SetModuleKeys{
-  key/.create_choices:nn = {a,b,c}
-    {Choice `\csname l_keys_current_choice_tl\endcsname' is number
-     \the\csname l_keys_current_choice_int\endcsname \\},
-  key/d/.code:n = {An extra choice \\},
   key = a,
   key = b,
   key = c,
@@ -231,70 +254,29 @@
   key = e
 }
 
-% Test ten: Keys can be used to set other keys.  One or more 
-% arguments can be accepted when this happens, allowing complex key 
-% setting to be carried out easily. There are expanded versions of these
-% properties, which work similarly.
+% Test nine: A completely unknown key should cause an error.
 % ----------------------------------------------------------------------
-% Hello Fred.
-% How are you, Fred?
-% Hello Fred.
-% How are you, Ginger?
-% ----------------------------------------------------------------------
-\SetModuleKeys{
-  key one/.code:n = {Hello #1.\\},
-  key two/.code:n = {How are you, #1?\\},
-  key three/.use_keys:n = { key one = #1, key two = #1},
-  key three = Fred,
-  key three/.use_keys:Nn = 2 { key one = #1, key two = #2},
-  key three = {Fred} {Ginger}
-}
-
-% Test eleven: The .try:w and .retry:w properties attempt to set a key
-% only if it exists.  The .try:w property does this for every key it
-% is given, whereas .retry: only works if the previous .try:w failed.
-% ----------------------------------------------------------------------
-% Hello
-% World
-% Seen
-% ----------------------------------------------------------------------
-\SetModuleKeys{
-  key one/.code:n = {#1\\},
-  key two/.code:n = {#1\\},
-  key one/.try:n = Hello,
-  key ten/.try:n = Rubbish,
-  key two/.try:n = World,
-  key two/.retry:n = Not seen,
-  key ten/.try:n = Rubbish,
-  key two/.retry:n = Seen,
-}
-
-% Test twelve: Two programmers tools, .show_code: and .show_key:, do
-% pretty much what might be expected. .show_key: is mainly useful for
-% internal keys.
-% ----------------------------------------------------------------------
-% a or b
-% ----------------------------------------------------------------------
-% > \keys-root/module name/key one/._cmd:w=\long macro:
-% #1#2->#1 or #2.
-%
-% > \keys-root/module name/key one/._num_args_tl=macro:
-% ->2.
-% ----------------------------------------------------------------------
-\SetModuleKeys{
-  key one/.code:Nn = 2 {#1 or #2},
-  key one = ab,
-  key one/.show_code:,
-  key one/._num_args_tl/.show_key:,
-}
-
-% Test thirteen: A completely unknown key should cause an error.
-% ----------------------------------------------------------------------
-% The key `/module name/unknown key' is unknown and is being ignored
+% The key `module/unknown key' is unknown and is being ignored.
 % ----------------------------------------------------------------------
 \SetModuleKeys{
   unknown key = some value
 }
+
+% Test ten: If the special `unknown' key has been set up, however,
+% unknown input can be re-directed.
+% ----------------------------------------------------------------------
+% You tried to set key `unknown key' to `some value'
+% ----------------------------------------------------------------------
+\ExplSyntaxOn
+\keys_define:nn { module } {
+   unknown .code:n = You~tried~to~set~key~`\l_keys_key_tl'~to~`#1'
+}
+\ExplSyntaxOff
+
+\SetModuleKeys{
+  unknown key = some~value
+}
+
 
 \end{document}
 

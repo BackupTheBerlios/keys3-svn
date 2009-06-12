@@ -16,13 +16,13 @@ See http://www.latex-project.org/lppl.txt
 The keys3 package is an experimental implementation of key
 management for LaTeX3.  The entire package is written in
 expl3 code rather than in traditional TeX/LaTeX.  The key
-model used by keys3 is based on that introduced by the
-pgfkeys package from the pgf/TiKZ bundle. Keys are thus
-addressed in a path-like manner, and are controlled by key
-properties:
+model used by keys3 is based on the idea that keys are created
+by setting key properties:
 
-  /module/key/.code:n = <code>,
-  /module/key/.value_required:
+  \keys_define:nn { module } { 
+    key .code:n = Hello #1,
+    key .value_required:
+  }
 
 The keys3 package is intended as a method for testing how key
 management might be implemented in LaTeX3.  Both the methods
@@ -132,119 +132,77 @@ This work consists of the file  keys3.dtx
 %</driver>
 % \fi
 %
-% \title{The \pkg{keys3} package^^A
-%   \thanks{This file has version number \fileversion, last
-%     revised \filedate.}\\
-% Key management for \LaTeX3}
-% \author{Joseph Wright^^A
-%   \thanks{E-mail: joseph.wright@morningstar2.co.uk}}
-% \date{\filedate}
+%\title{The \pkg{keys3} package^^A
+%  \thanks{This file has version number \fileversion, last
+%    revised \filedate.}\\
+%  Key management for \LaTeX3
+%}
+%\author{Joseph Wright^^A
+%  \thanks{E-mail: joseph.wright@morningstar2.co.uk}}
+%\date{\filedate}
 % 
-% \maketitle
+%\maketitle
 % 
-% \begin{documentation}
+%\begin{documentation}
 %
 %\section{Key management}
 %
 % The key--value method is a popular system for creating large numbers
-% of settings for controlling macro or package behaviour.  For the
+% of settings for controlling function or package behaviour.  For the
 % user, the system normally results in input of the form
 %\begin{verbatim}
 %  \PackageControlMacro{
-%    key     = value,
-%    key two = value two
+%    key-one = value one,
+%    key-two = value two
 %  }
 %\end{verbatim}
 % or
 %\begin{verbatim}
 %  \PackageMacro[
-%    key     = value,
-%    key two = value two
+%    key-one = value one,
+%    key-two = value two
 %  ]{argument}.
 %\end{verbatim}
 % For the programmer, the original \pkg{keyval} package gives only
 % the most basic interface for this work.  All key macros have to be
 % created one at a time, and as a result the \pkg{kvoptions} and
 % \pkg{xkeyval} packages have been written to extend the ease of
-% creating keys.  However, the underlying model is rather inflexible.
+% creating keys.  A very different approach has been provided by
+% the \pkg{pgfkeys} package, which uses a key--value list to
+% generate keys.
+% 
+% The \pkg{keys3} package is aimed at creating a programming 
+% interface for key--value controls in \LaTeX3. Keys are
+% created using a key--value interface, in a similar manner to 
+% \pkg{pgfkeys}. Each key is created by setting one or more
+% \emph{properties} of the key:
+%\begin{verbatim}
+%  \keys_define:nn { module }
+%    key-one .code:n = code including parameter #1,
+%    key-two .set    = \l_module_store_tl
+%  }
+%\end{verbatim}
+% These values can then be set as with other key--value approaches:
+%\begin{verbatim}
+%  \keys_set:nn { module }
+%    key-one = value one,
+%    key-two = value two
+%  }
+%\end{verbatim}
 %
-% As an alternative, \pkg{pgfkeys} from the \pkg{pgf}/Ti\emph{k}z
-% bundle uses a ``file-like'' model for keys. In this model, each key
-% has one or more functions attached to define its action.  In
-% \pkg{pgfkeys} terminology, these are key \emph{handlers}. Keys can
-% be created and used using a unified interface:
-%\begin{verbatim}
-%  \pgfkeys{
-%    /path/key/.handler = code,
-%    /path/key          = value
-%  }
-%\end{verbatim}
-%
-% The \pkg{keys3} package is aimed at creating a high-level
-% programmers interface for key--value controls in \LaTeX3. Key
-% creation and control follows the \pkg{pgfkeys} closely, although
-% changes have been made to adhere to the new coding ideas of \LaTeX3,
-% and new functions have been added.  The \pkg{keys3} package is
-% \emph{not} a simple translation of \pkg{pgfkeys} to the new syntax.
-% In package internals have been written from the ground up, to better
-% enforce variable typing and to act in a know manner under failing
-% circumstances.
-% 
-% In the \pkg{keys3} model, each key belongs to a module,
-% which may have one or more subdivisions. Each key then has
-% one or more properties which define how the key acts. In contrast
-% to \pkg{pgfkeys}, \pkg{keys3} divides up the tasks of
-% defining and setting keys between two separate functions (in the
-% same way as \pkg{keyval} does).
-%\begin{verbatim}
-%  \keys_define:n{
-%    /module/key/.property     = code,
-%    /module/sub/key/.property = more code,
-%  }
-%  \keys_set:n {
-%    /module/key = value
-%  }
-%\end{verbatim}
-% The combination of all \m{module} parts up to the \m{key} is referred
-% to as the \emph{path} of the key. 
-% 
-% Keys are created by assigning one or more properties to the key, 
-% most commonly a piece of code to execute when the key is used (this 
-% is the \texttt{.code:n} property).
-%\begin{verbatim}
-%  \keys_define:n{
-%    /module/key/.code:n = <code>
-%  }
-%\end{verbatim}
-% Keys are then used in the normal way, by assigning a value to the 
-% key.
-%\begin{verbatim}
-%  \keys_set:n{
-%    /module/key = <value>
-%  }
-%\end{verbatim}
-% Here, \meta{value} is passed to the \meta{code} defined |#1|. The
-% \meta{code} can then process it in whatever way is appropriate. 
-% 
-% At a document level, it is likely that \cs{keys_set:n} would be
-% wrapped up into a user macro or optional argument. For \LaTeXe, a 
-% generic set up macro might be created with:
+% At a document level, the \cs{keys_set:nn} macro used within a  
+% document function. For \LaTeXe, a generic set up function could be 
+% created with
 %\begin{verbatim}
 %  \newcommand*\SomePackageSetup[1]{%
-%    \@nameuse{keys_set:n}{%
-%      /package name/.cd:,
-%      #1
-%    }%
+%    \@nameuse{keys_set:nn}{module}{#1}%
 %  }
 %\end{verbatim}
 % or to use key--value input as the optional argument for a macro:
 %\begin{verbatim}
 %  \newcommand*\SomePackageMacro[2][]{%
 %    \begingroup
-%      \@nameuse{keys_set:n}{
-%        /package name/.cd:,
-%        #1
-%      }%
+%      \@nameuse{keys_set:nn}{module}{#1}%
 %      % Main code for \SomePackageMacro
 %    \endgroup
 %  }
@@ -252,660 +210,469 @@ This work consists of the file  keys3.dtx
 % The same concepts using \pkg{xparse} for \LaTeX3 use:
 %\begin{verbatim}
 %  \DeclareDocumentCommand \SomePackageSetup { m } {
-%    \keys_set:n {
-%      /package name/.cd:,
-%      #1
-%    }
+%    \keys_set:nn { module } { #1 }
 %  }
 %  \DeclareDocumentCommand \SomePackageMacro { o m } {
 %    \group_begin:
-%      \keys_set:n {
-%        /package name/.cd:,
-%        #1
-%      }
+%      \keys_set:nn { module } { #1 }
 %      % Main code for \SomePackageMacro
 %    \group_end:
 %  }
+%\end{verbatim}
+%
+% Key names may contain any tokens, as they are handled internally
+% using \cs{tl_to_str:n}. As will be discussed in 
+% section~\ref{sec:subdivision}, it is suggested that the character 
+% ``\texttt{/}'' is reserved for sub-division of keys into logical
+% groups. Macros are \emph{not} expanded when creating key names,
+% and so:
+%\begin{verbatim}
+%  \tl_set:Nn \l_module_tmp_tl { key }
+%  \keys_define:nn { module } {
+%    \l_module_tmp_tl .code:n = code
+%  }
 %\end{verbatim} 
+% will create a key called \cs{l_module_tmp_tl}, and not one called
+% \texttt{key}.
 %
-%\subsection{Creating, retrieving and setting keys}
+%\subsection{Creating keys}
 %
-% \begin{function}{\keys_define:n}
-%   \begin{syntax}
-%     "\keys_define:n" <keyval list>
-%   \end{syntax}
-%   Parses the <keyval list> and defines the keys listed there.
-%   This function is designed for use in code, and therefore does
-%   not check category codes or ignore spaces.
-% \end{function}
-%
-% \begin{function}{\keys_set:n}
-%   \begin{syntax}
-%     "\keys_set:n" <keyval list>
-%   \end{syntax}
-%   Parses the <keyval list> and sets the keys found in it. In
-%   contrast to \cs{keys_define:n}, this function does check category
-%   codes and ignore spaces, and is therefore suitable for user input.
-% \end{function}
-%
+%\begin{function}{\keys_define:nn}
+%  \begin{syntax}
+%    "\keys_define:nn" <module> <keyval list>
+%  \end{syntax}
+%  Parses the <keyval list> and defines the keys listed there for
+%  <module>. This function is designed for use in code, and therefore
+%  does  not check the category codes of characters or ignore spaces.
+%\end{function}
+% 
 % Setting up and altering keys is carried out using one or more
-% properties (in \pkg{pgfkeys}, these are called handlers). In all
-% cases, \m{key} may be a full-qualified key with a path, or a partial
-% key to which the default path will be added. Notice that when a
-% single argument is required, the braces around the argument may be
-% omitted without any error arising.
+% properties. The properties determine how a key acts, and may require 
+% zero, one or two argument: this is indicated by an argument specifier,
+% in the same way as a standard \LaTeX3 function. If only a single
+% argument is required, braces around \texttt{n} arguments can be
+% omitted.\footnote{This is a general feature of key--value input 
+% methods.}
 % 
-%\subsubsection{Storing values}
-%
-% A common use of key--value input is to store the values given in a 
-% variable for later use.  All storage variable can be accessed using
-% the same property:
-%\begin{verbatim}
-%  \keys_define:n {
-%    /module/key~one/.set:N   = \l_mod_data_int,
-%    /module/key~two/.set:N   = \l_mod_data_skip,
-%    /module/key~three/.set:N = \l_mod_data_tl,
-%    /module/key~four/.set:N  = \l_mod_data_toks
-%  }
-%\end{verbatim}
-% The type of variable to store is detected from the variable name, as
-% is the scope for setting: global variables are always set globally. 
-% 
-%\subsubsection{Multiple choice keys}
-%
-% Multiple choice keys are created in \pkg{keys3} using the 
-% \texttt{.expects_choice:} property. Each choice is then a sub-key of 
-% the choice key.
-%\begin{verbatim}
-%  \keys_define:n {
-%    /module/key/.expects_choice:,
-%    /module/key/choice~a/.code:n = Some code,
-%    /module/key/choice~b/.code:n = Some other code,
-%  }
-%\end{verbatim}
-% In this way, choices which execute arbitrary code can be created. 
-% Notice that the \m{code} should \emph{not} include a parameter (|#1|).
-% 
-% Often it is desirable to create a family of similar choices, which 
-% only require either the text of the choice, or the position of the 
-% choice in a list, to be used.  To create this type of simple choice,
-% \pkg{keys3} provides the \texttt{.create_choices:nn} property. This
-% applies the same code to a list of choice text. Inside the code,
-% the name of the choice given is available as 
-% \cs{l_keys_current_choice_tl}. The position of the choice in the 
-% lists is also available, as \cs{l_keys_current_choice_int}. 
-%\begin{verbatim}
-%  \keys_define:n {
-%    /module/key/.create_choices:nn = {choice~a, choice~b, choice~c} {
-%      You~gave~choice~``\l_keys_current_choice_tl'',~which~is~in~
-%      position~\l_keys_current_choice_int\~in~the~list.
-%    }
-%  }
-%\end{verbatim}
-% 
-%\subsection{Properties}
-%
-% \begin{function}{
-%   .bool_set:N|
-%   .bool_gset:N|
-% }
+%\begin{function}{.choice:}
 %  \begin{syntax}
-%    <key>/.bool_set:N = <bool>
+%    <key> .choice:
 %  \end{syntax}
-%  Defines <key> to set <bool> to <value> (which must be either 
-%  \texttt{true} or \texttt{false}).
-% \end{function}
-% 
-% \begin{function}{
-%   .bool_set_inverse:N|
-%   .bool_gset_inverse:N|
-% }
-%  \begin{syntax}
-%    <key>/.bool_set_inverse:N = <bool>
-%  \end{syntax}
-%  Defines <key> to set <bool> to <value> (which must be either 
-%  \texttt{true} or \texttt{false}), with reversed logic.
-% \end{function}
+%  Sets <key> to act as a multiple choice key. Creating choices 
+%  is discussed in section~\ref{sec:choice}.
+%\end{function}
 %
-% \begin{function}{.cd:}
-%  \begin{syntax}
-%    <key>/.cd:
-%  \end{syntax}
-%  Changes path to <key>.
-% \end{function}
-%
-% \begin{function}{
+%\begin{function}{
 %   .code:n|
 %   .code:x
 %  }
 %  \begin{syntax}
-%    <key>/.code:n = <code>
+%    <key> .code:n = <code>
 %  \end{syntax}
 %  Stores the <code> for execution when <key> is called. The <code> can
 %  include one parameter (|#1|).
-% \end{function}
+%\end{function}
 % 
-% \begin{function}{
+%\begin{function}{
 %   .code:Nn|
 %   .code:Nx
 % }
 %  \begin{syntax}
-%    <key>/.code:Nn = <number> <code>
+%    <key> .code:Nn = <number> <code>
 %  \end{syntax}
 %  Stores the <code> for execution when <key> is called. The <code> can
-%  include <number> parameters, which can be in the range 0--9.
-% \end{function}
+%  include <number> parameters, which can be in the standard \TeX\ 
+%  range 0--9.
+%\end{function}
 % 
-% \begin{function}{
-%   .create_choices:nn|
-%   .create_choices:nx|
-% }
-%  \begin{syntax}
-%    <key>/.create_choices:nn = <list> <code>
-%  \end{syntax}
-%  Creates a sub-key of <key> for each <choice> in the comma-separated
-%  <list>. Each <choice> will have <code> associated with it. The 
-%  current choice text is available as \cs{l_keys_current_choice_tl},
-%  and its position in the <list> as \cs{l_keys_current_choice_int}.
-% \end{function}
-% 
-% \begin{function}{
+%\begin{function}{
 %   .default:n|
 %   .default:V|
 %  }
 %  \begin{syntax}
-%    <key>/.default:n = <content>
+%    <key> .default:n = <content>
 %  \end{syntax}
 %  Creates a default value for <key>, which is used if no value is 
-%  given. The <content> is stored as a token list variable, and so 
-%  must be compatible with this variable type.
+%  given.
 %  \begin{texnote}
-%    The \texttt{V} variant is much like the standard method for
-%    setting a default value in \textsf{template}, while the
-%    \texttt{n} variant is similar to using \cs{DelayEvalution} in
-%    \textsf{template}.
+%    The <content> is stored as a token list variable, and this 
+%    means that there are some restrictions on the nature of <content>.
 %  \end{texnote}
-% \end{function}
+%\end{function}
 % 
-% \begin{function}{.expects_choice:}
+%\begin{function}{
+%   .generate_choices:nn|
+%   .generate_choices:nx|
+% }
 %  \begin{syntax}
-%    <key>/.expects_choice:
+%    <key> .generate_choices:nn = <comma list> <code>
 %  \end{syntax}
-%  Indicates that the <value> given for <key> should be a sub-key of
-%  <key>. In this way, <key> accepts one of a limited range of choices.
-% \end{function}
+%  Makes <key> a multiple choice key, accepting the choices specified
+%  in <comma list>. Each choice will execute <code> if it given. Within
+%  <code>, the name of the current choice is available as 
+%  \cs{l_keys_choice_tl},  and its position in the <comma list> as 
+%  \cs{l_keys_choice_int}. Multiple choices are discussed further in 
+%  section~\ref{sec:choice}.
+%\end{function}
 % 
-% \begin{function}{.retry:n}
-%  \begin{syntax}
-%    <key>/.retry:n = <data>
-%  \end{syntax}
-%  Executes <key> if it exists and if the previous \texttt{.try:n} 
-%  failed. The <data> is passed to <key>, if successful.
-% \end{function}
-% 
-% \begin{function}{
+%\begin{function}{
 %   .set:N|
 %   .set_x:N
 %}
 %  \begin{syntax}
-%    <key>/.set:N = <variable>
+%    <key> .set:N = <variable>
 %  \end{syntax}
 %  Defines <key> to store the value given in <variable>. The type and 
 %  scope (local or global) of <variable> are determined from the 
 %  name. The \texttt{x} version performs an expanded assignment.
-% \end{function}
+%  \begin{texnote}
+%    A \cs{<variable>_set:Nn} function must exist to allow setting
+%    of the <variable>.
+%  \end{texnote}
+%\end{function}
 % 
-% \begin{function}{
-%   .show_code:|
-%   .show_key:|
+%\begin{function}{
+%   .set_bool:N|
+%   .set_bool_inverse:N|
 % }
 %  \begin{syntax}
-%    <key>/.show_code:
-%    <key>/.show_key:
+%    <key> .set_bool:N = <bool>
+%    <key> .set_bool_inverse:N = <bool>
 %  \end{syntax}
-%  Shows the function for the current key or the code associated with
-%  the current key.
-% \end{function}
+%  Defines <key> to set <bool> to <value> (which must be either 
+%  \texttt{true} or \texttt{false}). The \texttt{inverse} version sets
+%  the switch to the opposite logical sense to the argument given.
+%\end{function}
 % 
-% \begin{function}{.try:n}
-%  \begin{syntax}
-%    <key>/.try:n = <data>
-%  \end{syntax}
-%  Executes <key> if defined, and does nothing otherwise.  The <data> is
-%  passed to <key>, if successful.
-% \end{function}
-% 
-% \begin{function}{
-%   .use_keys:n|
-%   .use_keys:x|
-% }
-%  \begin{syntax}
-%    <key>/.use_keys:n = <keyval list>
-%  \end{syntax}
-%  Calling <key> applies the <keyval list> as a block. Thus one <key> 
-%  can make many related settings. As usual, |#1| is available in the
-%  <keyval list> as <key> will take one argument.
-% \end{function}
-% 
-% \begin{function}{
-%   .use_keys:Nn|
-%   .use_keys:Nx|
-% }
-%  \begin{syntax}
-%    <key>/.use_keys:Nn = <number> <keyval list>
-%  \end{syntax}
-%  Calling <key> applies the <keyval list> as a block. Thus one <key> 
-%  can make many related settings. The <key> will take <number> of 
-%  arguments, which can be used inside the <keyval list>.
-% \end{function}
-% 
-% \begin{function}{
+%\begin{function}{
 %   .value_forbidden:|
 %   .value_required:|
 % }
 %  \begin{syntax}
-%    <key>/.value_forbidden:
+%    <key> .value_forbidden:
 %  \end{syntax}
 %  Flags for forbidding and requiring a <value> for <key>.
-% \end{function}
-% 
-%\subsection{Variables and constants}
+%\end{function}
 %
-% \begin{variable}{
-%   \c_keys_0_empty_tl|
-%   \c_keys_1_empty_tl|
-%   \c_keys_2_empty_tl|
-%   \c_keys_3_empty_tl|
-%   \c_keys_4_empty_tl|
-%   \c_keys_5_empty_tl|
-%   \c_keys_6_empty_tl|
-%   \c_keys_7_empty_tl|
-%   \c_keys_8_empty_tl|
-%   \c_keys_9_empty_tl|
-% }
-%   A set of token list variables containing empty groups.
-% \end{variable}
+%\subsection{Sub-dividing keys}
+%\label{sec:subdivision}
+%
+% When creating large numbers of keys, it may be desirable to divide 
+% them into several sub-groups for a given module. This can be achieved
+% either by adding a sub-division to the module name:
+%\begin{verbatim}
+%  \keys_define:nn { module / subgroup } {
+%    key .code:n = code
+%  }
+%\end{verbatim} 
+% or to the key name:
+%\begin{verbatim}
+%  \keys_define:nn { module } {
+%    subgroup / key .code:n = code
+%  }
+%\end{verbatim}  
+% As illustrated, the best choice of token for sub-dividing keys in
+% this way is ``\texttt{/}''. This is because of the method that is
+% used to represent keys internally. Both of the above code fragments
+% set the same key, which has full name \texttt{module/subgroup/key}.
 % 
-% \begin{variable}{\c_keys_cs_prefix_tl}
-%   The prefix added to the fully-qualified key when saving them.
-% \end{variable}
+% As will be illustrated in the next section, this subdivision is
+% particularly relevant to making multiple choices.
+%
+%\subsection{Multiple choices}
+%\label{sec:choice}
+%
+% In \pkg{keys3}, multiple choices are created by setting the 
+% \texttt{.choice:} property:
+%\begin{verbatim}
+%  \keys_define:nn { module } {
+%    key .choice:
+%  }
+%\end{verbatim}
+% For keys which are set up as choices, the valid choices are generated
+% by creating sub-keys of the choice key. This can be carried out in
+% two ways.
 % 
-% \begin{variable}{
-%   \c_keys_errors_path_tl|
-%   \c_keys_properties_path_tl|
-%   \c_keys_utilities_path_tl|
-% }
-%   Paths for properties used by \pkg{l3keys} itself.
-% \end{variable}
+% In many cases, choices execute similar code which is dependant only 
+% on the name of the choice or the position of the choice in the
+% list of choices. Here, the keys can share the same code, and can
+% be rapidly created using the \texttt{.generate_choices:nn}
+% property:
+%\begin{verbatim}
+%  \keys_define:nn { module } {
+%    key .generate_choices:nn = {
+%      choice-a, choice-b, choice-c
+%    } {
+%      You~gave~choice~``\l_keys_choice_tl'',~
+%      which~is~in~position~\l_keys_choice_int
+%      \~in~the~list.
+%    }
+%  }
+%\end{verbatim}
 % 
-% \begin{variable}{\c_keys_root_tl}
-%   The root path for keys.
-% \end{variable}
+%\begin{variable}{
+%  \l_keys_choice_tl|
+%  \l_keys_choice_int|
+%}
+%  Inside the code block, the variables \cs{l_keys_choice_tl} and
+%  \cs{l_keys_choice_int} are available to indicate the name of the
+%  current choice, and its position in the comma list.  The position
+%  is indexed from \(1\).
+%\end{variable}
+%
+% On the other hand, it is sometimes useful to create choices which
+% use entirely different code from one another. This can be achieved
+% by setting the \texttt{.choice:} property of a key, then manually
+% defining sub-keys.
+%\begin{verbatim}
+%  \keys_define:nn { module } {
+%    key choices:n,
+%    key / choice-a .code:n = code-a,
+%    key / choice-b .code:n = code-b,
+%    key / choice-c .code:n = code-c,
+%  }
+%\end{verbatim}
+%
+% It is possible to mix the two methods, but manually-created choices
+% should \emph{not} use \cs{l_keys_choice_tl} or \cs{l_keys_choice_int}.
+%
+%\subsection{Setting keys}
+%
+%\begin{function}{\keys_set:nn}
+%  \begin{syntax}
+%    "\keys_set:nn" <module> <keyval list>
+%  \end{syntax}
+%  Parses the <keyval list>, and sets those keys which are defined
+%  for <module>. The behaviour on finding an unknown key can be
+%  set by defining a special \texttt{unknown} key: this will be 
+%  illustrated later. In contrast to \cs{keys_define:nn}, this function
+%  does check category codes and ignore spaces, and is therefore 
+%  suitable for user input.
+%\end{function}
+%
+% If a key is not known, \cs{keys_set:nn} will look for a special
+% \texttt{unknown} key for the same module. This mechanism can be
+% used to create new keys from user input.
+%\begin{verbatim}
+%  \keys_define:nn { module } {
+%    unknown .code:n = 
+%      You~tried~to~set~key~`\l_keys_path_tl'~to~`#1'
+%  }
+%\end{verbatim}
+%
+%\begin{variable}{\l_keys_key_tl}
+%  When processing an unknown key, the name of the key is available
+%  as \cs{l_keys_key_tl}. Note that this will have been processed
+%  using \cs{tl_to_str:N}. The value passed to the key (if any) is
+%  available as the macro parameter |#1|.
+%\end{variable}
 % 
-% \begin{variable}{\l_keys_choice_code_tl}
-%   The code to execute for each multiple choice when created \emph{en 
-%   masse}.
-% \end{variable}
-% 
-% \begin{variable}{
-%   \l_keys_current_choice_tl|
-%   \l_keys_current_choice_int|
-% }
-%   Information on multiple choices.
-% \end{variable}
-% 
-% \begin{variable}{
-%   \l_keys_current_key_full_tl|
-%   \l_keys_current_key_name_tl|
-% }
-%   The current key name is stored both with and without a path.
-% \end{variable}
-% 
-% \begin{variable}{
-%   \l_keys_current_path_tl|
-%   \l_keys_default_path_tl|
-%   \l_keys_choice_path_tl|
-% }
-%   Various key paths need to be stored.
-% \end{variable}
-% 
-% \begin{variable}{\l_keys_current_value_toks}
-%   The value given for the current key, stored as a token register.
-% \end{variable}
-% 
-% \begin{variable}{\l_keys_no_value_bool}
-%   A marker for ``no value'' as key input.
-% \end{variable}
-% 
-% \begin{variable}{\l_keys_success_bool}
-%   A marker used when trying keys without raising errors.
-% \end{variable}
-% 
-% \begin{variable}{\l_keys_tmpa_tl}
-%   A scratch variable.
-% \end{variable}
+%\subsection{Examining keys: internal representation}
+%
+%\begin{function}{\keys_show:nn}
+%  \begin{syntax}
+%    "\keys_show:nn" <module> <key>
+%  \end{syntax}
+%  Shows the internal representation of a <key>. The function which
+%  executes a <key> is called \cs{keys > <module>/<key>.cmd:w}.
+%\end{function}
 % 
 %\subsection{Internal functions}
 %
-% Notice that everything should be done using the keys system. Only
-% \cs{keys_define:n} and so on are intended for external use. In all
-% cases, \m{key} is a fully-qualified key name. Functions created will
-% be prefixed with \cs{c_keys_cs_prefix_tl}.
-% 
-% \begin{function}{\keys_bool_new:n}
-%   \begin{syntax}
-%     "\keys_bool_new:n" <key>
-%   \end{syntax}
-%   Creates a switch <key>, which will be set to \texttt{true}.
-% \end{function}
-% 
-% \begin{function}{\keys_bool_set:nN}
-%   \begin{syntax}
-%     "\keys_bool_set:nN" <function> <boolean>
-%   \end{syntax}
-%   Uses <function> (either \texttt{set} or \texttt{gset}) to use 
-%   <value> in setting <boolean>. 
-% \end{function}
-% 
-% \begin{function}{
-%   \keys_bool_set_inverse:n|
-%   \keys_bool_set_inverse:nN|
-%  }
-%   \begin{syntax}
-%     "\keys_bool_set:n" <switch>
-%     "\keys_bool_set:nN" <function> <boolean>
-%   \end{syntax}
-%   Uses <function> (either \texttt{set} or \texttt{gset}) to use 
-%   <value> in setting <boolean>. 
-% \end{function}
-% 
-% \begin{function}{\keys_choice_create:n}
-%   \begin{syntax}
-%     "\keys_choice_create:n" <choice>
-%   \end{syntax}
-%   Creates <choice> as a sub-key of <key>.
-% \end{function}
-% 
-% \begin{function}{\keys_choices_create:Nnn}
-%   \begin{syntax}
-%     "\keys_choices_create:Nnn" <expansion> <list> <code>
-%   \end{syntax}
-%   Takes a comma separated <list> and makes a <choice> as a sub-key of
-%   the current <key> for each. The <choice> will execute <code>, which
-%   is processed according to <expansion> (either \texttt{n} or 
-%   \texttt{x}). The <code> has access to \cs{l_keys_current_choice_tl}
-%   and \cs{l_keys_current_choice_int}, which indicate the choice given.
-% \end{function}
-% 
-% \begin{function}{\keys_clear_properties:n}
-%   \begin{syntax}
-%     "\keys_clear_properties:n" <key>
-%   \end{syntax}
-%   Clears the internal properties of <key>.
-% \end{function}
-% 
-% \begin{function}{\keys_default_add:}
-%   \begin{syntax}
-%     "\keys_default_add:"
-%   \end{syntax}
-%   If no value was given for the current key, and a default value is
-%   available, copies the default into \cs{l_keys_current_value_toks}.
-% \end{function}
-% 
-% \begin{function}{\keys_choice_create:n}
-%   \begin{syntax}
-%     "\keys_choice_create:n" <choice>
-%   \end{syntax}
-%   Creates <choice> as a sub-key of <key>.
-% \end{function}
-% 
-% \begin{function}{
-%    \keys_get_variable_scope:N / (EXP) |
-%    \keys_get_variable_type:N  / (EXP)
+%\begin{function}{
+%    \keys_bool_set:N |
+%    \keys_bool_set_inverse:N
 %}
 %   \begin{syntax}
-%     "\keys_get_variable_scope:N" <var>
+%     "\keys_bool_set:N" <bool>
+%   \end{syntax}
+%   Creates code to set <bool> when <key> is given.
+%\end{function}
+%
+%\begin{function}{\keys_choice_make:}
+%   \begin{syntax}
+%     "\keys_choice_make:" 
+%   \end{syntax}
+%   Makes <key> a choice key.
+%\end{function}
+%
+%\begin{function}{\keys_choices_generate:nx}
+%   \begin{syntax}
+%     "\keys_choices_generate:nx" <comma list> <code>
+%   \end{syntax}
+%   Makes <comma list> choices for <key>, each using <code>.
+%\end{function}
+%
+%\begin{function}{\keys_choice_find:n}
+%   \begin{syntax}
+%     "\keys_choice_find:n" <choice>
+%   \end{syntax}
+%   Searches for <choice> as a sub-key of <key>.
+%\end{function}
+%
+%\begin{function}{
+%    \keys_cmd_set:nNn |
+%    \keys_cmd_set:nNx
+%}
+%   \begin{syntax}
+%     "\keys_cmd_set:nNn" <path> <num args> <code>
+%   \end{syntax}
+%   Creates a function for <path>, taking <num args> and using <code>.
+%\end{function}
+%
+%\begin{function}{
+%    \keys_default_set:n |
+%    \keys_default_set:V
+%}
+%   \begin{syntax}
+%     "\keys_default_set:n" <default>
+%   \end{syntax}
+%   Sets <default> for <key>.
+%\end{function}
+%
+%\begin{function}{
+%    \keys_define_elt:n |
+%    \keys_define_elt:nn
+%}
+%   \begin{syntax}
+%     "\keys_define_elt:n" <key> <value>
+%   \end{syntax}
+%   Processing functions for key--value pairs when defining keys.
+%\end{function}
+%
+%\begin{function}{\keys_define_key:n}
+%   \begin{syntax}
+%     "\keys_define_key:n" <key>
+%   \end{syntax}
+%   Defines <key>.
+%\end{function}
+%
+%\begin{function}{\keys_execute:}
+%   \begin{syntax}
+%     "\keys_execute:" 
+%   \end{syntax}
+%   Executes <key>.
+%\end{function}
+%
+%\begin{function}{\keys_execute_unknown:}
+%   \begin{syntax}
+%     "\keys_execute_unknown:" 
+%   \end{syntax}
+%   Handles unknown <key> names.
+%\end{function}
+%
+%\begin{function}{\keys_if_value_requirement:nTF}
+%   \begin{syntax}
+%     "\keys_if_value_requirement:nTF" <requirement>
+%     ~~~~<true code> <false code>
+%   \end{syntax}
+%   Check if <requirement> applies to <key>.
+%\end{function}
+%
+%\begin{function}{\keys_property_find:n}
+%   \begin{syntax}
+%     "\keys_property_find:n" <key>
+%   \end{syntax}
+%   Separates <key> from <property>.
+%\end{function}
+%
+%\begin{function}{\keys_property_new:nn}
+%   \begin{syntax}
+%     "\keys_property_new:nn" <property> <code>
+%   \end{syntax}
+%   Makes a new <property> expanding to <code>
+%\end{function}
+%
+%\begin{function}{\keys_property_undefine:n}
+%   \begin{syntax}
+%     "\keys_property_undefine:n" <property>
+%   \end{syntax}
+%   Deletes <property> of <key>.
+%\end{function}
+%
+%\begin{function}{
+%    \keys_set_elt:n  |
+%    \keys_set_elt:nn 
+%}
+%   \begin{syntax}
+%     "\keys_set_elt:n" <key> <value>
+%   \end{syntax}
+%   Processing functions for key--value pairs when setting keys.
+%\end{function}
+%
+%\begin{function}{\keys_tmp:w}
+%   \begin{syntax}
+%     "\keys_tmp:w" <args>
+%   \end{syntax}
+%   Used to store <code> to execute a <key>.
+%\end{function}
+%
+%\begin{function}{\keys_value_or_default:n}
+%   \begin{syntax}
+%     "\keys_value_or_default:n" <value>
+%   \end{syntax}
+%   Sets \cs{l_keys_value_toks} to <value>, or <default> if
+%   <value> was not given and if <default> is available.
+%\end{function}
+%
+%\begin{function}{\keys_value_requirement:n}
+%   \begin{syntax}
+%     "\keys_value_requirement:nn" <requirement>
+%   \end{syntax}
+%   Sets <key> to have <requirement> concerning <value>.
+%\end{function}
+%
+%\begin{function}{\keys_variable_set:NN}
+%   \begin{syntax}
+%     "\keys_variable_set:NN" <expansion> <var>
+%   \end{syntax}
+%   Sets <key> to assign <value> to <variable>
+%\end{function}
+% 
+%\begin{function}{
+%    \keys_variable_get_scope:N / (EXP) |
+%    \keys_variable_get_type:N  / (EXP)
+%}
+%   \begin{syntax}
+%     "\keys_variable_get_scope:N" <var>
 %   \end{syntax}
 %   Returns the scope (\texttt{g} or blank) or the type of <var>.
-% \end{function}
+%\end{function}
 % 
-% \begin{function}{\keys_msg_new:nn}
-%   \begin{syntax}
-%     "\keys_msg_new:nn" <name> <text>
-%   \end{syntax}
-%   Creates a new message with <name> which produces <text>.
-% \end{function}
-% 
-% \begin{function}{
-%   \keys_error:nn|
-%   \keys_error:n|
-% }
-%   \begin{syntax}
-%     "\keys_error:nn" <name> <arg>
-%     "\keys_error:n" <name> 
-%   \end{syntax}
-%   Issues error <name>, with or without <argument>.
-% \end{function}
-% 
-% \begin{function}{
-%   \keys_find_code_full:|
-%   \keys_find_code_name:
-% }
-%   \begin{syntax}
-%     "\keys_find_code_full:"
-%     "\keys_find_code_name:"
-%   \end{syntax}
-%   Find code to execute for the current fully qualified key 
-%   (\texttt{full}) or key name only (\texttt{name}).
-% \end{function}
-% 
-% \begin{function}{\keys_if_cmd_exist:n / (TF) (EXP) }
-%   \begin{syntax}
-%     "\keys_if_cmd_exist:nTF" <key> <true code> 
-%     ~~~~<false code>
-%   \end{syntax}
-%   Checks for the existence of a |._cmd:w| function for <key>.
-% \end{function}
-% 
-% \begin{function}{\keys_if_exist:n / (TF) (EXP) }
-%   \begin{syntax}
-%     "\keys_if_exist:nTF" <key> <true code> 
-%     ~~~~<false code>
-%   \end{syntax}
-%   Checks for the existence of a <key>.
-% \end{function}
-% 
-% \begin{function}{\keys_if_value:n / (TF) (EXP) }
-%   \begin{syntax}
-%     "\keys_if_value:nTF" <property> <true code> <false code>
-%   \end{syntax}
-%   Checks for the <property> switch of a <key> (typically 
-%   \texttt{required} or \texttt{forbidden}).
-% \end{function}
-% 
-% \begin{function}{\keys_define_internal:n}
-%   \begin{syntax}
-%     "\keys_define_internal:n" <keyval list>
-%   \end{syntax}
-%   An internal ``recycling'' version of \cs{keys_define:n}.
-% \end{function}
-% 
-% \begin{function}{
-%   \keys_no_value_elt:n|
-%   \keys_value_elt:nn
-% }
-%   \begin{syntax}
-%     "\keys_no_value_elt:n" <elt>
-%     "\keys_value_elt:nn" <elt> <value>
-%   \end{syntax}
-%   Functions used by \pkg{l3keyval} for each <elt> of the <keyval 
-%   list> being processed.
-% \end{function}
-% 
-% \begin{function}{\keys_parse:n}
-%   \begin{syntax}
-%     "\keys_parse:n" <keyval list>
-%   \end{syntax}
-%   Functions which actually parses <keyval list>.
-% \end{function}
-% 
-% \begin{function}{\keys_parse_list:n}
-%   \begin{syntax}
-%     "\keys_parse_list:n" <keyval list>
-%   \end{syntax}
-%   Set up macro for \cs{keys_parse:n}.
-% \end{function}
-% 
-% \begin{function}{
-%   \keys_path_add:N|
-%   \keys_path_add:w
-%  }
-%   \begin{syntax}
-%     "\keys_path_add:N" <tl>
-%     "\keys_path_add:w" <tlist> "\q_stop"
-%   \end{syntax}
-%   Adds a full path to key name stored in <tl> or given as <tlist>.
-% \end{function}
-% 
-% \begin{function}{\keys_process_elt:nn}
-%   \begin{syntax}
-%     "\keys_process_elt:nn" <elt> <value>
-%   \end{syntax}
-%   Lead-off processor for converting <elt> into a fully-qualified 
-%   <key> and checking validity of <value>.
-% \end{function}
-% 
-% \begin{function}{
-%   \keys_separate_path:|
-%   \keys_separate_path:w
-%  }
-%   \begin{syntax}
-%     "\keys_separate_path:" 
-%     "\keys_separate_path:w" / <path 1> / <path 2> "\q_stop"
-%   \end{syntax}
-%   Separates key into <path> and <key name>.
-% \end{function}
-% 
-% \begin{function}{
-%   \keys_set_variable:N|
-%   \keys_set_variable_x:N|
-%   \keys_set_variable:NN
+%\subsection{Variables and constants}
+%
+%\begin{variable}{
+%  \c_keys_properties_root_tl|
+%  \c_keys_root_tl
 %}
-%   \begin{syntax}
-%     "\keys_set_variable:N" <variable>
-%     "\keys_set_variable:NN" <variable> <expansion>
-%   \end{syntax}
-%   Detects the type and scope of <variable> and stores user data in
-%   the variable. The <expansion> should be a suitable argument
-%   specifier for a \texttt{set} function: normally \texttt{n} or
-%   \texttt{x}.
-% \end{function}
+%  The root paths for keys and properties.
+%\end{variable}
 % 
-% \begin{function}{
-%   \keys_set_cmd:nn|
-%   \keys_set_cmd:nx|
-%   \keys_set_cmd:nNn|
-%   \keys_set_cmd:nNx|
-%  }
-%   \begin{syntax}
-%     "\keys_set_cmd:nn" <key> <code>
-%     "\keys_set_cmd:nNn" <key> <number> <code>
-%   \end{syntax}
-%   Creates a |._cmd:w| function for <key>, with definition <code>. The
-%   \texttt{N} variant can include <number> parameters.
-% \end{function}
+%\begin{variable}{
+%  \c_keys_value_forbidden_tl|
+%  \c_keys_value_required_tl
+%}
+%  Marker text containers. 
+%\end{variable}
 % 
-% \begin{function}{
-%   \keys_store:nn|
-%   \keys_store:nV|
-%   \keys_store:nx
-%  }
-%   \begin{syntax}
-%     "\keys_store:nn" <key> <data>
-%   \end{syntax}
-%   Stores <data> in <key> function.
-% \end{function}
-% 
-% \begin{function}{\keys_toks_set:Nn}
-%   \begin{syntax}
-%     "\keys_toks_set:Nn" <toks> <key>
-%   \end{syntax}
-%   Sets <toks> equal to the content of <key>
-% \end{function}
-% 
-% \begin{function}{\keys_try:}
-%   \begin{syntax}
-%     "\keys_try:"
-%   \end{syntax}
-%   Attempt to execute a key, with no error if the key is unknown.
-% \end{function}
-% 
-% \begin{function}{\keys_undefine:n}
-%   \begin{syntax}
-%     "\keys_undefine:n" <key>
-%   \end{syntax}
-%   Delete definition of <key>.
-% \end{function}
-% 
-% \begin{function}{\keys_use:n}
-%   \begin{syntax}
-%     "\keys_use:n" <key>
-%   \end{syntax}
-%   Use definition of <key>.
-% \end{function}
-% 
-% \begin{function}{
-%   \keys_use_cmd:n|
-%   \keys_use_cmd:nn
-% }
-%   \begin{syntax}
-%     "\keys_use_cmd:n" <key>
-%     "\keys_use_cmd:nn" <key> <arg>
-%   \end{syntax}
-%   Uses the |._cmd:w| function for <key>, passing <arg> if needed.
-% \end{function}
-% 
-%\subsubsection{Internal properties}
+%\begin{variable}{
+%  \l_keys_module_tl|
+%  \l_keys_path_tl
+%}
+%  Various key paths need to be stored.
+%\end{variable}
 %
-% The internal key properties should not be accessed directly.
+%\begin{variable}{\l_keys_no_value_bool}
+%  A marker for ``no value'' as key input.
+%\end{variable}
 %
-% \begin{function}{._cmd:w}
-%  \begin{syntax}
-%  \end{syntax}
-%  The function which is executed for a key with \texttt{.code}.
-% \end{function}
-%
-% \begin{function}{._default_tl}
-%  \begin{syntax}
-%  \end{syntax}
-%  Holds the default value for a key.
-% \end{function}
+%\begin{variable}{\l_keys_value_toks}
+%  Holds the currently supplied value.
+%\end{variable}
 % 
-% \begin{function}{._forbidden_bool}
-%  \begin{syntax}
-%  \end{syntax}
-%  Indicates that a value cannot be given for <key>.
-% \end{function}
+%\end{documentation}
 % 
-% \begin{function}{._num_args_tl}
-%  \begin{syntax}
-%  \end{syntax}
-%  For functions defined with \texttt{.code:Nn} and \texttt{.code:Nx},
-%  contains the number of arguments the associated |._cmd:w| function
-%  takes.
-% \end{function}
-% 
-% \begin{function}{._required_bool}
-%  \begin{syntax}
-%  \end{syntax}
-%  Indicates that <key> must have a value provided.
-% \end{function}
-% 
-% \end{documentation}
-% 
-% \begin{implementation}
-% 
-%\subsection{Implementation}
+%\begin{implementation}
 %
 % The usual preliminaries.  
 %    \begin{macrocode}
@@ -914,117 +681,53 @@ This work consists of the file  keys3.dtx
   {\filename}{\filedate}{\fileversion}{\filedescription}
 %    \end{macrocode}
 %
-%\subsubsection{Variables and contrasts}
-%
-%\begin{macro}{\c_keys_0_empty_tl}
-%\begin{macro}{\c_keys_1_empty_tl}
-%\begin{macro}{\c_keys_2_empty_tl}
-%\begin{macro}{\c_keys_3_empty_tl}
-%\begin{macro}{\c_keys_4_empty_tl}
-%\begin{macro}{\c_keys_5_empty_tl}
-%\begin{macro}{\c_keys_6_empty_tl}
-%\begin{macro}{\c_keys_7_empty_tl}
-%\begin{macro}{\c_keys_8_empty_tl}
-%\begin{macro}{\c_keys_9_empty_tl}
-% A set of empty arguments.
-%    \begin{macrocode}
-\tl_new:cn { c_keys_0_empty_tl } {}
-\tl_new:cn { c_keys_1_empty_tl } { {} }
-\tl_new:cn { c_keys_2_empty_tl } { {} {} }
-\tl_new:cn { c_keys_3_empty_tl } { {} {} {} }
-\tl_new:cn { c_keys_4_empty_tl } { {} {} {} {} }
-\tl_new:cn { c_keys_5_empty_tl } { {} {} {} {} {} }
-\tl_new:cn { c_keys_6_empty_tl } { {} {} {} {} {} {} }
-\tl_new:cn { c_keys_7_empty_tl } { {} {} {} {} {} {} {} }
-\tl_new:cn { c_keys_8_empty_tl } { {} {} {} {} {} {} {} {} }
-\tl_new:cn { c_keys_9_empty_tl } { {} {} {} {} {} {} {} {} {} }
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{\c_keys_cs_prefix_tl}
-% First, the small number of constants needed are created. A prefix is
-% used to keep all of the actual key macros in one place.
-%    \begin{macrocode}
-\tl_new:Nn \c_keys_cs_prefix_tl { keys-root }
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\c_keys_errors_path_tl}
-%\begin{macro}{\c_keys_properties_path_tl}
-%\begin{macro}{\c_keys_utilities_path_tl}
-% The locations of all of the keys used by \pkg{keys3} itself.
-%    \begin{macrocode}
-\tl_new:Nn \c_keys_errors_path_tl     { /keys/errors }
-\tl_new:Nn \c_keys_properties_path_tl { /keys/properties }
-\tl_new:Nn \c_keys_utilities_path_tl  { /keys }
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
+%\subsubsection{Variables and constants}
 %
 %\begin{macro}{\c_keys_root_tl}
-% The key root should have a clear name; like all of the key macros,
-% this does not include the prefix.
+%\begin{macro}{\c_keys_properties_root_tl}
+% Where the keys are really stored.
 %    \begin{macrocode}
-\tl_new:Nn \c_keys_root_tl { / }
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\l_keys_choice_code_tl}
-% When making choices, the code for each key has to be stored.
-%    \begin{macrocode}
-\tl_new:N \l_keys_choice_code_tl
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\l_keys_current_choice_tl}
-%\begin{macro}{\l_keys_current_choice_int}
-% Multiple choices need some storage.
-%    \begin{macrocode}
-\tl_new:N \l_keys_current_choice_tl
-\int_new:N \l_keys_current_choice_int
+\tl_new:Nn \c_keys_root_tl { keys~>~ }
+\tl_new:Nn \c_keys_properties_root_tl { keys_properties }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_current_key_full_tl}
-%\begin{macro}{\l_keys_current_key_name_tl}
-% The current key name and the fully-qualified key are stored.
+%\begin{macro}{\c_keys_value_forbidden_tl}
+%\begin{macro}{\c_keys_value_required_tl}
+% Two marker token lists.
 %    \begin{macrocode}
-\tl_new:N \l_keys_current_key_full_tl
-\tl_new:N \l_keys_current_default_tl
+\tl_new:Nn \c_keys_value_forbidden_tl { forbidden }
+\tl_new:Nn \c_keys_value_required_tl { required }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_current_path_tl}
-%\begin{macro}{\l_keys_default_path_tl}
-%\begin{macro}{\l_keys_choice_path_tl}
-% The current and default paths can be stored as tls. The default path
-% is then initialised as the key root.
+%\begin{macro}{\l_keys_choice_int}
+%\begin{macro}{\l_keys_choice_tl}
+% Used for the multiple choice system.
 %    \begin{macrocode}
-\tl_new:N \l_keys_current_path_tl
-\tl_new:N \l_keys_default_path_tl
-\tl_set_eq:NN \l_keys_default_path_tl \c_keys_root_tl
-\tl_new:N \l_keys_choice_path_tl
+\int_new:N \l_keys_choice_int
+\tl_new:N \l_keys_choice_tl
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
+%
+%\begin{macro}{\l_keys_key_tl}
+%\begin{macro}{\l_keys_path_tl}
+% Storage for the current key name and the path of the key (key name 
+% plus module name).
+%    \begin{macrocode}
+\tl_new:N \l_keys_key_tl
+\tl_new:N \l_keys_path_tl
+%    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_current_value_toks}
-% The current value is stored in a token register.
+%\begin{macro}{\l_keys_module_tl}
+% The module for an entire set of keys.
 %    \begin{macrocode}
-\toks_new:N \l_keys_current_value_toks
+\tl_new:N \l_keys_module_tl
 %    \end{macrocode}
 %\end{macro}
 %
@@ -1035,242 +738,448 @@ This work consists of the file  keys3.dtx
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\l_keys_success_bool}
-% A switch for trying keys.
+%\begin{macro}{\l_keys_value_toks}
+% A token register for the given value.
 %    \begin{macrocode}
-\bool_new:N \l_keys_success_bool
+\toks_new:N \l_keys_value_toks
 %    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\l_keys_tmpa_tl}
-% A scratch area.
-%    \begin{macrocode}
-\tl_new:N \l_keys_tmpa_tl
-%    \end{macrocode}
-%\end{macro}
-%
-%\subsubsection{Functions}
-%
-%\begin{macro}{\keys_define:n}
-%    \begin{macrocode}
-\cs_new:Nn \keys_define:n {
-  \cs_set_eq:NN \keys_parse:n \KV_parse_no_space_removal_no_sanitize:n
-  \keys_define_internal:n {#1}
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_set:n}
-%    \begin{macrocode}
-\cs_new:Nn \keys_set:n {
-  \cs_set_eq:NN \keys_parse:n \KV_parse_space_removal_sanitize:n
-  \keys_define_internal:n {#1}
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_define_internal:n}
-%\begin{macro}[aux]{\keys_define_aux:nn}
-%\begin{macro}[aux]{\keys_define_aux:Vn}
-% The main key management macros both call the auxiliary function after
-% setting up the parser.  The expansion trick means a literal path is
-% sent to the later function, and so the default path can be redefined.
-%    \begin{macrocode}
-\cs_new:Nn \keys_define_internal:n {
-  \keys_define_aux:Vn \l_keys_default_path_tl {#1}
-}
-\cs_new:Nn \keys_define_aux:nn {
-  \tl_set_eq:NN \l_keys_default_path_tl \c_keys_root_tl
-  \keys_parse_list:n {#2}
-  \tl_set:Nn \l_keys_default_path_tl {#1}
-}
-\cs_generate_variant:Nn \keys_define_aux:nn { Vn }
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %\end{macro}
 %
 %\subsubsection{Internal functions}
 %
-%\begin{macro}{\keys_bool_new:n}
-% To create a new switch, which will be true (as the existence of the 
-% switch is the flag here).
+%\begin{macro}{\keys_bool_set:N}
+%\begin{macro}{\keys_bool_set_inverse:N}
+%\begin{macro}[aux]{\keys_bool_set_aux:N}
+% Boolean keys are really just choices, but all done by hand.
 %    \begin{macrocode}
-\cs_new_nopar:Nn \keys_bool_new:n {
-  \bool_new:c { \c_keys_cs_prefix_tl #1 }
-  \bool_set_true:c { \c_keys_cs_prefix_tl #1 }
+\cs_new_nopar:Nn \keys_bool_set:N {
+  \keys_cmd_set:nNx { \l_keys_path_tl / true } 1 {
+    \exp_not:c { bool_ \keys_variable_get_scope:N #1 set_true:N } 
+      \exp_not:N #1
+  }
+  \keys_cmd_set:nNx { \l_keys_path_tl / false } 1 {
+    \exp_not:N \use:c 
+      { bool_ \keys_variable_get_scope:N #1 set_false:N } 
+      \exp_not:N #1
+  }
+  \keys_bool_set_aux:N #1
+}
+\cs_new_nopar:Nn \keys_bool_set_inverse:N {
+  \keys_cmd_set:nNx { \l_keys_path_tl / true } 1 {
+    \exp_not:c { bool_ \keys_variable_get_scope:N #1 set_false:N }
+      \exp_not:N #1
+  }
+  \keys_cmd_set:nNx { \l_keys_path_tl / false } 1 {
+    \exp_not:c { bool_ \keys_variable_get_scope:N #1 set_true:N }
+      \exp_not:N #1
+  }
+  \keys_bool_set_aux:N #1
+}
+\cs_new_nopar:Nn \keys_bool_set_aux:N {
+  \keys_choice_make:
+  \cs_if_exist:NF #1 {
+    \bool_new:N #1
+  }
+  \keys_default_set:n { true }
 }
 %    \end{macrocode}
 %\end{macro}
+%\end{macro}
+%\end{macro}
 %
-%\begin{macro}{\keys_bool_set:nN}
-% Boolean keys are created by using the fact that only \texttt{true} and
-% \texttt{false} give the right result when looking for a setting 
-% function. A default is also set, so that the key name alone can be 
-% given.
+%\begin{macro}{\keys_choice_find:n}
+% Executing a choice has two parts. First, try the choice given, then
+% if that fails call the unknown key. That will exist, as it is created
+% when a choice is first made. So there is no need for any escape code.
 %    \begin{macrocode}
-\cs_new_nopar:Nn \keys_bool_set:nN {
-  \keys_parse_list:n {
-    \c_keys_properties_path_tl /.code:n = {
-      \cs_if_exist:cTF { bool_ #1 _ ##1 :N } {
-        \use:c { bool_ #1 _ ##1 :N } #2
-      }{
-        \keys_error:nn { Boolean~expected } {##1}
-      }
-    },
-    \l_keys_current_path_tl /.default:n = true
+\cs_new_nopar:Nn \keys_choice_find:n {
+  \keys_execute_aux:nn { \l_keys_path_tl / #1 } {
+    \keys_execute_aux:nn { \l_keys_path_tl / unknown } { }
   }
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\keys_bool_set_inverse:n}
-%\begin{macro}{\keys_bool_set_inverse:nN}
-% To set keys with reversed logic, the basics can be done in the same 
-% way as for the standard switches.  The only thing needed is a 
-% reversal of \texttt{true}/\texttt{false}.
+%\begin{macro}{\keys_choice_make:}
+% To make a choice from a key, two steps: set the code, and set the 
+% unknown key.
 %    \begin{macrocode}
-\cs_new_nopar:Nn \keys_bool_set_inverse:n {
-  \tl_if_eq:nnTF {#1} { true } { false } { true }
-}
-\cs_new_nopar:Nn \keys_bool_set_inverse:nN {
-  \keys_parse_list:n {
-    \c_keys_properties_path_tl /.code:n = {
-      \cs_if_exist:cTF { bool_ #1 _ ##1 :N } {
-        \use:c { bool_ #1 _ \keys_bool_set_inverse:n {##1} :N } #2
-      }{
-        \keys_error:nn { Boolean~expected } {##1}
-      }
-    },
-    \l_keys_current_path_tl /.default:n = true
+\cs_new_nopar:Nn \keys_choice_make: {
+  \keys_cmd_set:nNn { \l_keys_path_tl } 1 {
+    \keys_choice_find:n {##1}
+  }
+  \keys_cmd_set:nNn { \l_keys_path_tl / unknown } 1 {
+    \msg_error:nnxx { keys } { choice~unknown }
+      { \l_keys_path_tl } {##1} 
   }
 }
 %    \end{macrocode}
 %\end{macro}
+%
+%\begin{macro}{\keys_choices_generate:nx}
+%\begin{macro}[aux]{\keys_choices_generate_aux:n}
+% Creating multiple-choices means setting up the ``indicator'' code,
+% then applying whatever the user wanted.
+%    \begin{macrocode}
+\cs_new:Nn \keys_choices_generate:nx {
+  \keys_choice_make:
+  \int_zero:N \l_keys_choice_int
+  \cs_set_nopar:Nn \keys_choices_generate_aux:n {
+    \int_incr:N \l_keys_choice_int
+    \keys_cmd_set:nNx { \l_keys_path_tl / ##1 } 1 {
+      \exp_not:n { \tl_set:Nn \l_keys_choice_tl } {##1}
+      \exp_not:n { \int_set:Nn \l_keys_choice_int }
+        { \int_use:N \l_keys_choice_int }
+      #2
+    }
+  }
+  \clist_map_function:nN {#1} \keys_choices_generate_aux:n 
+}
+\cs_new_nopar:Nn \keys_choices_generate_aux:n { }
+%    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\keys_choices_create:Nnn}
-%\begin{macro}[aux]{\keys_choices_create_aux:n}
-%\begin{macro}[aux]{\keys_choices_create_aux:x}
-%\begin{macro}{\keys_choice_create:n}
-% When making multiple choices, the code for each choice is the same.
-% Only the path and counter need to be altered. 
+%\begin{macro}{\keys_cmd_set:nNn}
+%\begin{macro}{\keys_cmd_set:nNx}
+%\begin{macro}[aux]{\keys_cmd_set_aux:nN}
+% Creating a new command means setting properties and then creating
+% a function with the correct number of arguments.
 %    \begin{macrocode}
-\cs_new:Nn \keys_choices_create:Nnn {
-  \tl_set_eq:NN \l_keys_choice_path_tl \l_keys_current_path_tl
-  \int_zero:N \l_keys_current_choice_int
-  \use:c { keys_choices_create_aux: #1 } {#3}
-  \clist_map_function:nN {#2} \keys_choice_create:n
-  \keys_define_internal:n { \l_keys_choice_path_tl  /.expects_choice: }
+\cs_new:Nn \keys_cmd_set:nNn {
+  \keys_cmd_set_aux:nN {#1} #2
+  \cs_generate_from_arg_count:cNnn { \c_keys_root_tl #1 .cmd:w } 
+    \cs_set:Npn #2 {#3}
 }
-\cs_new:Nn \keys_choices_create_aux:n {
-  \tl_set:Nn \l_keys_choice_code_tl { \exp_not:n {#1} }
+\cs_new:Nn \keys_cmd_set:nNx {
+  \keys_cmd_set_aux:nN {#1} #2
+  \cs_generate_from_arg_count:cNnn { \c_keys_root_tl #1 .cmd:w } 
+    \cs_set:Npx #2 {#3}
 }
-\cs_new:Nn \keys_choices_create_aux:x {
-  \tl_set:Nn \l_keys_choice_code_tl {#1}
+\cs_new_nopar:Nn \keys_cmd_set_aux:nN {
+  \keys_property_undefine:n { #1 .default_tl }
+  \num_set:cn { \c_keys_root_tl #1 .args_num } {#2}
+  \tl_set:cn  { \c_keys_root_tl #1 .req_tl } { } 
 }
-\cs_new_nopar:Nn \keys_choice_create:n {
-  \int_incr:N \l_keys_current_choice_int
-  \keys_parse_list:n {
-    \l_keys_choice_path_tl / #1 /.code:x = {
-      \exp_not:n { \int_set:Nn \l_keys_current_choice_int }
-        { \int_use:N \l_keys_current_choice_int }
-      \exp_not:n { \tl_set:Nn \l_keys_current_choice_tl } {#1}
-      \l_keys_choice_code_tl
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\keys_default_set:n}
+%\begin{macro}{\keys_default_set:V}
+% Setting a default value is easy.
+%    \begin{macrocode}
+\cs_new:Nn \keys_default_set:n {
+  \tl_set:cn { \c_keys_root_tl \l_keys_path_tl .default_tl } {#1}
+}
+\cs_generate_variant:Nn \keys_default_set:n { V }
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\keys_define:nn}
+% The main key-defining function mainly sets up things for \pkg{l3keyval}
+% to use.
+%    \begin{macrocode}
+\cs_new:Nn \keys_define:nn {
+  \tl_set:Nn \l_keys_module_tl {#1}
+  \cs_set_eq:NN \KV_key_no_value_elt:n \keys_define_elt:n
+  \cs_set_eq:NN \KV_key_value_elt:nn \keys_define_elt:nn
+  \KV_parse_no_space_removal_no_sanitize:n {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_define_elt:n}
+%\begin{macro}{\keys_define_elt:nn}
+% The element processors for defining keys.
+%    \begin{macrocode}
+\cs_new:Nn \keys_define_elt:n {
+  \bool_set_true:N \l_keys_no_value_bool
+  \keys_define_elt_aux:nn {#1} { }
+}
+\cs_new:Nn \keys_define_elt:nn {
+  \bool_set_false:N \l_keys_no_value_bool
+  \keys_define_elt_aux:nn {#1} {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}[aux]{\keys_define_elt_aux:nn}
+% The auxiliary function does most of the work.
+%    \begin{macrocode}
+\cs_new:Nn \keys_define_elt_aux:nn {
+  \keys_property_find:n {#1}
+  \cs_set_eq:Nc \keys_tmp:w 
+    { \c_keys_properties_root_tl \l_keys_key_tl }
+  \cs_if_exist:NTF \keys_tmp:w {
+    \keys_define_key:n {#2}
+  }{
+    \msg_error:nnx { keys } { property~unknown } 
+      { \l_keys_key_tl }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_define_key:n}
+% Defining a new key means finding the code for the appropriate 
+% property then running it. As properties have signatures, a check
+% can be made for required values without needing anything set
+% explicitly.
+%    \begin{macrocode}
+\cs_new:Nn \keys_define_key:n {
+  \bool_if:NTF \l_keys_no_value_bool {
+    \intexpr_compare:nTF { 
+      \exp_args:Nc \cs_get_arg_count_from_signature:N 
+        { \l_keys_key_tl }  = \c_zero
+    } {
+      \keys_tmp:w
+    }{
+      \msg_error:nnx { keys } { property~value~required } 
+        { \l_keys_key_tl }
+    }  
+  }{
+    \intexpr_compare:nTF { 
+      \exp_args:Nc \cs_get_arg_count_from_signature:N 
+        { \l_keys_key_tl }  = \c_one
+    } {
+      \keys_tmp:w {#1}
+    }{
+      \keys_tmp:w #1
     }
   }
 }
 %    \end{macrocode}
 %\end{macro}
+%
+%\begin{macro}{\keys_execute:}
+%\begin{macro}{\keys_execute_unknown:}
+%\begin{macro}[aux]{\keys_execute_aux:nn}
+% Actually executing a key is done in two parts. First, look for the
+% key itself, then look for the \texttt{unknown} key with the same
+% path. If both of these fail, complain!
+%    \begin{macrocode}
+\cs_new_nopar:Nn \keys_execute: {
+  \keys_execute_aux:nn { \l_keys_path_tl } {
+    \keys_execute_unknown:
+  }
+}
+\cs_new_nopar:Nn \keys_execute_unknown: {
+  \keys_execute_aux:nn { \l_keys_module_tl / unknown } {
+    \msg_error:nnx { keys } { key~unknown } { \l_keys_path_tl }
+  }
+}
+%    \end{macrocode}
+% If there is only one argument required, it is wrapped in braces so
+% that everything is passed through properly. On the other hand, if more
+% than one is needed it is down to the user to have put things in 
+% correctly!
+%    \begin{macrocode}
+\cs_new_nopar:Nn \keys_execute_aux:nn {
+  \cs_set_eq:Nc \keys_tmp:w { \c_keys_root_tl #1 .cmd:w }
+  \cs_if_exist:NTF \keys_tmp:w {
+    \intexpr_compare:nTF { 
+      \num_use:c { \c_keys_root_tl #1 .args_num } = \c_one
+    } {
+      \exp_args:NV \keys_tmp:w \l_keys_value_toks
+    }{
+      \exp_after:wN \keys_tmp:w \toks_use:N \l_keys_value_toks
+    }
+  }{
+    #2
+  }
+}
+%    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\keys_clear_properties:n}
-% To avoid problem on redefinition, all properties are removed.
+%\begin{macro}{\keys_if_value_requirement:nTF}
+% To test if a value is required or forbidden. Only one version is
+% needed, so done by hand.
 %    \begin{macrocode}
-\cs_new_nopar:Nn \keys_clear_properties:n {
-  \keys_undefine:n { #1 /._cmd:w }      
-  \keys_undefine:n { #1 /._default_tl }  
-  \keys_undefine:n { #1 /._forbidden_bool } 
-  \keys_undefine:n { #1 /._num_args_tl }
-  \keys_undefine:n { #1 /._required_bool }
+\cs_new_nopar:Npn \keys_if_value_requirement:nTF #1 {
+  \tl_if_eq:ccTF { c_keys_value_ #1 _tl } {
+    \c_keys_root_tl \l_keys_path_tl .req_tl
+  } 
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\keys_default_add:}
-% Copies the default value to the current one if needed.
+%\begin{macro}{\keys_property_find:n}
+%\begin{macro}[aux]{\keys_property_find_aux:w}
+% Searching for a property means finding the last ``\texttt{.}'' in
+% the input, and storing the text before and after it.
 %    \begin{macrocode}
-\cs_new_nopar:Nn \keys_default_add: {
+\cs_new_nopar:Nn \keys_property_find:n {
+  \tl_set:Nx \l_keys_path_tl { \l_keys_module_tl / }
+  \tl_if_in:nnTF {#1} {.} {
+    \keys_property_find_aux:n {#1}
+  }{
+    \msg_error:nnx { keys } { no~property } { #1 }
+  }
+}
+\cs_new_nopar:Nn \keys_property_find_aux:n {
+  \keys_property_find_aux:w #1 \q_stop
+}
+\cs_new_nopar:Npn \keys_property_find_aux:w #1 . #2 \q_stop {
+  \tl_if_in:nnTF {#2} {.} {
+    \tl_set:Nx \l_keys_path_tl { \l_keys_path_tl . #1 }
+    \keys_property_find_aux:w #2 \q_stop
+  }{
+    \tl_set:Nx \l_keys_path_tl { \l_keys_path_tl \tl_to_str:n {#1} }
+    \tl_set:Nn \l_keys_key_tl { . #2 }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\keys_property_new:nn}
+% Creating a new propery is simply a case of making the correctly-named
+% function.
+%    \begin{macrocode}
+\cs_new_nopar:Nn \keys_property_new:nn {
+  \cs_new:cn { \c_keys_properties_root_tl #1 } {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_property_undefine:n}
+% Removing a property means undefining it.
+%    \begin{macrocode}
+\cs_new_nopar:Nn \keys_property_undefine:n {
+  \cs_set_eq:cN { \c_keys_root_tl #1 } \c_undefined
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_set:nn}
+% The main setting function just does the set up to get \pkg{l3keyval}
+% to do the hard work.
+%    \begin{macrocode}
+\cs_new:Nn \keys_set:nn {
+  \tl_set:Nn \l_keys_module_tl {#1}
+  \cs_set_eq:NN \KV_key_no_value_elt:n \keys_set_elt:n
+  \cs_set_eq:NN \KV_key_value_elt:nn \keys_set_elt:nn
+  \KV_parse_space_removal_sanitize:n {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_set_elt:n}
+%\begin{macro}{\keys_set_elt:nn}
+% The two element processors are almost identical, and pass the data 
+% through to the underlying auxiliary, which does the work.
+%    \begin{macrocode}
+\cs_new:Nn \keys_set_elt:n {
+  \bool_set_true:N \l_keys_no_value_bool
+  \keys_set_elt_aux:nn {#1} { }
+}
+\cs_new:Nn \keys_set_elt:nn {
+  \bool_set_false:N \l_keys_no_value_bool
+  \keys_set_elt_aux:nn {#1} {#2}
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\begin{macro}[aux]{\keys_set_elt_aux:nn}
+%\begin{macro}[aux]{\keys_set_elt_aux:}
+% First, set the current path and add a default if needed. There are 
+% then checks to see if the a value is required or forbidden. If 
+% everything passes, move on to execute the code.
+%    \begin{macrocode}
+\cs_new:Nn \keys_set_elt_aux:nn {
+  \tl_set:Nx \l_keys_key_tl { \tl_to_str:n {#1} }
+  \tl_set:Nx \l_keys_path_tl { \l_keys_module_tl / \l_keys_key_tl }
+  \keys_value_or_default:n {#2}
+  \keys_if_value_requirement:nTF { required } {
+    \bool_if:NTF \l_keys_no_value_bool {
+      \msg_error:nnx { keys }  { key~value~required } 
+        { \l_keys_path_tl }
+    }{
+      \keys_set_elt_aux:
+    }
+  }{
+    \keys_set_elt_aux:
+  } 
+}
+\cs_new_nopar:Nn \keys_set_elt_aux: {
+  \keys_if_value_requirement:nTF { forbidden } {
+    \bool_if:NTF \l_keys_no_value_bool {
+      \keys_execute:
+    }{
+      \msg_error:nnxx { keys} { key~value~forbidden } 
+        { \l_keys_path_tl }
+        { \toks_use:N \l_keys_value_toks }
+    }
+  }{
+    \keys_execute:
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\keys_show:nn}
+% Showing a key is just a question of using the correct name.
+%    \begin{macrocode}
+\cs_new_nopar:Nn \keys_show:nn {
+  \cs_show:c { \c_keys_root_tl #1 / \tl_to_str:n {#2} .cmd:w }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_tmp:w}
+% This scratch function is used to actually execute keys.
+%    \begin{macrocode}
+\cs_new:Npn \keys_tmp:w {}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\keys_value_or_default:n}
+% If a value is given, return it as |#1|, otherwise send a default if
+% available.
+%    \begin{macrocode}
+\cs_new:Nn \keys_value_or_default:n {
+  \toks_set:Nn \l_keys_value_toks  {#1}
   \bool_if:NT \l_keys_no_value_bool {
-    \keys_if_exist:nT 
-      { \l_keys_current_key_full_tl /._default_tl } {
-      \keys_toks_set:Nn \l_keys_current_value_toks
-        { \l_keys_current_key_full_tl /._default_tl }
-      \bool_set_false:N \l_keys_no_value_bool
-    }
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_find_code_full:}
-%\begin{macro}{\keys_find_code_name:}
-% Two functions to find something to process the key value given. First,
-% a search is made for either a command property for the key, or a 
-% function for the key itself. If that fails, the generic handlers are 
-% used after separating out the key name and key path.
-%    \begin{macrocode}
-\cs_new_nopar:Nn \keys_find_code_full: {
-  \keys_if_cmd_exist:nTF { \l_keys_current_key_full_tl } {
-    \keys_use_cmd:n { \l_keys_current_key_full_tl }
-  }{
-    \keys_if_exist:nTF { \l_keys_current_key_full_tl } {
-      \bool_if:NTF \l_keys_no_value_bool {
-        \keys_use:n { \l_keys_current_key_full_tl }
-      }{
-        \keys_store:nx { \l_keys_current_key_full_tl }
-          { \toks_use:N \l_keys_current_value_toks }
+    \cs_if_exist:cT { \c_keys_root_tl \l_keys_path_tl .default_tl } {
+      \toks_set:Nv \l_keys_value_toks  { 
+        \c_keys_root_tl \l_keys_path_tl .default_tl 
       }
-    }{
-      \keys_find_code_name:
-    }
-  }
-}
-\cs_new_nopar:Nn \keys_find_code_name: {
-  \keys_separate_path:
-  \keys_if_cmd_exist:nTF
-    { \c_keys_properties_path_tl / \l_keys_current_key_name_tl } {
-    \keys_use_cmd:n  
-      {\c_keys_properties_path_tl / \l_keys_current_key_name_tl}
-  }{
-    \keys_if_cmd_exist:nTF 
-      { \l_keys_current_path_tl / unknown } {
-      \keys_use_cmd:n { \l_keys_current_path_tl / unknown }
-    }{
-      \keys_error:n { unknown~key }
     }
   }
 }
 %    \end{macrocode}
 %\end{macro}
+%
+%\begin{macro}{\keys_value_requirement:n}
+% Values can be required or forbidden by having the appropriate marker
+% set.
+%    \begin{macrocode}
+\cs_new_nopar:Nn \keys_value_requirement:n { 
+  \tl_set_eq:cc { \c_keys_root_tl \l_keys_path_tl .req_tl } 
+    { c_keys_value_ #1 _tl }
+}
+%    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\keys_get_variable_scope:N}
-%\begin{macro}[aux]{\keys_get_variable_scope_aux:N}
-%\begin{macro}{\keys_get_variable_type:N}
-%\begin{macro}[aux]{\keys_get_variable_type:w}
-% Getting the scope means only returning anything if the variable is
-% global. The two-part procedure makes this work nicely. On the other
-% hand, finding the type needs a loop.
+%\begin{macro}{\keys_variable_get_scope:N}
+%\begin{macro}[aux]{\keys_variable_get_scope_aux:N}
+%\begin{macro}{\keys_variable_get_type:N}
+%\begin{macro}[aux]{\keys_variable_get_type:w}
+% Expandable functions to find the type of a variable, and to 
+% return \texttt{g} if the variable is global.
 %    \begin{macrocode}
-\cs_new_nopar:Nn \keys_get_variable_scope:N {
+\cs_new_nopar:Nn \keys_variable_get_scope:N {
   \tl_if_eq:xxT { \token_to_str:N g } 
-    { \keys_get_variable_scope_aux:N  #1 } 
+    { \keys_variable_get_scope_aux:N  #1 } 
     { g }
 }
-\cs_new_nopar:Nn \keys_get_variable_scope_aux:N {
+\cs_new_nopar:Nn \keys_variable_get_scope_aux:N {
   \exp_last_unbraced:NNo \use_i:nn \use_i_delimit_by_q_stop:nw 
     \token_to_str:N #1 \q_stop
 }
@@ -1279,15 +1188,15 @@ This work consists of the file  keys3.dtx
   \char_make_other:N \&
 \tl_to_lowercase:n {
   \group_end:
-  \cs_new_nopar:Nn \keys_get_variable_type:N {
-    \exp_after:wN \keys_get_variable_type_aux:w 
+  \cs_new_nopar:Nn \keys_variable_get_type:N {
+    \exp_after:wN \keys_variable_get_type_aux:w 
       \token_to_str:N #1 & \q_nil \q_stop
   }
-  \cs_new_nopar:Npn \keys_get_variable_type_aux:w #1 & #2 \q_stop {
+  \cs_new_nopar:Npn \keys_variable_get_type_aux:w #1 & #2 \q_stop {
     \quark_if_nil:nTF {#2} {
       #1
     }{
-      \keys_get_variable_type_aux:w #2 \q_stop
+      \keys_variable_get_type_aux:w #2 \q_stop
     }
   }
 }
@@ -1297,475 +1206,53 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}[TF]{\keys_if_cmd_exist:n}
-% A dedicated check for the |._cmd:w| property key.
+%\begin{macro}{\keys_variable_set:NN}
+% To set a variable, there is first a check so that it must exist.
+% The setting function is then created by recovering the type and
+% scope from the variable name.
 %    \begin{macrocode}
-\prg_new_conditional:Nnn \keys_if_cmd_exist:n {TF,T,F} {
- \if_cs_exist:w \c_keys_cs_prefix_tl #1 /._cmd:w \cs_end:
-   \prg_return_true: 
-  \else: 
-    \prg_return_false: 
-  \fi:
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}[TF]{\keys_if_exist:n}
-% Check if a key exists without adding to the hash table.
-%    \begin{macrocode}
-\prg_new_conditional:Nnn \keys_if_exist:n {TF,T,F} {
- \if_cs_exist:w \c_keys_cs_prefix_tl #1 \cs_end:
-   \prg_return_true: 
-  \else: 
-    \prg_return_false: 
-  \fi:
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}[TF]{\keys_if_value:n}
-% Used for required and forbidden values.
-%    \begin{macrocode}
-\prg_new_conditional:Nnn \keys_if_value:n {TF,T,F} {
- \if_cs_exist:w 
-   \c_keys_cs_prefix_tl \l_keys_current_key_full_tl /._ #1 _bool 
- \cs_end:
-   \prg_return_true: 
-  \else: 
-    \prg_return_false: 
-  \fi:
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_no_value_elt:n}
-%\begin{macro}{\keys_value_elt:nn}
-% The two functions passed to \pkg{l3keyval} to actually act on each
-% key found.
-%    \begin{macrocode}
-\cs_new:Nn \keys_no_value_elt:n {
-  \bool_set_true:N \l_keys_no_value_bool
-  \keys_process_elt:nn {#1} { }
-}
-\cs_new:Nn \keys_value_elt:nn {
-  \bool_set_false:N \l_keys_no_value_bool
-  \keys_process_elt:nn {#1} {#2}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{\keys_parse:n}
-% The macro used to actually process the key--value input is taken from
-% \pkg{l3keyval}.  There are two possible options, and so at this
-% stage the macro is simply reserved.
-%    \begin{macrocode}
-\cs_new:Nn \keys_parse:n { \ERROR }
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_parse_list:n}
-% All of the management macros call this common parser. First, the key
-% processing macros are defined, then the appropriate parser is called.
-%    \begin{macrocode}
-\cs_new:Nn \keys_parse_list:n {
-  \cs_set_eq:NN \KV_key_value_elt:nn \keys_value_elt:nn
-  \cs_set_eq:NN \KV_key_no_value_elt:n \keys_no_value_elt:n
-  \keys_parse:n {#1}
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_path_add:N}
-%\begin{macro}{\keys_path_add:w}
-%\begin{macro}[aux]{\keys_path_add_aux:w}
-% The code to check for a path looks for a |/| at the start of the key.
-%    \begin{macrocode}
-\cs_new_nopar:Nn \keys_path_add:N {
-  \exp_after:wN \keys_path_add:w #1 \q_stop
-}
-\cs_new_nopar:Npn \keys_path_add:w {
-  \exp_after:wN \peek_meaning:NTF \c_keys_root_tl {
-    \use_none_delimit_by_q_stop:w
-  }{
-    \keys_path_add_aux:w
+\cs_new_nopar:Nn \keys_variable_set:NN {
+  \cs_if_exist:NF #2 {
+    \use:c { \keys_variable_get_type:N #2 _new:N } #2
   }
-}
-\cs_new_nopar:Npn \keys_path_add_aux:w #1 \q_stop {
-  \tl_set:Nx \l_keys_current_key_full_tl {\l_keys_default_path_tl #1}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{\keys_process_elt:nn}
-%\begin{macro}[aux]{\keys_process_elt_aux:}
-% The key processor starts by storing the given key name and value, and
-% adding a path to the former if necessary. There is then potentially a
-% need to fill in a default value before checking for required or 
-% forbidden values.
-%    \begin{macrocode}
-\cs_new:Nn \keys_process_elt:nn {
-  \tl_set:Nx \l_keys_current_key_full_tl {#1}
-  \toks_set:Nn \l_keys_current_value_toks {#2}
-  \keys_path_add:N \l_keys_current_key_full_tl
-  \keys_default_add:
-  \keys_if_value:nTF { required } {
-    \bool_if:NTF \l_keys_no_value_bool {
-      \keys_error:n { value~required }
-    }{
-      \keys_process_elt_aux:
-    }
-  }{
-    \keys_process_elt_aux:
-  }
-}
-\cs_new:Nn \keys_process_elt_aux: {
-  \keys_if_value:nTF { forbidden } {
-    \bool_if:NTF \l_keys_no_value_bool {
-      \keys_find_code_full:
-    }{
-      \keys_error:nn { value~forbidden } 
-        { \toks_use:N \l_keys_current_value_toks }
-    }
-  }{
-    \keys_find_code_full:
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{\keys_separate_path:}
-%\begin{macro}{\keys_separate_path:w}
-% A simple piece of recursion to find the key name and path.
-%    \begin{macrocode}
-\cs_new_nopar:Nn \keys_separate_path: {
-  \tl_clear:N \l_keys_current_path_tl
-  \exp_after:wN \keys_separate_path:w \l_keys_current_key_full_tl 
-    / \q_stop
-}
-\cs_new_nopar:Npn \keys_separate_path:w / #1 / #2 \q_stop {
-  \tl_if_empty:nTF {#2} {
-    \tl_set:Nn \l_keys_current_key_name_tl {#1}
-  }{
-     \tl_put_right:Nn \l_keys_current_path_tl { / #1 }
-     \keys_separate_path:w /#2 \q_stop
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{\keys_set_variable:N}
-%\begin{macro}{\keys_set_variable_x:N}
-%\begin{macro}{\keys_set_variable:NN}
-% To set a variable, the variable name is interrogated to recover the
-% type and scope. This is then used to construct the setting function.
-% There is a check first to ensure that the variable exists.
-%    \begin{macrocode}
-\cs_new_nopar:Nn \keys_set_variable:N {
-  \keys_set_variable:NN #1 n
-}
-\cs_new_nopar:Nn \keys_set_variable_x:N {
-  \keys_set_variable:NN #1 x
-}
-\cs_new_nopar:Nn \keys_set_variable:NN {
-  \cs_if_exist:NF #1 {
-    \use:c {
-      \keys_get_variable_type:N #1
-      _new:N
-    } #1
-  }
-  \keys_parse_list:n {
-    \c_keys_properties_path_tl /.code:x = {
-      \exp_not:c {
-        \keys_get_variable_type:N #1
-        _
-        \keys_get_variable_scope:N #1
-        set:N 
-        #2
-      }
-      \exp_not:N #1 {##1}
-    }
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{\keys_set_cmd:nn}
-%\begin{macro}{\keys_set_cmd:nx}
-%\begin{macro}{\keys_set_cmd:nNn}
-%\begin{macro}{\keys_set_cmd:nNx}
-%\begin{macro}{._cmd:w}
-%\begin{macro}{._num_args_tl}
-% Creation of the key |._cmd:w| macros happens here. For the 
-% multiple-argument versions, the number of arguments is stored for
-% use later on.
-%    \begin{macrocode}
-\cs_new:Nn \keys_set_cmd:nn {
-  \keys_clear_properties:n {#1}
-  \cs_set:cpn { \c_keys_cs_prefix_tl #1 /._cmd:w } ##1 {#2}
-}
-\cs_new:Nn \keys_set_cmd:nx {
-  \keys_clear_properties:n {#1}
-  \cs_set:cpx { \c_keys_cs_prefix_tl #1 /._cmd:w } ##1 {#2}
-}
-\cs_new:Nn \keys_set_cmd:nNn {
-  \keys_clear_properties:n {#1}
-  \cs_generate_from_arg_count:cNnn { \c_keys_cs_prefix_tl #1 /._cmd:w } 
-      \cs_set:Npn #2 {#3}
-  \keys_store:nn { #1 /._num_args_tl} {#2}
-}
-\cs_new:Nn \keys_set_cmd:nNx {
-  \keys_clear_properties:n {#1}
-  \cs_generate_from_arg_count:cNnn { \c_keys_cs_prefix_tl #1 /._cmd:w } 
-      \cs_set:Npx #2 {#3}
-  \keys_store:nn { #1 /._num_args_tl} {#2}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{\keys_store:nn}
-%\begin{macro}{\keys_store:nV}
-%\begin{macro}{\keys_store:nx}
-% Direct storage of data in keys.
-%    \begin{macrocode}
-\cs_new:Nn \keys_store:nn {
-  \tl_set:cn { \c_keys_cs_prefix_tl #1 } {#2}
-}
-\cs_new:Nn \keys_store:nV {
-  \tl_set:cV { \c_keys_cs_prefix_tl #1 } #2
-}
-\cs_new:Nn \keys_store:nx {
-  \tl_set:cx { \c_keys_cs_prefix_tl #1 } {#2}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{\keys_toks_set:Nn}
-% Sets a toks to the content of a key.
-%    \begin{macrocode}
-\cs_new_nopar:Nn \keys_toks_set:Nn {
-  \exp_args:NNv \toks_set:Nn #1 { \c_keys_cs_prefix_tl #2 }
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_try:}
-% A function to look for the |._cmd:w| property of a key, and executes
-% it if found.
-%    \begin{macrocode}
-\cs_new_nopar:Nn \keys_try: {
-  \bool_set_false:N \l_keys_success_bool
-  \keys_if_cmd_exist:nT { \l_keys_current_path_tl } {
-    \bool_set_true:N \l_keys_success_bool
-    \bool_if:NT \l_keys_no_value_bool {
-      \keys_if_exist:nT
-        { \l_keys_current_path_tl /._default_tl } {
-        \keys_toks_set:Nn \l_keys_current_value_toks
-          { \l_keys_current_path_tl /._default_tl }
-      }
-    }
-    \cs_set_eq:NN \l_keys_current_key_full_tl \l_keys_current_path_tl 
-    \keys_use_cmd:n { \l_keys_current_path_tl }
+  \keys_cmd_set:nNx { \l_keys_path_tl } 1 {
+    \exp_not:c { 
+      \keys_variable_get_type:N #2 _
+      \keys_variable_get_scope:N #2 set:N #1 
+    } \exp_not:N #2 {##1}
   }
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{\keys_undefine:n}
-% To remove a key.
+%\begin{macro}{.choice:}
+% Making a choice is handled internally, as it is also needed by
+% \texttt{.generate_choices:nn}.
 %    \begin{macrocode}
-\cs_new_nopar:Nn \keys_undefine:n {
-  \cs_set_eq:cN { \c_keys_cs_prefix_tl #1 } \c_undefined
+\keys_property_new:nn { .choice: } {
+  \keys_choice_make:
 }
 %    \end{macrocode}
 %\end{macro}
-%
-%\begin{macro}{\keys_use:n}
-% Use whatever is stored in a key.
-%    \begin{macrocode}
-\cs_new_nopar:Nn \keys_use:n {
-  \use:c { \c_keys_cs_prefix_tl #1 }
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_use_cmd:n}
-%\begin{macro}{\keys_use_cmd:nn}
-%\begin{macro}[aux]{\keys_use_cmd_aux:nn}
-%\begin{macro}[aux]{\keys_use_cmd_aux:w}
-% Some care is needed when using command keys. For commands with 
-% multiple arguments a check is made in case none were given, and if
-% so a series of empty values is given instead.
-%    \begin{macrocode}
-\cs_new_nopar:Nn \keys_use_cmd:n {
-  \exp_args:Nno \keys_use_cmd:nn {#1} 
-    { \toks_use:N \l_keys_current_value_toks }
-}
-\cs_new_nopar:Nn \keys_use_cmd:nn {
-  \keys_if_exist:nTF { #1 /._num_args_tl } {
-     \keys_use_cmd_aux:nn {#1} {#2}
-  }{
-    \keys_use:n {#1/._cmd:w} {#2}
-  }
-}
-\cs_new_nopar:Nn \keys_use_cmd_aux:nn {
-  \tl_if_empty:nTF {#2} {
-    \cs_set:Npn \keys_use_cmd_aux:w {
-      \keys_use:n { #1 /._cmd:w }
-    }
-    \exp_after:wN \exp_after:wN \exp_after:wN \keys_use_cmd_aux:w 
-      \cs:w
-        c_keys_ \keys_use:n { #1 /._num_args_tl } _empty_tl
-      \cs_end:
-  }{
-    \keys_use:n { #1 /._cmd:w } #2
-  }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%
-%\subsubsection{Error handling code}
-%
-% The \LaTeX3 approach is to have named errors called separately and 
-% defined separately. To make life a little easier here, some custom
-% functions are used to keep repetition down.
-% 
-%\begin{macro}{\keys_msg_new:nn}
-% To create new error messages, a utility function is created.
-%    \begin{macrocode}
-\cs_new_nopar:Npn \keys_msg_new:nn #1 {
-  \msg_new:nnn { keys } {#1}
-}
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{\keys_error:n}
-%\begin{macro}{\keys_error:nn}
-% Utilities for using errors, which always have 
-% \cs{l_keys_current_key_full_tl} as the first argument.
-%    \begin{macrocode}
-\cs_new_protected_nopar:Nn \keys_error:nn {
-  \msg_error:nnxx { keys } {#1} { \l_keys_current_key_full_tl } {#2}
-}
-\cs_new_protected_nopar:Nn \keys_error:n {
-  \msg_error:nnx { keys } {#1} { \l_keys_current_key_full_tl }
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%
-%    \begin{macrocode}
-\keys_msg_new:nn 
-  { unknown~key } 
-  {The key `#1' is unknown and is being ignored.}
-\keys_msg_new:nn 
-  { value~required }
-  {The key `#1' requires a value\\%
-  and is being ignored.}
-\keys_msg_new:nn 
-  { value~forbidden }
-  {The key `#1' cannot taken a value:\\%
-   the given input `#2' is being ignored.}
-\keys_msg_new:nn 
-  { Boolean~expected } 
-  {Key `#1' takes the Boolean values\\%
-  `true' and `false'~only.\\%
-   The given value `#2' is being ignored.}
-\keys_msg_new:nn 
-  { not_boolean }
-  {Key `#1' is not a Boolean key: you cannot create a complement.}
-\keys_msg_new:nn 
-  { unknown~choice }
-  {Choice `#2' unknown for key `#1':\\%
-   the key is being ignored.}
-%    \end{macrocode}
-%
-%\subsubsection{Property definitions}
 %
 %\begin{macro}{.code:n}
-%\begin{macro}{.code:Nn}
-% The \texttt{.code:n} and \texttt{.code:Nn} properties have to be 
-% defined directly.
-%    \begin{macrocode}
-\keys_set_cmd:nn { \c_keys_properties_path_tl /.code:n } {
-  \keys_set_cmd:nn { \l_keys_current_path_tl } {#1}
-}
-\keys_set_cmd:nNn { \c_keys_properties_path_tl /.code:Nn } 2 {
-  \keys_set_cmd:nNn { \l_keys_current_path_tl } #1 {#2}
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-% 
-% First, an error is created for unknown keys: this is done early to
-% catch any internal errors.
-%    \begin{macrocode}
-\keys_define:n {
-  \c_keys_errors_path_tl /unknown/.code:n = {
-    \keys_error:n { unknown~key }
-  }
-}
-%    \end{macrocode}
-%    
 %\begin{macro}{.code:x}
+%\begin{macro}{.code:Nn}
 %\begin{macro}{.code:Nx}
-% Fully-expanded versions of the basic \texttt{.code} properties.
+% Creating code is simply a case of passing through to the underlying
+% \texttt{set} function.
 %    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.code:x/.code:n = {
-    \keys_set_cmd:nx { \l_keys_current_path_tl } {#1}
-  },
-  \c_keys_properties_path_tl /.code:Nx/.code:Nn = 2 {
-    \keys_set_cmd:nNx { \l_keys_current_path_tl } {#1} {#2}
-  }
+\keys_property_new:nn { .code:n } {
+  \keys_cmd_set:nNn { \l_keys_path_tl } 1 {#1}
 }
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%    
-%\begin{macro}{.cd:}
-% The change-directory property simply alters the value of the default
-% path. 
-%    \begin{macrocode}
-\keys_define:n {
-    \c_keys_properties_path_tl /.cd:/.code:n = {
-    \tl_set:Nx \l_keys_default_path_tl { \l_keys_current_path_tl / }
-  }
+\keys_property_new:nn { .code:Nn } {
+  \keys_cmd_set:nNn { \l_keys_path_tl } #1 {#2}
 }
-%    \end{macrocode}
-%\end{macro}
-%
-%\begin{macro}{.value_forbidden:}
-%\begin{macro}{._required_bool}
-%\begin{macro}{.value_required:}
-%\begin{macro}{._forbidden_bool}
-% Values are required or forbidden by creating the appropriate flags.
-%    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.value_required:/.code:n = {
-    \keys_bool_new:n { \l_keys_current_path_tl /._required_bool }
-    \keys_undefine:n { \l_keys_current_path_tl /._forbidden_bool }
-  },
-  \c_keys_properties_path_tl /.value_forbidden:/.code:n = {
-    \keys_bool_new:n { \l_keys_current_path_tl /._forbidden_bool }
-    \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
-  }
+\keys_property_new:nn { .code:x } {
+  \keys_cmd_set:nNx { \l_keys_path_tl } 1 {#1}
+}
+\keys_property_new:nn { .code:Nx } {
+  \keys_cmd_set:nNx { \l_keys_path_tl } #1 {#2}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1775,181 +1262,110 @@ This work consists of the file  keys3.dtx
 %
 %\begin{macro}{.default:n}
 %\begin{macro}{.default:V}
-%\begin{macro}{._default_tl}
-% The default value for a key is stored in the |._default_tl|
-% private property.
+% Expansion is left to the internal functions.
 %    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.default:n/.code:n = {
-    \keys_store:nn { \l_keys_current_path_tl /._default_tl } {#1}
-    \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
-  },
-  \c_keys_properties_path_tl /.default:V/.code:n = {
-    \keys_store:nV { \l_keys_current_path_tl /._default_tl } #1
-    \keys_undefine:n { \l_keys_current_path_tl /._required_bool }
-  }  
+\keys_property_new:nn { .default:n } {
+  \keys_default_set:n  {#1} 
+}
+\keys_property_new:nn { .default:V } {
+  \keys_default_set:V #1
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
+%
+%\begin{macro}{.generate_choices:nn}
+%\begin{macro}{.generate_choices:nx}
+% Making choices is expansion-dependent.
+%    \begin{macrocode}
+\keys_property_new:nn { .generate_choices:nn } {
+  \keys_choices_generate:nx {#1} { \exp_not:n {#2} }
+}
+\keys_property_new:nn { .generate_choices:nx } {
+  \keys_choices_generate:nx {#1} {#2}
+}
+%    \end{macrocode}
 %\end{macro}
+%\end{macro}
+%
+%\subsubsection{Properties}
 %
 %\begin{macro}{.set:N}
 %\begin{macro}{.set_x:N}
-% Setting variables is easy.
+% Setting a variable is very easy: just pass the data along.
 %    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.set:N/.code:n = {
-    \keys_set_variable:N #1
-  },
-  \c_keys_properties_path_tl /.set_x:N/.code:n = {
-    \keys_set_variable_x:N #1
-  },
+\keys_property_new:nn { .set:N } {
+  \keys_variable_set:NN n #1
 }
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%    
-%\begin{macro}{.bool_set:N}
-%\begin{macro}{.bool_gset:N}
-% The properties for switches look similar, although internally things
-% are rather different.
-%    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.bool_set:N/.code:n = {
-    \keys_bool_set:nN { set } #1
-  },
-  \c_keys_properties_path_tl /.bool_gset:N/.code:n = {
-    \keys_bool_set:nN { gset } #1
-  },
-}
-%    \end{macrocode}%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{.bool_set_inverse:N}
-%\begin{macro}{.bool_gset_inverse:N}
-% The inverse versions of the switches are handled in the same way
-% here.
-%    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.bool_set_inverse:N/.code:n = {
-    \keys_bool_set_inverse:nN { set } #1
-  },
-  \c_keys_properties_path_tl /.bool_gset_inverse:N/.code:n = {
-    \keys_bool_set_inverse:nN { gset } #1
-  },
+\keys_property_new:nn { .set_x:N } {
+  \keys_variable_set:NN x #1
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{.expects_choice:}
-% Multiple choice keys are created by searching sub-keys. So the
-% code to make a key into a multiple choice is quite simple.
+%\begin{macro}{.set_bool:N}
+%\begin{macro}{.set_bool_inverse:N}
+% One function for each of these, but this keeps the key functions
+% themselves  short.
 %    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.expects_choice:/.code:n = {
-    \keys_define_internal:n {
-      \l_keys_current_path_tl /.cd:,
-      .code:n = {
-        \tl_set:Nn \l_keys_current_choice_tl {##1}
-        \int_zero:N \l_keys_current_choice_int
-        \exp_args:No \keys_parse_list:n 
-          { \l_keys_current_key_full_tl / ##1 }
-      },
-      unknown/.code:n = {
-        \keys_error:nn { unknown~choice } 
-          { \l_keys_current_key_name_tl }
-      }
-    }
-  },
+\keys_property_new:nn { .set_bool:N } {
+  \keys_bool_set:N #1
 }
-%    \end{macrocode}
-%\end{macro}
-%\begin{macro}{.create_choices:nn}
-%\begin{macro}{.create_choices:nx}
-% Creating choices as a block.
-%    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.create_choices:nn/.code:Nn = 2 {
-    \keys_choices_create:Nnn n {#1} {#2}
-  },
-  \c_keys_properties_path_tl /.create_choices:nx/.code:Nn = 2 {
-    \keys_choices_create:Nnn x {#1} {#2}
-  },
+\keys_property_new:nn { .set_bool_inverse:N } {
+  \keys_bool_set_inverse:N #1
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{.use_keys:n}
-%\begin{macro}{.use_keys:x}
-%\begin{macro}{.use_keys:Nn}
-%\begin{macro}{.use_keys:Nx}
-% Keys calling other keys is actually quite easy.
+%\begin{macro}{.value_forbidden:}
+%\begin{macro}{.value_required:}
+% These are very similar, so both call the same function.
 %    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.use_keys:n/.code:n = {
-    \keys_define_internal:n {
-      \l_keys_current_path_tl /.code:n = { \keys_parse_list:n {#1} }
-    }
-  },
-  \c_keys_properties_path_tl /.use_keys:x/.code:n = {
-    \keys_define_internal:n {
-      \l_keys_current_path_tl /.code:x = {
-        \exp_not:N \keys_parse_list:n {#1}
-      }
-    }
-  },
-  \c_keys_properties_path_tl /.use_keys:Nn/.code:Nn = 2 {
-    \keys_define_internal:n {
-      \l_keys_current_path_tl /.code:Nn = #1 { \keys_parse_list:n {#2} }
-    }
-  },
-  \c_keys_properties_path_tl /.use_keys:Nx/.code:Nn = 2 {
-    \keys_define_internal:n {
-      \l_keys_current_path_tl /.code:Nx =
-        #1 { \exp_not:N \keys_parse_list:n {#2} }
-    }
-  }
+\keys_property_new:nn { .value_forbidden: } {
+  \keys_value_requirement:n { forbidden }
 }
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{.try:n}
-%\begin{macro}{.retry:n}
-% For attempting to set keys without assuming they exist.
-%    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.try:n/.code:n = { \keys_try: },
-  \c_keys_properties_path_tl /.retry:n/.code:n = {
-    \bool_if:NF \l_keys_success_bool { \keys_try: }
-  }
+\keys_property_new:nn { .value_required: } {
+  \keys_value_requirement:n { required } 
 }
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{.show_code:}
-%\begin{macro}{.show_key:}
-% Finally, two keys for debugging problems.
+%\subsubsection{Messages}
+%
+% For when the package needs to complain.
 %    \begin{macrocode}
-\keys_define:n {
-  \c_keys_properties_path_tl /.show_code:/.code:n = {
-    \cs_show:c { 
-      \c_keys_cs_prefix_tl \l_keys_current_path_tl /._cmd:w 
-    }
-  },
-  \c_keys_properties_path_tl /.show_key:/.code:n = {
-    \cs_show:c { \c_keys_cs_prefix_tl \l_keys_current_path_tl }
-  }
+\msg_new:nnn { keys } { choice~unknown } {%
+  Choice `#2' unknown for key `#1':\\%
+  the key is being ignored.%
 }
+\msg_new:nnn { keys } { key~unknown } {%
+  The key `#1' is unknown and is being ignored.%
+}
+\msg_new:nnn { keys } { key~value~forbidden }{%
+  The key `#1' cannot taken a value:\\%
+  the given input `#2' is being ignored.%
+}
+\msg_new:nnn { keys } { key~value~required } {%
+  The key `#1' requires a value\\%
+  and is being ignored.%
+}
+\msg_new:nnn { keys } { no~property } {%
+  No property given in definition of key `#1'.%
+}
+\msg_new:nnn { keys } { property~unknown } {%
+  The key property `#1' is unknown.%
+}
+\msg_new:nnn { keys } { property~value~required } {%
+  The property `#1' requires a value\\%
+  and is being ignored.%
+}
+%    \end{macrocode}
+%
+%    \begin{macrocode}
 %</package>
 %    \end{macrocode}
-%\end{macro}
-%\end{macro}
 %
-% \end{implementation}
+%\end{implementation}

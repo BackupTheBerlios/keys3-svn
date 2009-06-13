@@ -1212,13 +1212,13 @@ This work consists of the file  keys3.dtx
   \char_make_other:N \&
 \tl_to_lowercase:n {
   \group_end:
-\cs_new_nopar:Nn \keys_variable_get_scope:N {
-  \exp_last_unbraced:Nf \keys_variable_get_scope_aux:w
-  { \cs_to_str:N #1 \exp_stop_f: & a \q_nil }
-}
-\cs_new:Npn \keys_variable_get_scope_aux:w #1 & #2 \q_nil {
-  \token_if_eq_meaning:NNF a #2 {g}
-}
+  \cs_new_nopar:Nn \keys_variable_get_scope:N {
+    \exp_last_unbraced:Nf \keys_variable_get_scope_aux:w
+    { \cs_to_str:N #1 \exp_stop_f: & a \q_nil }
+  }
+  \cs_new:Npn \keys_variable_get_scope_aux:w #1 & #2#3 \q_nil {
+    \token_if_eq_meaning:NNF a #2 {g}
+  }
 }
 \group_begin:
   \char_set_lccode:nn {`\&} {`\_}
@@ -1227,13 +1227,13 @@ This work consists of the file  keys3.dtx
   \group_end:
   \cs_new_nopar:Nn \keys_variable_get_type:N {
     \exp_after:wN \keys_variable_get_type_aux:w 
-      \token_to_str:N #1 & \q_nil \q_stop
+      \token_to_str:N #1 & a \q_nil 
   }
-  \cs_new_nopar:Npn \keys_variable_get_type_aux:w #1 & #2 \q_stop {
-    \quark_if_nil:nTF {#2} {
+  \cs_new_nopar:Npn \keys_variable_get_type_aux:w #1 & #2#3 \q_nil {
+    \token_if_eq_meaning:NNTF a #2 {
       #1
     }{
-      \keys_variable_get_type_aux:w #2 \q_stop
+      \keys_variable_get_type_aux:w #2#3 \q_nil
     }
   }
 }

@@ -479,6 +479,14 @@ This work consists of the file  keys3.dtx
 % 
 %\subsection{Internal functions}
 %
+%\begin{function}{\keys_arguments_tidy:w}
+%   \begin{syntax}
+%     "\keys_arguments_tidy:w " <args> "\q_keys_stop"
+%   \end{syntax}
+%   Clears <args> from the stack: used to clean up after executing a
+%   key.
+%\end{function}
+%
 %\begin{function}{
 %    \keys_bool_set:N |
 %    \keys_bool_set_inverse:N
@@ -669,6 +677,10 @@ This work consists of the file  keys3.dtx
 %\begin{variable}{\l_keys_value_toks}
 %  Holds the currently supplied value.
 %\end{variable}
+%
+%\begin{variable}{\q_keys_stop}
+%  A private quark for delimiting arguments.
+%\end{variable}
 % 
 %\end{documentation}
 % 
@@ -745,7 +757,21 @@ This work consists of the file  keys3.dtx
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\q_keys_stop}
+% A quark for delimiting keys: no one else should use it!
+%    \begin{macrocode}
+\quark_new:N \q_keys_stop
+%    \end{macrocode}
+%\end{macro}
+%
 %\subsubsection{Internal functions}
+%
+%\begin{macro}{\keys_arguments_tidy:w}
+% So that nothing runs away, a safety precaution is taken in the code.
+%    \begin{macrocode}
+\cs_new:Npn \keys_arguments_tidy:w #1 \q_keys_stop { }
+%    \end{macrocode}
+%\end{macro}
 %
 %\begin{macro}{\keys_bool_set:N}
 %\begin{macro}{\keys_bool_set_inverse:N}
@@ -849,12 +875,12 @@ This work consists of the file  keys3.dtx
 \cs_new:Nn \keys_cmd_set:nNn {
   \keys_cmd_set_aux:nN {#1} #2
   \cs_generate_from_arg_count:cNnn { \c_keys_root_tl #1 .cmd:w } 
-    \cs_set:Npn #2 {#3}
+    \cs_set:Npn #2 { #3 \keys_arguments_tidy:w }
 }
 \cs_new:Nn \keys_cmd_set:nNx {
   \keys_cmd_set_aux:nN {#1} #2
   \cs_generate_from_arg_count:cNnn { \c_keys_root_tl #1 .cmd:w } 
-    \cs_set:Npx #2 {#3}
+    \cs_set:Npx #2 { #3 \exp_not:N \keys_arguments_tidy:w }
 }
 \cs_new_nopar:Nn \keys_cmd_set_aux:nN {
   \keys_property_undefine:n { #1 .default_tl }
@@ -933,9 +959,9 @@ This work consists of the file  keys3.dtx
   \bool_if:NTF \l_keys_no_value_bool {
     \intexpr_compare:nTF { 
       \exp_args:Nc \cs_get_arg_count_from_signature:N 
-        { \l_keys_key_tl }  = \c_zero
+        { \l_keys_key_tl } = \c_zero
     } {
-      \keys_tmp:w
+      \keys_tmp:w \q_keys_stop
     }{
       \msg_error:nnx { keys } { property~value~required } 
         { \l_keys_key_tl }
@@ -945,9 +971,9 @@ This work consists of the file  keys3.dtx
       \exp_args:Nc \cs_get_arg_count_from_signature:N 
         { \l_keys_key_tl }  = \c_one
     } {
-      \keys_tmp:w {#1}
+      \keys_tmp:w {#1} \q_keys_stop
     }{
-      \keys_tmp:w #1
+      \keys_tmp:w #1 { } { } { } { } { } { } { } { } { } \q_keys_stop
     }
   }
 }
@@ -975,7 +1001,9 @@ This work consists of the file  keys3.dtx
 % If there is only one argument required, it is wrapped in braces so
 % that everything is passed through properly. On the other hand, if more
 % than one is needed it is down to the user to have put things in 
-% correctly!
+% correctly! The use of \cs{q_keys_stop} here means that arguments
+% do not run away (hence the nine empty groups), but that the module
+% can clean up the spare groups at the end of executing the key.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_execute_aux:nn {
   \cs_set_eq:Nc \keys_tmp:w { \c_keys_root_tl #1 .cmd:w }
@@ -983,9 +1011,10 @@ This work consists of the file  keys3.dtx
     \intexpr_compare:nTF { 
       \num_use:c { \c_keys_root_tl #1 .args_num } = \c_one
     } {
-      \exp_args:NV \keys_tmp:w \l_keys_value_toks
+      \exp_args:NV \keys_tmp:w \l_keys_value_toks \q_keys_stop
     }{
       \exp_after:wN \keys_tmp:w \toks_use:N \l_keys_value_toks
+      { } { } { } { } { } { } { } { } { } \q_keys_stop
     }
   }{
     #2
@@ -1042,7 +1071,8 @@ This work consists of the file  keys3.dtx
 % function.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_property_new:nn {
-  \cs_new:cn { \c_keys_properties_root_tl #1 } {#2}
+  \cs_new:cn { \c_keys_properties_root_tl #1 } 
+    { #2 \keys_arguments_tidy:w }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1225,6 +1255,8 @@ This work consists of the file  keys3.dtx
 %    \end{macrocode}
 %\end{macro}
 %
+%\subsubsection{Properties}
+%
 %\begin{macro}{.choice:}
 % Making a choice is handled internally, as it is also needed by
 % \texttt{.generate_choices:nn}.
@@ -1287,8 +1319,6 @@ This work consists of the file  keys3.dtx
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
-%
-%\subsubsection{Properties}
 %
 %\begin{macro}{.set:N}
 %\begin{macro}{.set_x:N}

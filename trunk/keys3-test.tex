@@ -34,10 +34,7 @@
 %   You said: `'
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
-\keys_show:nn { module } {unknown}
-\keys_set:nn { module } {
-  clive = india
-}
+
 \keys_define:nn { module } {
   key .code:n = {You~said:~`#1'\\}
 }
@@ -51,19 +48,23 @@
 
 % Test two: Creating a multiple-argument key. Here, the arguments
 % given need to be at least as many as those required by the code!
+% If not enough are given, empty groups will be passed to the key
+% function to prevent runaway arguments.
 % ----------------------------------------------------------------------
 %   You said: `A', `B', `C', D'.
 %   You said: `AAA', `BBB', `CCC', ` DDD'.
+%   You said: `Not', `enough', `arguments', `'.
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
 \keys_define:nn { module } {
-  key .code:Nn = 4 {You said:~`#1',~`#2',~`#3',~`#4'.\\},
+  key .code:Nn = 4 {You~said:~`#1',~`#2',~`#3',~`#4'.\\},
 }
 \ExplSyntaxOff
 
 \SetModuleKeys{
   key = ABCD,
-  key = {AAA}{BBB} {CCC} { DDD}
+  key = {AAA}{BBB} {CCC} { DDD},
+  key = {Not} {enough} {arguments} 
 }
 
 % Test three: Variants of .code:n and .code:Nn exist which carry out a
@@ -122,7 +123,7 @@
 % ----------------------------------------------------------------------
 \ExplSyntaxOn
 \keys_define:nn { module } {
-  key-one .code:n = All okay\\,
+  key-one .code:n = All~okay\\,
   key-one .value_forbidden:,
   key-two .code:n = #1,
   key-two .value_required:

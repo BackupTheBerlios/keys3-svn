@@ -1198,20 +1198,27 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{\keys_variable_get_scope:N}
-%\begin{macro}[aux]{\keys_variable_get_scope_aux:N}
+%\begin{macro}[aux]{\keys_variable_get_scope_aux:w}
 %\begin{macro}{\keys_variable_get_type:N}
 %\begin{macro}[aux]{\keys_variable_get_type:w}
 % Expandable functions to find the type of a variable, and to 
-% return \texttt{g} if the variable is global.
+% return \texttt{g} if the variable is global. The trick for 
+% \cs{keys_variable_get_scope:N} is the same as that in 
+% \cs{cs_split_function:NN}, but it can be simplified as the
+% requirements here are less complex.
 %    \begin{macrocode}
+\group_begin:
+  \char_set_lccode:nn {`\&} {`\g}
+  \char_make_other:N \&
+\tl_to_lowercase:n {
+  \group_end:
 \cs_new_nopar:Nn \keys_variable_get_scope:N {
-  \tl_if_eq:xxT { \token_to_str:N g } 
-    { \keys_variable_get_scope_aux:N  #1 } 
-    { g }
+  \exp_last_unbraced:Nf \keys_variable_get_scope_aux:w
+  { \cs_to_str:N #1 \exp_stop_f: & a \q_nil }
 }
-\cs_new_nopar:Nn \keys_variable_get_scope_aux:N {
-  \exp_last_unbraced:NNo \use_i:nn \use_i_delimit_by_q_stop:nw 
-    \token_to_str:N #1 \q_stop
+\cs_new:Npn \keys_variable_get_scope_aux:w #1 & #2 \q_nil {
+  \token_if_eq_meaning:NNF a #2 {g}
+}
 }
 \group_begin:
   \char_set_lccode:nn {`\&} {`\_}

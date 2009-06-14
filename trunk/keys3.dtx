@@ -190,7 +190,7 @@ This work consists of the file  keys3.dtx
 %  }
 %\end{verbatim}
 %
-% At a document level, the \cs{keys_set:nn} macro used within a  
+% At a document level, \cs{keys_set:nn} is used within a  
 % document function. For \LaTeXe, a generic set up function could be 
 % created with
 %\begin{verbatim}
@@ -225,7 +225,7 @@ This work consists of the file  keys3.dtx
 % section~\ref{sec:subdivision}, it is suggested that the character 
 % ``\texttt{/}'' is reserved for sub-division of keys into logical
 % groups. Macros are \emph{not} expanded when creating key names,
-% and so:
+% and so
 %\begin{verbatim}
 %  \tl_set:Nn \l_module_tmp_tl { key }
 %  \keys_define:nn { module } {
@@ -270,7 +270,8 @@ This work consists of the file  keys3.dtx
 %    <key> .code:n = <code>
 %  \end{syntax}
 %  Stores the <code> for execution when <key> is called. The <code> can
-%  include one parameter (|#1|).
+%  include one parameter (|#1|), which will be the <value> given for the
+%  <key>.
 %\end{function}
 % 
 %\begin{function}{
@@ -282,7 +283,9 @@ This work consists of the file  keys3.dtx
 %  \end{syntax}
 %  Stores the <code> for execution when <key> is called. The <code> can
 %  include <number> parameters, which can be in the standard \TeX\ 
-%  range 0--9.
+%  range 0--9. If too few parameters are given when the key is used, 
+%  sufficient empty groups will be supplied to prevent an error
+%  occurring.
 %\end{function}
 % 
 %\begin{function}{
@@ -290,13 +293,24 @@ This work consists of the file  keys3.dtx
 %   .default:V|
 %  }
 %  \begin{syntax}
-%    <key> .default:n = <content>
+%    <key> .default:n = <default>
 %  \end{syntax}
-%  Creates a default value for <key>, which is used if no value is 
-%  given.
+%  Creates a <default> value for <key>, which is used if no value is 
+%  given. This will be used if only the key name is given, but not if
+%  a blank <value> is given:
+%  \begin{verbatim}
+%    \keys_define:nn { module } {
+%      key .code:n  = Hello #1,
+%      key .default = World
+%    }
+%    \keys_set:nn { module} {
+%      key = Fred, % Prints "Hello Fred"
+%      key,        % Prints "Hello World"
+%      key = ,     % Prints "Hello "
+%    }
+%  \end{verbatim}
 %  \begin{texnote}
-%    The <content> is stored as a token list variable, and this 
-%    means that there are some restrictions on the nature of <content>.
+%    The <default> is stored as a token list variable.
 %  \end{texnote}
 %\end{function}
 % 
@@ -324,11 +338,25 @@ This work consists of the file  keys3.dtx
 %  \end{syntax}
 %  Defines <key> to store the value given in <variable>. The type and 
 %  scope (local or global) of <variable> are determined from the 
-%  name. The \texttt{x} version performs an expanded assignment.
-%  \begin{texnote}
-%    A \cs{<variable>_set:Nn} function must exist to allow setting
-%    of the <variable>.
-%  \end{texnote}
+%  name. The \texttt{x} version performs an expanded assignment. For
+%  example
+%  \begin{verbatim}
+%    \keys_define:nn { module } {
+%      key-one .set:N = \l_module_tmpa_tl,  % Locally sets a tl var.
+%      key_two .set:N = \g_module_tmpa_toks % Globally sets a toks
+%    }
+%    \keys_set:nn { module } {
+%      key-one = Value, % \l_module_tmpa_tl contains "Value"
+%      key-two = Stuff  % \g_module_tmpa_toks contains "Stuff"
+%    }
+%  \end{verbatim}
+%  Assignments are automatically global for global variables. 
+%  
+%  A  \cs{<variable>_set:Nn} function must exist to allow setting of the
+%  <variable>. An error will result if this is not the case. The 
+%  \texttt{.set_x:N} version can only be applied to variable types which
+%  have a \cs{<variable>_set:Nx} function: other cases will result in an 
+%  error.
 %\end{function}
 % 
 %\begin{function}{
@@ -351,7 +379,8 @@ This work consists of the file  keys3.dtx
 %  \begin{syntax}
 %    <key> .value_forbidden:
 %  \end{syntax}
-%  Flags for forbidding and requiring a <value> for <key>.
+%  Flags for forbidding and requiring a <value> for <key>. Any <value>
+%  given will be ignored.
 %\end{function}
 %
 %\subsection{Sub-dividing keys}
@@ -1249,6 +1278,17 @@ This work consists of the file  keys3.dtx
 % scope from the variable name.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_variable_set:NN {
+  \cs_if_exist:cF {
+    \keys_variable_get_type:N #2 _
+    \keys_variable_get_scope:N #2 set:N #1
+  } {
+    \msg_error:nnxx { keys } { no~set~function } {
+      \exp_not:c {
+        \keys_variable_get_type:N #2 _
+        \keys_variable_get_scope:N #2 set:N #1
+      }
+    } {#2}
+  }
   \cs_if_exist:NF #2 {
     \use:c { \keys_variable_get_type:N #2 _new:N } #2
   }
@@ -1391,6 +1431,16 @@ This work consists of the file  keys3.dtx
 }
 \msg_new:nnn { keys } { no~property } {%
   No property given in definition of key `#1'.%
+}
+\msg_new:nnnn { keys } { no~set~function } {%
+  There is no function #1\\%
+  for setting variable \exp_not:N #2.%
+}{%
+  keys3 can only `set' variables which have a function\\%
+  \exp_not:N \<var>_(g)set:Nn, or in some cases 
+  \exp_not:N \<var>_(g)set:Nx.\\%
+  You have asked to `set' some other kind of variable.%
+  
 }
 \msg_new:nnn { keys } { property~unknown } {%
   The key property `#1' is unknown.%

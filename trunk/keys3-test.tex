@@ -36,7 +36,8 @@
 \ExplSyntaxOn
 
 \keys_define:nn { module } {
-  key .code:n = {You~said:~`#1'\\}
+  key .set:N = \l_tmpa_clist,
+  key .code:n = {You~said:~`#1'\\},
 }
 \ExplSyntaxOff
 

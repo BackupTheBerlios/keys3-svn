@@ -694,7 +694,8 @@ This work consists of the file  keys3.dtx
 % 
 %\begin{variable}{
 %  \l_keys_module_tl|
-%  \l_keys_path_tl
+%  \l_keys_path_tl|
+%  \l_keys_property_tl
 %}
 %  Various key paths need to be stored.
 %\end{variable}
@@ -756,12 +757,15 @@ This work consists of the file  keys3.dtx
 %
 %\begin{macro}{\l_keys_key_tl}
 %\begin{macro}{\l_keys_path_tl}
+%\begin{macro}{\l_keys_property_tl}
 % Storage for the current key name and the path of the key (key name 
 % plus module name).
 %    \begin{macrocode}
 \tl_new:N \l_keys_key_tl
 \tl_new:N \l_keys_path_tl
+\tl_new:N \l_keys_property_tl
 %    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %\end{macro}
 %
@@ -967,12 +971,12 @@ This work consists of the file  keys3.dtx
 \cs_new:Nn \keys_define_elt_aux:nn {
   \keys_property_find:n {#1}
   \cs_set_eq:Nc \keys_tmp:w 
-    { \c_keys_properties_root_tl \l_keys_key_tl }
+    { \c_keys_properties_root_tl \l_keys_property_tl }
   \cs_if_exist:NTF \keys_tmp:w {
     \keys_define_key:n {#2}
   }{
     \msg_error:nnx { keys } { property~unknown } 
-      { \l_keys_key_tl }
+      { \l_keys_property_tl }
   }
 }
 %    \end{macrocode}
@@ -988,17 +992,17 @@ This work consists of the file  keys3.dtx
   \bool_if:NTF \l_keys_no_value_bool {
     \intexpr_compare:nTF { 
       \exp_args:Nc \cs_get_arg_count_from_signature:N 
-        { \l_keys_key_tl } = \c_zero
+        { \l_keys_property_tl } = \c_zero
     } {
       \keys_tmp:w \q_keys_stop
     }{
       \msg_error:nnx { keys } { property~value~required } 
-        { \l_keys_key_tl }
+        { \l_keys_property_tl }
     }  
   }{
     \intexpr_compare:nTF { 
       \exp_args:Nc \cs_get_arg_count_from_signature:N 
-        { \l_keys_key_tl }  = \c_one
+        { \l_keys_property_tl }  = \c_one
     } {
       \keys_tmp:w {#1} \q_keys_stop
     }{
@@ -1084,11 +1088,13 @@ This work consists of the file  keys3.dtx
 }
 \cs_new_nopar:Npn \keys_property_find_aux:w #1 . #2 \q_stop {
   \tl_if_in:nnTF {#2} {.} {
-    \tl_set:Nx \l_keys_path_tl { \l_keys_path_tl . #1 }
+    \tl_set:Nx \l_keys_path_tl { 
+      \l_keys_path_tl . \tl_to_str:n {#1}
+    }
     \keys_property_find_aux:w #2 \q_stop
   }{
     \tl_set:Nx \l_keys_path_tl { \l_keys_path_tl \tl_to_str:n {#1} }
-    \tl_set:Nn \l_keys_key_tl { . #2 }
+    \tl_set:Nn \l_keys_property_tl { . #2 }
   }
 }
 %    \end{macrocode}

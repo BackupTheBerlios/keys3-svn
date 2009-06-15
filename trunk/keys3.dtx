@@ -678,6 +678,10 @@ This work consists of the file  keys3.dtx
 % 
 %\subsection{Variables and constants}
 %
+%\begin{variable}{\c_keys_prefix_tl}
+%  The module prefix: this may need to be varied elsewhere in the code.
+%\end{variable}
+%
 %\begin{variable}{
 %  \c_keys_properties_root_tl|
 %  \c_keys_root_tl
@@ -704,6 +708,14 @@ This work consists of the file  keys3.dtx
 %  A marker for ``no value'' as key input.
 %\end{variable}
 %
+%\begin{variable}{\l_keys_prefix_tl}
+%  The current module prefix: allows some re-direction.
+%\end{variable}
+%
+%\begin{variable}{\l_keys_root_tl}
+%  The current location to search for key definitions.
+%\end{variable}
+%
 %\begin{variable}{\l_keys_value_toks}
 %  Holds the currently supplied value.
 %\end{variable}
@@ -724,6 +736,13 @@ This work consists of the file  keys3.dtx
 %    \end{macrocode}
 %
 %\subsubsection{Variables and constants}
+%
+%\begin{macro}{\c_keys_prefix_tl}
+% The name of the module itself.
+%    \begin{macrocode}
+\tl_new:Nn \c_keys_prefix_tl { keys }
+%    \end{macrocode}
+%\end{macro}
 %
 %\begin{macro}{\c_keys_root_tl}
 %\begin{macro}{\c_keys_properties_root_tl}
@@ -780,6 +799,20 @@ This work consists of the file  keys3.dtx
 % To indicate that no value has been given.
 %    \begin{macrocode}
 \bool_new:N \l_keys_no_value_bool
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\l_keys_prefix_tl}
+% Used in defining properties.
+%    \begin{macrocode}
+\tl_new:N \l_keys_prefix_tl
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\l_keys_root_tl}
+% For re-assigning things.
+%    \begin{macrocode}
+\tl_new:N \l_keys_root_tl
 %    \end{macrocode}
 %\end{macro}
 %
@@ -930,7 +963,7 @@ This work consists of the file  keys3.dtx
 % Setting a default value is easy.
 %    \begin{macrocode}
 \cs_new:Nn \keys_default_set:n {
-  \tl_set:cn { \c_keys_root_tl \l_keys_path_tl .default_tl } {#1}
+  \tl_set:cn { \l_keys_root_tl \l_keys_path_tl .default_tl } {#1}
 }
 \cs_generate_variant:Nn \keys_default_set:n { V }
 %    \end{macrocode}
@@ -943,6 +976,8 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new:Nn \keys_define:nn {
   \tl_set:Nn \l_keys_module_tl {#1}
+  \tl_set_eq:NN \l_keys_prefix_tl \c_keys_prefix_tl
+  \tl_set_eq:NN \l_keys_root_tl \c_keys_root_tl
   \cs_set_eq:NN \KV_key_no_value_elt:n \keys_define_elt:n
   \cs_set_eq:NN \KV_key_value_elt:nn \keys_define_elt:nn
   \KV_parse_no_space_removal_no_sanitize:n {#2}
@@ -1039,10 +1074,10 @@ This work consists of the file  keys3.dtx
 % can clean up the spare groups at the end of executing the key.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_execute_aux:nn {
-  \cs_set_eq:Nc \keys_tmp:w { \c_keys_root_tl #1 .cmd:w }
+  \cs_set_eq:Nc \keys_tmp:w { \l_keys_root_tl #1 .cmd:w }
   \cs_if_exist:NTF \keys_tmp:w {
     \intexpr_compare:nTF { 
-      \num_use:c { \c_keys_root_tl #1 .args_num } = \c_one
+      \num_use:c { \l_keys_root_tl #1 .args_num } = \c_one
     } {
       \exp_args:NV \keys_tmp:w \l_keys_value_toks \q_keys_stop
     }{
@@ -1064,7 +1099,7 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new_nopar:Npn \keys_if_value_requirement:nTF #1 {
   \tl_if_eq:ccTF { c_keys_value_ #1 _tl } {
-    \c_keys_root_tl \l_keys_path_tl .req_tl
+    \l_keys_root_tl \l_keys_path_tl .req_tl
   } 
 }
 %    \end{macrocode}
@@ -1102,7 +1137,7 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{\keys_property_new:nn}
-% Creating a new propery is simply a case of making the correctly-named
+% Creating a new property is simply a case of making the correctly-named
 % function.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_property_new:nn {
@@ -1116,7 +1151,7 @@ This work consists of the file  keys3.dtx
 % Removing a property means undefining it.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_property_undefine:n {
-  \cs_set_eq:cN { \c_keys_root_tl #1 } \c_undefined
+  \tl_set_eq:cN { \l_keys_root_tl #1 } \c_undefined
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1127,6 +1162,7 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new:Nn \keys_set:nn {
   \tl_set:Nn \l_keys_module_tl {#1}
+  \tl_set_eq:NN \l_keys_root_tl \c_keys_root_tl
   \cs_set_eq:NN \KV_key_no_value_elt:n \keys_set_elt:n
   \cs_set_eq:NN \KV_key_value_elt:nn \keys_set_elt:nn
   \KV_parse_space_removal_sanitize:n {#2}
@@ -1211,9 +1247,9 @@ This work consists of the file  keys3.dtx
 \cs_new:Nn \keys_value_or_default:n {
   \toks_set:Nn \l_keys_value_toks  {#1}
   \bool_if:NT \l_keys_no_value_bool {
-    \cs_if_exist:cT { \c_keys_root_tl \l_keys_path_tl .default_tl } {
+    \cs_if_exist:cT { \l_keys_root_tl \l_keys_path_tl .default_tl } {
       \toks_set:Nv \l_keys_value_toks  { 
-        \c_keys_root_tl \l_keys_path_tl .default_tl 
+        \l_keys_root_tl \l_keys_path_tl .default_tl 
       }
     }
   }
@@ -1226,7 +1262,7 @@ This work consists of the file  keys3.dtx
 % set.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_value_requirement:n { 
-  \tl_set_eq:cc { \c_keys_root_tl \l_keys_path_tl .req_tl } 
+  \tl_set_eq:cc { \l_keys_root_tl \l_keys_path_tl .req_tl } 
     { c_keys_value_ #1 _tl }
 }
 %    \end{macrocode}
@@ -1315,7 +1351,7 @@ This work consists of the file  keys3.dtx
 % \texttt{.generate_choices:nn}.
 %    \begin{macrocode}
 \keys_property_new:nn { .choice: } {
-  \keys_choice_make:
+  \use:c { \l_keys_prefix_tl _choice_make: }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1328,16 +1364,16 @@ This work consists of the file  keys3.dtx
 % \texttt{set} function.
 %    \begin{macrocode}
 \keys_property_new:nn { .code:n } {
-  \keys_cmd_set:nNn { \l_keys_path_tl } 1 {#1}
+  \use:c { \l_keys_prefix_tl _cmd_set:nNn } { \l_keys_path_tl } 1 {#1}
 }
 \keys_property_new:nn { .code:Nn } {
-  \keys_cmd_set:nNn { \l_keys_path_tl } #1 {#2}
+  \use:c { \l_keys_prefix_tl _cmd_set:nNn } { \l_keys_path_tl } #1 {#2}
 }
 \keys_property_new:nn { .code:x } {
-  \keys_cmd_set:nNx { \l_keys_path_tl } 1 {#1}
+  \use:c { \l_keys_prefix_tl _cmd_set:nNx } { \l_keys_path_tl } 1 {#1}
 }
 \keys_property_new:nn { .code:Nx } {
-  \keys_cmd_set:nNx { \l_keys_path_tl } #1 {#2}
+  \use:c { \l_keys_prefix_tl _cmd_set:nNx } { \l_keys_path_tl } #1 {#2}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1350,10 +1386,10 @@ This work consists of the file  keys3.dtx
 % Expansion is left to the internal functions.
 %    \begin{macrocode}
 \keys_property_new:nn { .default:n } {
-  \keys_default_set:n  {#1} 
+  \use:c { \l_keys_prefix_tl _default_set:n } {#1} 
 }
 \keys_property_new:nn { .default:V } {
-  \keys_default_set:V #1
+  \use:c { \l_keys_prefix_tl _default_set:V } #1
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1364,10 +1400,11 @@ This work consists of the file  keys3.dtx
 % Making choices is expansion-dependent.
 %    \begin{macrocode}
 \keys_property_new:nn { .generate_choices:nn } {
-  \keys_choices_generate:nx {#1} { \exp_not:n {#2} }
+  \use:c { \l_keys_prefix_tl _choices_generate:nx } {#1} 
+    { \exp_not:n {#2} }
 }
 \keys_property_new:nn { .generate_choices:nx } {
-  \keys_choices_generate:nx {#1} {#2}
+  \use:c { \l_keys_prefix_tl _choices_generate:nx } {#1} {#2}
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1378,10 +1415,10 @@ This work consists of the file  keys3.dtx
 % Setting a variable is very easy: just pass the data along.
 %    \begin{macrocode}
 \keys_property_new:nn { .set:N } {
-  \keys_variable_set:NN n #1
+  \use:c { \l_keys_prefix_tl _variable_set:NN } n #1
 }
 \keys_property_new:nn { .set_x:N } {
-  \keys_variable_set:NN x #1
+  \use:c { \l_keys_prefix_tl _variable_set:NN } x #1
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1393,10 +1430,10 @@ This work consists of the file  keys3.dtx
 % themselves  short.
 %    \begin{macrocode}
 \keys_property_new:nn { .set_bool:N } {
-  \keys_bool_set:N #1
+  \use:c { \l_keys_prefix_tl _bool_set:N } #1
 }
 \keys_property_new:nn { .set_bool_inverse:N } {
-  \keys_bool_set_inverse:N #1
+  \use:c { \l_keys_prefix_tl _bool_set_inverse:N } #1
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1407,10 +1444,10 @@ This work consists of the file  keys3.dtx
 % These are very similar, so both call the same function.
 %    \begin{macrocode}
 \keys_property_new:nn { .value_forbidden: } {
-  \keys_value_requirement:n { forbidden }
+  \use:c { \l_keys_prefix_tl _value_requirement:n } { forbidden }
 }
 \keys_property_new:nn { .value_required: } {
-  \keys_value_requirement:n { required } 
+  \use:c { \l_keys_prefix_tl _value_requirement:n } { required } 
 }
 %    \end{macrocode}
 %\end{macro}

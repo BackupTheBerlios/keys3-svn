@@ -704,6 +704,11 @@ This work consists of the file  keys3.dtx
 %  A marker for ``no value'' as key input.
 %\end{variable}
 %
+%\begin{variable}{\l_keys_root_tl}
+%  To allow some internal tricks, this is a variable version of the 
+%  constant.
+%\end{variable}
+%
 %\begin{variable}{\l_keys_value_toks}
 %  Holds the currently supplied value.
 %\end{variable}
@@ -780,6 +785,13 @@ This work consists of the file  keys3.dtx
 % To indicate that no value has been given.
 %    \begin{macrocode}
 \bool_new:N \l_keys_no_value_bool
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\l_keys_root_tl}
+% A variable version of the constant.
+%    \begin{macrocode}
+\tl_new:N \l_keys_root_tl
 %    \end{macrocode}
 %\end{macro}
 %
@@ -907,18 +919,18 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new:Nn \keys_cmd_set:nNn {
   \keys_cmd_set_aux:nN {#1} #2
-  \cs_generate_from_arg_count:cNnn { \c_keys_root_tl #1 .cmd:w } 
+  \cs_generate_from_arg_count:cNnn { \l_keys_root_tl #1 .cmd:w } 
     \cs_set:Npn #2 { #3 \keys_arguments_tidy:w }
 }
 \cs_new:Nn \keys_cmd_set:nNx {
   \keys_cmd_set_aux:nN {#1} #2
-  \cs_generate_from_arg_count:cNnn { \c_keys_root_tl #1 .cmd:w } 
+  \cs_generate_from_arg_count:cNnn { \l_keys_root_tl #1 .cmd:w } 
     \cs_set:Npx #2 { #3 \exp_not:N \keys_arguments_tidy:w }
 }
 \cs_new_nopar:Nn \keys_cmd_set_aux:nN {
   \keys_property_undefine:n { #1 .default_tl }
-  \num_set:cn { \c_keys_root_tl #1 .args_num } {#2}
-  \tl_set:cn  { \c_keys_root_tl #1 .req_tl } { } 
+  \num_set:cn { \l_keys_root_tl #1 .args_num } {#2}
+  \tl_set:cn  { \l_keys_root_tl #1 .req_tl } { } 
 }
 %    \end{macrocode}
 %\end{macro}
@@ -930,7 +942,7 @@ This work consists of the file  keys3.dtx
 % Setting a default value is easy.
 %    \begin{macrocode}
 \cs_new:Nn \keys_default_set:n {
-  \tl_set:cn { \c_keys_root_tl \l_keys_path_tl .default_tl } {#1}
+  \tl_set:cn { \l_keys_root_tl \l_keys_path_tl .default_tl } {#1}
 }
 \cs_generate_variant:Nn \keys_default_set:n { V }
 %    \end{macrocode}
@@ -938,10 +950,15 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{\keys_define:nn}
+%\begin{macro}[aux]{\keys_define_aux:nn}
 % The main key-defining function mainly sets up things for \pkg{l3keyval}
 % to use.
 %    \begin{macrocode}
-\cs_new:Nn \keys_define:nn {
+\cs_new:Npn \keys_define:nn {
+  \tl_set_eq:NN \l_keys_root_tl \c_keys_root_tl
+  \keys_define_aux:nn
+}
+\cs_new:Nn \keys_define_aux:nn {
   \tl_set:Nn \l_keys_module_tl {#1}
   \cs_set_eq:NN \KV_key_no_value_elt:n \keys_define_elt:n
   \cs_set_eq:NN \KV_key_value_elt:nn \keys_define_elt:nn
@@ -949,12 +966,13 @@ This work consists of the file  keys3.dtx
 }
 %    \end{macrocode}
 %\end{macro}
+%\end{macro}
 %
 %\begin{macro}{\keys_define_elt:n}
 %\begin{macro}{\keys_define_elt:nn}
 % The element processors for defining keys.
 %    \begin{macrocode}
-\cs_new:Nn \keys_define_elt:n {
+\cs_new_nopar:Nn \keys_define_elt:n {
   \bool_set_true:N \l_keys_no_value_bool
   \keys_define_elt_aux:nn {#1} { }
 }
@@ -1039,10 +1057,10 @@ This work consists of the file  keys3.dtx
 % can clean up the spare groups at the end of executing the key.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_execute_aux:nn {
-  \cs_set_eq:Nc \keys_tmp:w { \c_keys_root_tl #1 .cmd:w }
+  \cs_set_eq:Nc \keys_tmp:w { \l_keys_root_tl #1 .cmd:w }
   \cs_if_exist:NTF \keys_tmp:w {
     \intexpr_compare:nTF { 
-      \num_use:c { \c_keys_root_tl #1 .args_num } = \c_one
+      \num_use:c { \l_keys_root_tl #1 .args_num } = \c_one
     } {
       \exp_args:NV \keys_tmp:w \l_keys_value_toks \q_keys_stop
     }{
@@ -1064,13 +1082,14 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new_nopar:Npn \keys_if_value_requirement:nTF #1 {
   \tl_if_eq:ccTF { c_keys_value_ #1 _tl } {
-    \c_keys_root_tl \l_keys_path_tl .req_tl
+    \l_keys_root_tl \l_keys_path_tl .req_tl
   } 
 }
 %    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{\keys_property_find:n}
+%\begin{macro}[aux]{\keys_property_find_aux:n}
 %\begin{macro}[aux]{\keys_property_find_aux:w}
 % Searching for a property means finding the last ``\texttt{.}'' in
 % the input, and storing the text before and after it.
@@ -1100,6 +1119,7 @@ This work consists of the file  keys3.dtx
 %    \end{macrocode}
 %\end{macro}
 %\end{macro}
+%\end{macro}
 %
 %\begin{macro}{\keys_property_new:nn}
 % Creating a new property is simply a case of making the correctly-named
@@ -1116,7 +1136,7 @@ This work consists of the file  keys3.dtx
 % Removing a property means undefining it.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_property_undefine:n {
-  \cs_set_eq:cN { \c_keys_root_tl #1 } \c_undefined
+  \cs_set_eq:cN { \l_keys_root_tl #1 } \c_undefined
 }
 %    \end{macrocode}
 %\end{macro}
@@ -1127,6 +1147,7 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \cs_new:Nn \keys_set:nn {
   \tl_set:Nn \l_keys_module_tl {#1}
+  \tl_set_eq:NN \l_keys_root_tl \c_keys_root_tl
   \cs_set_eq:NN \KV_key_no_value_elt:n \keys_set_elt:n
   \cs_set_eq:NN \KV_key_value_elt:nn \keys_set_elt:nn
   \KV_parse_space_removal_sanitize:n {#2}
@@ -1139,7 +1160,7 @@ This work consists of the file  keys3.dtx
 % The two element processors are almost identical, and pass the data 
 % through to the underlying auxiliary, which does the work.
 %    \begin{macrocode}
-\cs_new:Nn \keys_set_elt:n {
+\cs_new_nopar:Nn \keys_set_elt:n {
   \bool_set_true:N \l_keys_no_value_bool
   \keys_set_elt_aux:nn {#1} { }
 }
@@ -1211,9 +1232,9 @@ This work consists of the file  keys3.dtx
 \cs_new:Nn \keys_value_or_default:n {
   \toks_set:Nn \l_keys_value_toks  {#1}
   \bool_if:NT \l_keys_no_value_bool {
-    \cs_if_exist:cT { \c_keys_root_tl \l_keys_path_tl .default_tl } {
+    \cs_if_exist:cT { \l_keys_root_tl \l_keys_path_tl .default_tl } {
       \toks_set:Nv \l_keys_value_toks  { 
-        \c_keys_root_tl \l_keys_path_tl .default_tl 
+        \l_keys_root_tl \l_keys_path_tl .default_tl 
       }
     }
   }
@@ -1226,7 +1247,7 @@ This work consists of the file  keys3.dtx
 % set.
 %    \begin{macrocode}
 \cs_new_nopar:Nn \keys_value_requirement:n { 
-  \tl_set_eq:cc { \c_keys_root_tl \l_keys_path_tl .req_tl } 
+  \tl_set_eq:cc { \l_keys_root_tl \l_keys_path_tl .req_tl } 
     { c_keys_value_ #1 _tl }
 }
 %    \end{macrocode}

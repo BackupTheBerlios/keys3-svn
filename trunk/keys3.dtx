@@ -1108,7 +1108,7 @@ This work consists of the file  keys3.dtx
 \cs_new_nopar:Npn \keys_property_find_aux:w #1 . #2 \q_stop {
   \tl_if_in:nnTF {#2} {.} {
     \tl_set:Nx \l_keys_path_tl { 
-      \l_keys_path_tl . \tl_to_str:n {#1}
+      \l_keys_path_tl \tl_to_str:n {#1} .
     }
     \keys_property_find_aux:w #2 \q_stop
   }{

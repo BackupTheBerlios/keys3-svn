@@ -256,7 +256,8 @@
   key = e
 }
 
-% Test nine: 
+% Test nine: Making a function from a key.: the key contains the 
+% definition using the appropriate number of arguments.
 % ----------------------------------------------------------------------
 % \long macro:#1#2->
 % \long macro:#1#2->Hello `#1', you said `#2'.
@@ -275,9 +276,28 @@
 
 \ExplSyntaxOn
 
-\expandafter\meaning\csname module_function:nn\endcsname 
+\expandafter\meaning\csname module_function:nn\endcsname \\
 
-% Test ten: A completely unknown key should cause an error.
+% Test ten: 
+% ----------------------------------------------------------------------
+% Stuff
+% Value
+% ----------------------------------------------------------------------
+\ExplSyntaxOn
+\keys_define:nn { module } {
+  key .set:N     = \l_temp_tl,
+  key .initial:n = Stuff
+}
+\l_temp_tl \\
+\ExplSyntaxOff
+\SetModuleKeys{
+  key = Value
+}
+\ExplSyntaxOn
+\l_temp_tl
+\ExplSyntaxOff
+
+% Test eleven: A completely unknown key should cause an error.
 % ----------------------------------------------------------------------
 % The key `module/unknown key' is unknown and is being ignored.
 % ----------------------------------------------------------------------
@@ -285,7 +305,7 @@
   unknown key = some value
 }
 
-% Test eleven: If the special `unknown' key has been set up, however,
+% Test twelve: If the special `unknown' key has been set up, however,
 % unknown input can be re-directed.
 % ----------------------------------------------------------------------
 % You tried to set key `unknown key' to `some value'

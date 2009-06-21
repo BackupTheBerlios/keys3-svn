@@ -340,6 +340,17 @@ This work consists of the file  keys3.dtx
 %  \cs{l_keys_choice_int}. Multiple choices are discussed further in 
 %  section~\ref{sec:choice}.
 %\end{function}
+%
+%\begin{function}{
+%   .initial:n|
+%   .initial:V
+%  }
+%  \begin{syntax}
+%    <key> .initial:n = <initial>
+%  \end{syntax}
+%  Sets <key> using the <initial> value given. This can only be given
+%  after the<key> is created.
+%\end{function}
 % 
 %\begin{function}{
 %   .set:N|
@@ -1082,6 +1093,21 @@ This work consists of the file  keys3.dtx
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{\keys_initial_value:n}
+%\begin{macro}{\keys_initial_value:V}
+% Pretty easy to set initial values.
+%    \begin{macrocode}
+\cs_new:Nn \keys_initial_value:n {
+  \toks_set:Nn \l_keys_value_toks {#1}
+  \keys_execute_aux:nn { \l_keys_path_tl } {
+    \msg_error:nnx { keys } { initial~without~key } { \l_keys_path_tl }
+  }
+}
+\cs_generate_variant:Nn \keys_initial_value:n { V }
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}{\keys_property_find:n}
 %\begin{macro}[aux]{\keys_property_find_aux:n}
 %\begin{macro}[aux]{\keys_property_find_aux:w}
@@ -1403,6 +1429,20 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
+%\begin{macro}{.initial:n}
+%\begin{macro}{.initial:V}
+% Sending things off as usual.
+%    \begin{macrocode}
+\keys_property_new:nn { .initial:n } {
+  \keys_initial_value:n {#1}
+}
+\keys_property_new:nn { .initial:V } {
+  \keys_initial_value:V #1
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}{.set:N}
 %\begin{macro}{.set_x:N}
 % Setting a variable is very easy: just pass the data along.
@@ -1453,6 +1493,10 @@ This work consists of the file  keys3.dtx
 \msg_new:nnn { keys } { choice~unknown } {%
   Choice `#2' unknown for key `#1':\\%
   the key is being ignored.%
+}
+\msg_new:nnn { keys } { initial~without~key } {%
+  An initial value cannot be set for key `#1':
+  the key has not yet been created.%
 }
 \msg_new:nnn { keys } { key~unknown } {%
   The key `#1' is unknown and is being ignored.%

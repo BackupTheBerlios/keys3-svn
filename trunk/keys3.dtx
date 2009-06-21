@@ -313,6 +313,18 @@ This work consists of the file  keys3.dtx
 %    The <default> is stored as a token list variable.
 %  \end{texnote}
 %\end{function}
+%
+%\begin{function}{.function:N}
+%  \begin{syntax}
+%    <key> .function:N = <function>
+%  \end{syntax}
+%  The input for <key> is used to define <function>, which internally
+%  uses \cs{cs_set:Nn}. The effect is the same as \texttt{<key> 
+%  .code:n = \{ \cs{cs_set:Nn} <function> } |{#1}| \texttt{ \} }.
+%  The <function> should be an internal function, as the number of 
+%  arguments is detected from the argument specifier. If the
+%  <function> is not defined, it is initialised to empty.
+%\end{function}
 % 
 %\begin{function}{
 %   .generate_choices:nn|
@@ -941,7 +953,7 @@ This work consists of the file  keys3.dtx
 % The main key-defining function mainly sets up things for \pkg{l3keyval}
 % to use.
 %    \begin{macrocode}
-\cs_new:Npn \keys_define:nn {
+\cs_new:Nn \keys_define:nn {
   \tl_set:Nn \l_keys_module_tl {#1}
   \cs_set_eq:NN \KV_key_no_value_elt:n \keys_define_elt:n
   \cs_set_eq:NN \KV_key_value_elt:nn \keys_define_elt:nn
@@ -1359,6 +1371,22 @@ This work consists of the file  keys3.dtx
 }
 %    \end{macrocode}
 %\end{macro}
+%\end{macro}
+%
+%\begin{macro}{.function:N}
+% Creating functions is pretty easy, so is done without an extra
+% internal function. There is a check to ensure that the function is 
+% defined.
+%    \begin{macrocode}
+\keys_property_new:nn { .function:N } {
+  \keys_cmd_set:nNn { \l_keys_path_tl } 1 {
+    \cs_set:Nn #1 {##1}
+  } 
+  \cs_if_free:NT #1 {
+    \cs_set:Nn #1 { }
+  }
+}
+%    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{.generate_choices:nn}

@@ -278,7 +278,7 @@
 
 \expandafter\meaning\csname module_function:nn\endcsname \\
 
-% Test ten: 
+% Test ten: Initialisation of a storage area if a key is not given. 
 % ----------------------------------------------------------------------
 % Stuff
 % Value
@@ -297,7 +297,22 @@
 \l_temp_tl
 \ExplSyntaxOff
 
-% Test eleven: A completely unknown key should cause an error.
+% Test eleven: Meta-keys for setting sub-choices.
+% ----------------------------------------------------------------------
+% `Value' and `Value'
+% ----------------------------------------------------------------------
+\ExplSyntaxOn
+\keys_define:nn { module } {
+  key-one   .meta:n = { key-two = #1, key-three = #1 },
+  key-two   .code:n = `#1'~,
+  key-three .code:n = and~`#1'
+}
+\ExplSyntaxOff
+\SetModuleKeys{
+  key-one = Value
+}
+
+% Test twelve: A completely unknown key should cause an error.
 % ----------------------------------------------------------------------
 % The key `module/unknown key' is unknown and is being ignored.
 % ----------------------------------------------------------------------
@@ -305,7 +320,7 @@
   unknown key = some value
 }
 
-% Test twelve: If the special `unknown' key has been set up, however,
+% Test thirteen: If the special `unknown' key has been set up, however,
 % unknown input can be re-directed.
 % ----------------------------------------------------------------------
 % You tried to set key `unknown key' to `some value'

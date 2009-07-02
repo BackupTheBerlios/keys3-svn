@@ -351,6 +351,15 @@ This work consists of the file  keys3.dtx
 %  Sets <key> using the <initial> value given. This can only be given
 %  after the<key> is created.
 %\end{function}
+%
+%\begin{function}{.meta:n}
+%  \begin{syntax}
+%    <key> .meta:n = <keys>
+%  \end{syntax}
+%  Makes <key> a meta-key, which will set several other <keys> in 
+%  one go.  If <key> is given with a value, it is passed through to
+%  the subsidiary <keys> for processing.
+%\end{function}
 % 
 %\begin{function}{
 %   .set:N|
@@ -627,6 +636,13 @@ This work consists of the file  keys3.dtx
 %     ~~~~<true code> <false code>
 %   \end{syntax}
 %   Check if <requirement> applies to <key>.
+%\end{function}
+%
+%\begin{function}{\keys_meta_make:n}
+%   \begin{syntax}
+%     "\keys_meta_make:n" <keys>
+%   \end{syntax}
+%   Makes <key> a meta-key to set <keys>.
 %\end{function}
 %
 %\begin{function}{\keys_property_find:n}
@@ -1108,6 +1124,17 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %\end{macro}
 %
+%\begin{macro}{\keys_meta_make:n}
+% To create a met-key, simply set up to pass data through.
+%    \begin{macrocode}
+\cs_new_nopar:Nn \keys_meta_make:n {
+  \keys_cmd_set:nNx { \l_keys_path_tl } 1 {
+    \exp_not:N \keys_set:nn { \l_keys_module_tl } {#1}
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{\keys_property_find:n}
 %\begin{macro}[aux]{\keys_property_find_aux:n}
 %\begin{macro}[aux]{\keys_property_find_aux:w}
@@ -1441,6 +1468,15 @@ This work consists of the file  keys3.dtx
 }
 %    \end{macrocode}
 %\end{macro}
+%\end{macro}
+%
+%\begin{macro}{.meta:}
+% Making a meta is handled internally.
+%    \begin{macrocode}
+\keys_property_new:nn { .meta:n } {
+  \keys_meta_make:n {#1}
+}
+%    \end{macrocode}
 %\end{macro}
 %
 %\begin{macro}{.set:N}

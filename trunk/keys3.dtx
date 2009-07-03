@@ -977,16 +977,21 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{\keys_define:nn}
+%\begin{macro}[aux]{\keys_define_aux:}
 % The main key-defining function mainly sets up things for \pkg{l3keyval}
 % to use.
 %    \begin{macrocode}
 \cs_new:Nn \keys_define:nn {
   \tl_set:Nn \l_keys_module_tl {#1}
-  \cs_set_eq:NN \KV_key_no_value_elt:n \keys_define_elt:n
-  \cs_set_eq:NN \KV_key_value_elt:nn \keys_define_elt:nn
+  \keys_define_aux:
   \KV_parse_no_space_removal_no_sanitize:n {#2}
 }
+\cs_new_nopar:Nn \keys_define_aux: {
+  \cs_set_eq:NN \KV_key_no_value_elt:n \keys_define_elt:n
+  \cs_set_eq:NN \KV_key_value_elt:nn \keys_define_elt:nn
+}
 %    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\keys_define_elt:n}
@@ -1130,6 +1135,7 @@ This work consists of the file  keys3.dtx
 \cs_new_nopar:Nn \keys_meta_make:n {
   \keys_cmd_set:nNx { \l_keys_path_tl } 1 {
     \exp_not:N \keys_set:nn { \l_keys_module_tl } {#1}
+    \exp_not:N \keys_define_aux:
   }
 }
 %    \end{macrocode}

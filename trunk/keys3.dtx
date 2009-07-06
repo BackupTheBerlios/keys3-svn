@@ -638,6 +638,16 @@ This work consists of the file  keys3.dtx
 %   Check if <requirement> applies to <key>.
 %\end{function}
 %
+%\begin{function}{
+%    \keys_initial_value:n |
+%    \keys_initial_value:V
+%}
+%   \begin{syntax}
+%     "\keys_initial_value:n" <value>
+%   \end{syntax}
+%   Sets <value> as initial contents for <key>.
+%\end{function}
+%
 %\begin{function}{\keys_meta_make:n}
 %   \begin{syntax}
 %     "\keys_meta_make:n" <keys>
@@ -739,6 +749,13 @@ This work consists of the file  keys3.dtx
 %  Various key paths need to be stored.
 %\end{variable}
 %
+%\begin{variable}{
+%  \l_keys_nesting_seq|
+%  \l_keys_nesting_tl
+%}
+%  To allow safe nesting of \cs{keys_define:nn} and \cs{keys_set:nn}.
+%\end{variable}
+%
 %\begin{variable}{\l_keys_no_value_bool}
 %  A marker for ``no value'' as key input.
 %\end{variable}
@@ -813,6 +830,16 @@ This work consists of the file  keys3.dtx
 %    \begin{macrocode}
 \tl_new:N \l_keys_module_tl
 %    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{\l_keys_nesting_seq}
+%\begin{macro}{\l_keys_nesting_tl}
+% For nesting.
+%    \begin{macrocode}
+\seq_new:N \l_keys_nesting_seq
+\tl_new:Nn \l_keys_nesting_tl { none }
+%    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\l_keys_no_value_bool}
@@ -977,21 +1004,23 @@ This work consists of the file  keys3.dtx
 %\end{macro}
 %
 %\begin{macro}{\keys_define:nn}
-%\begin{macro}[aux]{\keys_define_aux:}
 % The main key-defining function mainly sets up things for \pkg{l3keyval}
 % to use.
 %    \begin{macrocode}
 \cs_new:Nn \keys_define:nn {
   \tl_set:Nn \l_keys_module_tl {#1}
-  \keys_define_aux:
-  \KV_parse_no_space_removal_no_sanitize:n {#2}
-}
-\cs_new_nopar:Nn \keys_define_aux: {
   \cs_set_eq:NN \KV_key_no_value_elt:n \keys_define_elt:n
   \cs_set_eq:NN \KV_key_value_elt:nn \keys_define_elt:nn
+  \seq_push:NV \l_keys_nesting_seq \l_keys_nesting_tl
+  \tl_set:Nn \l_keys_nesting_tl { define }
+  \KV_parse_no_space_removal_no_sanitize:n {#2}
+  \seq_pop:NN \l_keys_nesting_seq \l_keys_nesting_tl
+  \cs_set_eq:Nc \KV_key_no_value_elt:n 
+    { keys_ \l_keys_nesting_tl _elt:n }
+  \cs_set_eq:Nc \KV_key_value_elt:nn 
+    { keys_ \l_keys_nesting_tl _elt:nn }  
 }
 %    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\keys_define_elt:n}
@@ -1135,7 +1164,6 @@ This work consists of the file  keys3.dtx
 \cs_new_nopar:Nn \keys_meta_make:n {
   \keys_cmd_set:nNx { \l_keys_path_tl } 1 {
     \exp_not:N \keys_set:nn { \l_keys_module_tl } {#1}
-    \exp_not:N \keys_define_aux:
   }
 }
 %    \end{macrocode}
@@ -1202,7 +1230,14 @@ This work consists of the file  keys3.dtx
   \tl_set:Nn \l_keys_module_tl {#1}
   \cs_set_eq:NN \KV_key_no_value_elt:n \keys_set_elt:n
   \cs_set_eq:NN \KV_key_value_elt:nn \keys_set_elt:nn
+  \seq_push:NV \l_keys_nesting_seq \l_keys_nesting_tl
+  \tl_set:Nn \l_keys_nesting_tl { set }
   \KV_parse_space_removal_sanitize:n {#2}
+  \seq_pop:NN \l_keys_nesting_seq \l_keys_nesting_tl
+  \cs_set_eq:Nc \KV_key_no_value_elt:n 
+    { keys_ \l_keys_nesting_tl _elt:n }
+  \cs_set_eq:Nc \KV_key_value_elt:nn 
+    { keys_ \l_keys_nesting_tl _elt:nn }
 }
 %    \end{macrocode}
 %\end{macro}

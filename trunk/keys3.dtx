@@ -254,6 +254,20 @@ This work consists of the file  keys3.dtx
 % omitted.\footnote{This is a general feature of key--value input 
 % methods.}
 % 
+% 
+%\begin{function}{
+%   .bool:N|
+%   .bool_inverse:N|
+% }
+%  \begin{syntax}
+%    <key> .bool:N = <bool>
+%    <key> .bool_inverse:N = <bool>
+%  \end{syntax}
+%  Defines <key> to set <bool> to <value> (which must be either 
+%  \texttt{true} or \texttt{false}). The \texttt{inverse} version sets
+%  the switch to the opposite logical sense to the argument given.
+%\end{function}
+% 
 %\begin{function}{.choice:}
 %  \begin{syntax}
 %    <key> .choice:
@@ -389,19 +403,6 @@ This work consists of the file  keys3.dtx
 %  \texttt{.set_x:N} version can only be applied to variable types which
 %  have a \cs{<variable>_set:Nx} function: other cases will result in an 
 %  error.
-%\end{function}
-% 
-%\begin{function}{
-%   .set_bool:N|
-%   .set_bool_inverse:N|
-% }
-%  \begin{syntax}
-%    <key> .set_bool:N = <bool>
-%    <key> .set_bool_inverse:N = <bool>
-%  \end{syntax}
-%  Defines <key> to set <bool> to <value> (which must be either 
-%  \texttt{true} or \texttt{false}). The \texttt{inverse} version sets
-%  the switch to the opposite logical sense to the argument given.
 %\end{function}
 % 
 %\begin{function}{
@@ -1418,6 +1419,21 @@ This work consists of the file  keys3.dtx
 %
 %\subsubsection{Properties}
 %
+%\begin{macro}{.bool:N}
+%\begin{macro}{.bool_inverse:N}
+% One function for each of these, but this keeps the key functions
+% themselves  short.
+%    \begin{macrocode}
+\keys_property_new:nn { .bool:N } {
+  \keys_bool_set:N #1
+}
+\keys_property_new:nn { .bool_inverse:N } {
+  \keys_bool_set_inverse:N #1
+}
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
 %\begin{macro}{.choice:}
 % Making a choice is handled internally, as it is also needed by
 % \texttt{.generate_choices:nn}.
@@ -1529,21 +1545,6 @@ This work consists of the file  keys3.dtx
 }
 \keys_property_new:nn { .set_x:N } {
   \keys_variable_set:NN x #1
-}
-%    \end{macrocode}
-%\end{macro}
-%\end{macro}
-%
-%\begin{macro}{.set_bool:N}
-%\begin{macro}{.set_bool_inverse:N}
-% One function for each of these, but this keeps the key functions
-% themselves  short.
-%    \begin{macrocode}
-\keys_property_new:nn { .set_bool:N } {
-  \keys_bool_set:N #1
-}
-\keys_property_new:nn { .set_bool_inverse:N } {
-  \keys_bool_set_inverse:N #1
 }
 %    \end{macrocode}
 %\end{macro}

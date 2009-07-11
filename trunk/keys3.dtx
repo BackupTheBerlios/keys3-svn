@@ -255,17 +255,12 @@ This work consists of the file  keys3.dtx
 % methods.}
 % 
 % 
-%\begin{function}{
-%   .bool:N|
-%   .bool_inverse:N|
-% }
+%\begin{function}{.bool:N}
 %  \begin{syntax}
 %    <key> .bool:N = <bool>
-%    <key> .bool_inverse:N = <bool>
 %  \end{syntax}
 %  Defines <key> to set <bool> to <value> (which must be either 
-%  \texttt{true} or \texttt{false}). The \texttt{inverse} version sets
-%  the switch to the opposite logical sense to the argument given.
+%  \texttt{true} or \texttt{false}). 
 %\end{function}
 % 
 %\begin{function}{.choice:}
@@ -1420,18 +1415,12 @@ This work consists of the file  keys3.dtx
 %\subsubsection{Properties}
 %
 %\begin{macro}{.bool:N}
-%\begin{macro}{.bool_inverse:N}
-% One function for each of these, but this keeps the key functions
-% themselves  short.
+% One function for this.
 %    \begin{macrocode}
 \keys_property_new:nn { .bool:N } {
   \keys_bool_set:N #1
 }
-\keys_property_new:nn { .bool_inverse:N } {
-  \keys_bool_set_inverse:N #1
-}
 %    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{.choice:}
